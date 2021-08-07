@@ -1,0 +1,41 @@
+// See https://go.microsoft.com/fwlink/?LinkId=733558
+// for the documentation about the tasks.json format
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Snowpack Dev",
+      "type": "npm",
+      "script": "debug",
+      "options": {
+        "env": { "TSC_WATCH": "Both" }
+      },
+      "path": "src/app/package.json",
+      "isBackground": true,
+      "problemMatcher": "$tsc-watch",
+      "dependsOn": [
+        "Install Extension Dependencies",
+        "Install UI Dependencies"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Install Extension Dependencies",
+      "type": "shell",
+      "command": "yarn",
+      "group": "none"
+    },
+    {
+      "label": "Install UI Dependencies",
+      "type": "shell",
+      "command": "yarn",
+      "options": {
+        "cwd": "src/app"
+      },
+      "group": "none"
+    }
+  ]
+}

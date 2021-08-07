@@ -1,0 +1,27 @@
+{
+  "name": "vscode-extension-react",
+  "version": "1.0.0",
+  "description": "A best practice on developing Webview UI in Visual Studio Code extension with React.",
+  "main": "dist/index.js",
+  "author": "Darren Daniel Day",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "watch:types": "yarn tsc -w --noEmit",
+    "start": "snowpack dev",
+    "build": "snowpack build",
+    "debug": "node ./vscode-debug.mjs --dev"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.3",
+    "@types/react-dom": "^17.0.3",
+    "snowpack": "^3.7.1",
+    "typescript": "^4.3.2"
+  },
+  "dependencies": {
+    "@material-ui/core": "^4.11.4",
+    "@material-ui/icons": "^4.11.2",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  }
+}
