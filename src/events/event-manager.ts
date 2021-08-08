@@ -4,7 +4,7 @@ import type { CoreEvents } from "../app/message-protocol";
 import { json } from "../app/src/json-serializer";
 import type { PropertyKeys } from "../utils/types/property-key";
 
-interface IEventDispatcher<T> extends EventHub<T>, vscode.Disposable {
+export interface IEventDispatcher<T> extends EventHub<T>, vscode.Disposable {
   onEach(
     handler: (event: PropertyKeys<T>, value: T[PropertyKeys<T>]) => void
   ): void;
@@ -108,5 +108,3 @@ export function createEventHubAdapter<T>(): IEventHubAdapter<T> {
     eventHandler,
   };
 }
-
-export const globalEventHubAdapter = createEventHubAdapter<CoreEvents>();

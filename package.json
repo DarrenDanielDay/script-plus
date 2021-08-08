@@ -82,6 +82,7 @@
   },
   "devDependencies": {
     "@snowpack/plugin-react-refresh": "^2.5.0",
+    "@types/fs-extra": "^9.0.12",
     "@types/glob": "^7.1.3",
     "@types/vscode": "^1.46.0",
     "@typescript-eslint/eslint-plugin": "^4.29.0",
@@ -95,5 +96,11 @@
     "snowpack": "^3.6.2",
     "typescript": "^4.3.2",
     "vsce": "^1.88.0"
+  },
+  "dependencies": {
+    "@types/ramda": "^0.27.44",
+    "fs-extra": "^10.0.0",
+    "ramda": "^0.27.1",
+    "taio": "^0.4.0"
   }
 }

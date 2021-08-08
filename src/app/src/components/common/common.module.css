@@ -1,0 +1,5 @@
+/* @type */
+.center-row {
+  display: flex;
+  align-items: center;
+}

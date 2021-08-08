@@ -1,9 +1,7 @@
 import type { Error, Request, Response } from "../app/communication";
 import { access } from "../utils";
-import type * as vscode from "vscode";
-import { createCoreAPI } from "./core-module";
 
-interface IModuleManager<T> {
+export interface IModuleManager<T> {
   readonly api: T;
   useImpl(api: T): void;
   callModuleAPI(path: string[], params: readonly unknown[]): Promise<unknown>;
@@ -70,5 +68,3 @@ export function createModuleManager<T>(api: T): IModuleManager<T> {
   };
   return instance;
 }
-
-export const globalModuleManager = createModuleManager(createCoreAPI());
