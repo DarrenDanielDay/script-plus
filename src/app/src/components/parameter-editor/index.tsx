@@ -11,18 +11,21 @@ import {
   makeStyles,
   useTheme,
   Tooltip,
+  FormLabel,
 } from "@material-ui/core";
 import { AddOutlined, DeleteOutlined } from "@material-ui/icons";
 import classNames from "classnames";
-import { compose, equals, omit, prop, T, __ } from "ramda";
+import { compose, equals, identity, omit, prop, T, __ } from "ramda";
 import React, { useState } from "react";
 import type { EnumUnderlayingType, StandardEnum } from "taio/build/types/enum";
 import { enumKeys, enumValues } from "taio/build/utils/enum";
 import { die } from "taio/build/utils/internal/exceptions";
-import { isAnyOf } from "taio/build/utils/validator/array";
 import { isNumber, isString } from "taio/build/utils/validator/primitive";
 import type { ArgumentField } from "../../../../models/script";
-import styles from "../common/common.module.css";
+import commonStyles from "../common/common.module.css";
+import { EnumPicker } from "../enum-picker";
+import { ListPicker } from "../list-picker";
+import styles from "./style.module.css";
 
 export interface ParameterEditorProp {
   onParametersChange?: (params: Record<string, ArgumentField>) => void;
@@ -46,9 +49,17 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export const ParameterEditor: React.FC<ParameterEditorProp> = ({}) => {
+  const classes = useStyles();
   const [fields, setFields] = useState<Record<string, ArgumentField>>({});
+  const fieldKeys = Object.keys(fields);
   const [newFieldName, setNewFieldName] = useState("");
+  const [editingFieldKey, setEditingFieldKey] = useState<string | null>(null);
+  const field =
+    editingFieldKey !== null ? fields[editingFieldKey] ?? null : null;
   const isNameOccupied = newFieldName in fields;
+  const configNameValidateText = isNameOccupied
+    ? `"${newFieldName}" already exist.`
+    : "";
   const handleFieldEdit: OnFieldEditCallback = (
     type,
     fieldKey,
@@ -61,6 +72,7 @@ export const ParameterEditor: React.FC<ParameterEditorProp> = ({}) => {
         break;
       case "delete":
         setFields((fields) => omit([fieldKey], fields));
+        setEditingFieldKey(null);
       default:
         break;
     }
@@ -77,36 +89,57 @@ export const ParameterEditor: React.FC<ParameterEditorProp> = ({}) => {
       },
     }));
     setNewFieldName("");
+    setEditingFieldKey(newFieldName);
   };
   return (
-    <Box padding margin>
-      <Box className={styles["center-row"]}>
+    <Box>
+      <Box
+        className={classNames(
+          commonStyles["center-row"],
+          styles["config-name-edit-row"]
+        )}
+      >
+        <FormControl className={classes.formControl}>
+          <FormLabel>Create New</FormLabel>
+        </FormControl>
         <TextField
           variant="outlined"
           value={newFieldName}
           onChange={(e) => setNewFieldName(e.target.value)}
-          error={isNameOccupied}
+          error={!!configNameValidateText}
           label="config name"
           placeholder="Input new config name"
-          helperText={isNameOccupied ? `"${newFieldName}" already exist.` : ""}
+          helperText={configNameValidateText}
         ></TextField>
         <IconButton
           onClick={handleAddField}
-          disabled={!newFieldName}
+          disabled={!!configNameValidateText || !newFieldName}
           color="primary"
         >
           <AddOutlined></AddOutlined>
         </IconButton>
+        {!!fieldKeys.length && (
+          <FormControl
+            className={classNames(classes.formControl, classes.selectControl)}
+          >
+            <InputLabel>config keys</InputLabel>
+            <ListPicker
+              list={Object.keys(fields)}
+              displayMapping={identity}
+              value={editingFieldKey ?? ""}
+              onChange={(fieldKey) => setEditingFieldKey(fieldKey)}
+            ></ListPicker>
+          </FormControl>
+        )}
       </Box>
       <Box>
-        {Object.entries(fields).map(([name, field], i) => (
+        {editingFieldKey != null && field != null && (
           <FieldEditor
-            key={i}
-            name={name}
+            name={editingFieldKey}
             field={field}
             onFieldEdit={handleFieldEdit}
           ></FieldEditor>
-        ))}
+        )}
       </Box>
     </Box>
   );
@@ -163,18 +196,10 @@ export const FieldEditor: React.FC<IFieldEditorProp> = ({
           className={classNames(classes.formControl, classes.selectControl)}
         >
           <InputLabel>type</InputLabel>
-          <Select
-            label="type"
+          <EnumPicker
             value={field.type}
-            onChange={(e) => {
-              const { value: type } = e.target;
-              if (
-                !isAnyOf(
-                  ...(enumValues(ConfigTypeEnum) as ArgumentField["type"][])
-                )(type)
-              ) {
-                return;
-              }
+            enumObject={ConfigTypeEnum}
+            onChange={(type) => {
               let newField: ArgumentField = { ...field };
               newField.type = type;
               switch (type) {
@@ -198,13 +223,7 @@ export const FieldEditor: React.FC<IFieldEditorProp> = ({
               }
               onFieldEdit?.("update", name, newField);
             }}
-          >
-            {enumKeys(ConfigTypeEnum).map((key, i) => (
-              <MenuItem key={i} value={ConfigTypeEnum[key]}>
-                {key}
-              </MenuItem>
-            ))}
-          </Select>
+          ></EnumPicker>
         </FormControl>
         <FormControl className={classNames(classes.tinyFormControl)}>
           <InputLabel>default value</InputLabel>
@@ -230,18 +249,17 @@ export const FieldEditor: React.FC<IFieldEditorProp> = ({
               }
             ></Input>
           ) : field.type === "boolean" ? (
-            <Select
-              value={+field.defaultValue}
-              onChange={(e) =>
+            <ListPicker
+              list={[false, true]}
+              displayMapping={String}
+              value={field.defaultValue}
+              onChange={(value) =>
                 onFieldEdit?.("update", name, {
                   ...field,
-                  defaultValue: !!e.target.value,
+                  defaultValue: value,
                 })
               }
-            >
-              <MenuItem value={0}>false</MenuItem>
-              <MenuItem value={1}>true</MenuItem>
-            </Select>
+            ></ListPicker>
           ) : (
             <Select
               value={field.defaultValue}
@@ -310,7 +328,7 @@ export const FieldEditor: React.FC<IFieldEditorProp> = ({
       <Box>
         {field.type === "enum" && (
           <EnumValueEditor
-            currentEnum={field.enumOptions.enumObject}
+            enumObject={field.enumOptions.enumObject}
             onAdd={(key, value, display) => {
               console.log("add");
               onFieldEdit?.("update", name, {
@@ -318,7 +336,7 @@ export const FieldEditor: React.FC<IFieldEditorProp> = ({
                 enumOptions: {
                   enumNameMapping: {
                     ...field.enumOptions.enumNameMapping,
-                    [value]: display,
+                    [value]: display || key,
                   },
                   enumObject: Object.assign(
                     {
@@ -361,26 +379,26 @@ export interface IEnumValueEditorProp {
     enumValue: number | string,
     displayName: string
   ) => void;
-  currentEnum?: StandardEnum<EnumUnderlayingType>;
+  enumObject?: StandardEnum<EnumUnderlayingType>;
 }
 
 export const EnumValueEditor: React.FC<IEnumValueEditorProp> = ({
   onAdd,
-  currentEnum,
+  enumObject,
 }) => {
   const classes = useStyles();
   const [enumKey, setEnumKey] = useState("");
   const [enumValue, setEnumValue] = useState<number | string>("");
   const [enumName, setEnumName] = useState("");
-  const enumKeyValidateInfo = enumKeys(currentEnum ?? {}).includes(enumKey)
+  const enumKeyValidateInfo = enumKeys(enumObject ?? {}).includes(enumKey)
     ? `name "${enumKey}" already exists`
     : !/^[a-z]/i.test(enumKey)
     ? "name should start with words"
     : "";
-  const enumValueValidateInfo = enumValues(currentEnum ?? {}).includes(
-    enumValue
-  )
+  const enumValueValidateInfo = enumValues(enumObject ?? {}).includes(enumValue)
     ? `value ${enumValue} already exists`
+    : enumValue === ""
+    ? "value should not be empty"
     : "";
   const isAllValid = !enumValueValidateInfo && !enumKeyValidateInfo;
   const renderDeleteEnumButton = () => (
@@ -398,7 +416,7 @@ export const EnumValueEditor: React.FC<IEnumValueEditorProp> = ({
     </IconButton>
   );
   return (
-    <Box className={styles["center-row"]}>
+    <Box className={commonStyles["center-row"]}>
       <TextField
         variant="outlined"
         className={classes.tinyFormControl}
@@ -441,7 +459,7 @@ export const EnumValueEditor: React.FC<IEnumValueEditorProp> = ({
   );
 };
 function isNumberLike(strOrNumber: string | number) {
-  return !isNaN(+strOrNumber);
+  return !isNaN(+strOrNumber) && strOrNumber !== "";
 }
 
 function enumValueDisplay(strOrNumber: string | number) {
