@@ -1,4 +1,6 @@
-import { useCallback } from "react";
+import * as R from "ramda";
+import { useCallback, useState } from "react";
+import type { Func } from "taio/build/types/concepts";
 import { useSafeState } from "./use-safe-state";
 
 export function useLoading(): [
@@ -18,4 +20,15 @@ export function useLoading(): [
     }
   }, []);
   return [loading, loadingScope, setLoading];
+}
+
+export function useLoadingPipe<T>(
+  getter: Func<[], Promise<T>>,
+  reciever: Func<[T], void>
+) {
+  const [loading, setLoading] = useState(false);
+  const fire = R.pipe(R.T, setLoading, getter, (promise) =>
+    promise.then(reciever).finally(R.pipe(R.F, setLoading))
+  );
+  return [loading, fire] as const;
 }

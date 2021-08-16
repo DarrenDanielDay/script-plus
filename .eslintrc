@@ -5,7 +5,8 @@
     "**/*.cjs",
     "**/*.mjs",
     "**/*.d.ts",
-    "src/app/*"
+    "src/app/*",
+    "user-scripts/**"
   ],
   "parserOptions": {
     "project": ["./tsconfig.json"]

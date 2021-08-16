@@ -8,75 +8,55 @@ import {
   TextField,
   Input,
   InputLabel,
-  makeStyles,
-  useTheme,
   Tooltip,
   FormLabel,
+  Fab,
+  useTheme,
 } from "@material-ui/core";
-import { AddOutlined, DeleteOutlined } from "@material-ui/icons";
+import { AddOutlined, DeleteOutlined, Save } from "@material-ui/icons";
 import classNames from "classnames";
-import { compose, equals, identity, omit, prop, T, __ } from "ramda";
-import React, { useState } from "react";
+import * as R from "ramda";
+import React, { useEffect, useState } from "react";
 import type { EnumUnderlayingType, StandardEnum } from "taio/build/types/enum";
 import { enumKeys, enumValues } from "taio/build/utils/enum";
 import { die } from "taio/build/utils/internal/exceptions";
 import { isNumber, isString } from "taio/build/utils/validator/primitive";
-import type { ArgumentField } from "../../../../models/script";
+import type { ArgumentConfig, ArgumentField } from "../../../../models/script";
+import { assertNonNullish } from "../../utils/well-typed";
 import commonStyles from "../common/common.module.css";
 import { EnumPicker } from "../enum-picker";
 import { ListPicker } from "../list-picker";
 import styles from "./style.module.css";
+import { useStyles } from "../common/common-mui-styles";
 
 export interface ParameterEditorProp {
-  onParametersChange?: (params: Record<string, ArgumentField>) => void;
-  onDone?: (params?: Record<string, ArgumentField>) => void;
+  configObject: ArgumentConfig;
+  onDone?: (fields: ArgumentConfig, description: string) => void;
 }
 
-const useStyles = makeStyles((theme) => ({
-  formControl: {
-    margin: theme.spacing(1),
-  },
-  tinyFormControl: {
-    margin: theme.spacing(1),
-    width: theme.spacing(15),
-  },
-  textAreaControl: {
-    width: theme.spacing(48),
-  },
-  selectControl: {
-    width: theme.spacing(12),
-  },
-}));
-
-export const ParameterEditor: React.FC<ParameterEditorProp> = ({}) => {
+export const ParameterEditor: React.FC<ParameterEditorProp> = ({
+  configObject,
+  onDone,
+}) => {
+  const theme = useTheme();
   const classes = useStyles();
-  const [fields, setFields] = useState<Record<string, ArgumentField>>({});
+  const [fields, setFields] = useState<ArgumentConfig>(configObject);
   const fieldKeys = Object.keys(fields);
+  const [scriptDescription, setScriptDescription] = useState("");
   const [newFieldName, setNewFieldName] = useState("");
   const [editingFieldKey, setEditingFieldKey] = useState<string | null>(null);
+  useEffect(() => {
+    setFields(configObject);
+  }, [configObject]);
   const field =
     editingFieldKey !== null ? fields[editingFieldKey] ?? null : null;
   const isNameOccupied = newFieldName in fields;
   const configNameValidateText = isNameOccupied
     ? `"${newFieldName}" already exist.`
     : "";
-  const handleFieldEdit: OnFieldEditCallback = (
-    type,
-    fieldKey,
-    editedField
-  ) => {
-    console.log(editedField);
-    switch (type) {
-      case "update":
-        setFields((fields) => ({ ...fields, [fieldKey]: editedField }));
-        break;
-      case "delete":
-        setFields((fields) => omit([fieldKey], fields));
-        setEditingFieldKey(null);
-      default:
-        break;
-    }
-  };
+  const handleFieldEdit: OnFieldEditCallback = (fieldKey, editedField) =>
+    setFields((fields) => ({ ...fields, [fieldKey]: editedField }));
+
   const handleAddField = () => {
     if (!newFieldName) return;
     setFields((fields) => ({
@@ -93,6 +73,25 @@ export const ParameterEditor: React.FC<ParameterEditorProp> = ({}) => {
   };
   return (
     <Box>
+      <Fab
+        color="primary"
+        onClick={() => onDone?.(fields, scriptDescription)}
+        className={classes.saveFab}
+      >
+        <Save />
+      </Fab>
+      <Box>
+        <TextField
+          multiline
+          rowsMax={3}
+          style={{ width: theme.spacing(72) }}
+          variant="outlined"
+          label="script description"
+          placeholder="Input some description for this script"
+          value={scriptDescription}
+          onChange={(e) => setScriptDescription(e.target.value)}
+        ></TextField>
+      </Box>
       <Box
         className={classNames(
           commonStyles["center-row"],
@@ -100,15 +99,15 @@ export const ParameterEditor: React.FC<ParameterEditorProp> = ({}) => {
         )}
       >
         <FormControl className={classes.formControl}>
-          <FormLabel>Create New</FormLabel>
+          <FormLabel>Add new</FormLabel>
         </FormControl>
         <TextField
           variant="outlined"
           value={newFieldName}
           onChange={(e) => setNewFieldName(e.target.value)}
           error={!!configNameValidateText}
-          label="config name"
-          placeholder="Input new config name"
+          label="config key"
+          placeholder="Input new key"
           helperText={configNameValidateText}
         ></TextField>
         <IconButton
@@ -118,6 +117,8 @@ export const ParameterEditor: React.FC<ParameterEditorProp> = ({}) => {
         >
           <AddOutlined></AddOutlined>
         </IconButton>
+      </Box>
+      <Box>
         {!!fieldKeys.length && (
           <FormControl
             className={classNames(classes.formControl, classes.selectControl)}
@@ -125,10 +126,24 @@ export const ParameterEditor: React.FC<ParameterEditorProp> = ({}) => {
             <InputLabel>config keys</InputLabel>
             <ListPicker
               list={Object.keys(fields)}
-              displayMapping={identity}
+              displayMapping={R.identity}
               value={editingFieldKey ?? ""}
               onChange={(fieldKey) => setEditingFieldKey(fieldKey)}
             ></ListPicker>
+          </FormControl>
+        )}
+        {editingFieldKey != null && !!fieldKeys.length && (
+          <FormControl className={classes.formControl}>
+            <IconButton
+              style={{ color: colors.red[500] }}
+              onClick={() => {
+                assertNonNullish(editingFieldKey);
+                setFields((fields) => R.omit([editingFieldKey], fields));
+                setEditingFieldKey(null);
+              }}
+            >
+              <DeleteOutlined></DeleteOutlined>
+            </IconButton>
           </FormControl>
         )}
       </Box>
@@ -145,11 +160,7 @@ export const ParameterEditor: React.FC<ParameterEditorProp> = ({}) => {
   );
 };
 
-type OnFieldEditCallback = (
-  type: "update" | "delete",
-  fieldKey: string,
-  field: ArgumentField
-) => void;
+type OnFieldEditCallback = (fieldKey: string, field: ArgumentField) => void;
 
 export interface IFieldEditorProp {
   name: string;
@@ -170,28 +181,9 @@ export const FieldEditor: React.FC<IFieldEditorProp> = ({
   onFieldEdit,
 }) => {
   const classes = useStyles();
-  const theme = useTheme();
   return (
     <Box>
       <Box>
-        <FormControl className={classes.tinyFormControl}>
-          <InputLabel>config name</InputLabel>
-          <Input
-            value={name}
-            disabled
-            style={{ color: theme.palette.text.primary }}
-          ></Input>
-        </FormControl>
-        <FormControl className={classes.formControl}>
-          <Tooltip title="delete field">
-            <IconButton
-              style={{ color: colors.red[500] }}
-              onClick={() => onFieldEdit?.("delete", name, field)}
-            >
-              <DeleteOutlined></DeleteOutlined>
-            </IconButton>
-          </Tooltip>
-        </FormControl>
         <FormControl
           className={classNames(classes.formControl, classes.selectControl)}
         >
@@ -221,7 +213,7 @@ export const FieldEditor: React.FC<IFieldEditorProp> = ({
                 default:
                   die();
               }
-              onFieldEdit?.("update", name, newField);
+              onFieldEdit?.(name, newField);
             }}
           ></EnumPicker>
         </FormControl>
@@ -232,7 +224,7 @@ export const FieldEditor: React.FC<IFieldEditorProp> = ({
               type="number"
               value={field.defaultValue}
               onChange={(e) =>
-                onFieldEdit?.("update", name, {
+                onFieldEdit?.(name, {
                   ...field,
                   defaultValue: +e.target.value,
                 })
@@ -242,7 +234,7 @@ export const FieldEditor: React.FC<IFieldEditorProp> = ({
             <Input
               value={field.defaultValue}
               onChange={(e) =>
-                onFieldEdit?.("update", name, {
+                onFieldEdit?.(name, {
                   ...field,
                   defaultValue: e.target.value,
                 })
@@ -254,7 +246,7 @@ export const FieldEditor: React.FC<IFieldEditorProp> = ({
               displayMapping={String}
               value={field.defaultValue}
               onChange={(value) =>
-                onFieldEdit?.("update", name, {
+                onFieldEdit?.(name, {
                   ...field,
                   defaultValue: value,
                 })
@@ -264,7 +256,7 @@ export const FieldEditor: React.FC<IFieldEditorProp> = ({
             <Select
               value={field.defaultValue}
               onChange={(e) =>
-                onFieldEdit?.("update", name, {
+                onFieldEdit?.(name, {
                   ...field,
                   // @ts-expect-error Enum cannot be infered
                   defaultValue: e.target.value,
@@ -288,29 +280,29 @@ export const FieldEditor: React.FC<IFieldEditorProp> = ({
               <IconButton
                 style={{ color: colors.red[500] }}
                 onClick={() => {
-                  const newEnumObject = omit(
+                  const newEnumObject = R.omit(
                     [
                       isNumber(field.defaultValue)
                         ? field.defaultValue + ""
                         : undefined,
                       enumKeys(field.enumOptions.enumObject).find(
-                        compose(
-                          equals(field.defaultValue),
-                          prop(__, field.enumOptions.enumObject)
+                        R.compose(
+                          R.equals(field.defaultValue),
+                          R.prop(R.__, field.enumOptions.enumObject)
                         )
                       ),
                     ].filter(isString),
                     field.enumOptions.enumObject
                   );
-                  return onFieldEdit?.("update", name, {
+                  return onFieldEdit?.(name, {
                     ...field,
-                    defaultValue: enumValues(newEnumObject).find(T) ?? "",
+                    defaultValue: enumValues(newEnumObject).find(R.T) ?? "",
                     enumOptions: {
                       enumObject: newEnumObject,
-                      enumNameMapping: omit(
+                      enumNameMapping: R.omit(
                         [
                           enumValues(field.enumOptions.enumObject)
-                            .find(equals(field.defaultValue))
+                            .find(R.equals(field.defaultValue))
                             ?.toString(),
                         ].filter(isString),
                         field.enumOptions.enumNameMapping ?? {}
@@ -331,7 +323,7 @@ export const FieldEditor: React.FC<IFieldEditorProp> = ({
             enumObject={field.enumOptions.enumObject}
             onAdd={(key, value, display) => {
               console.log("add");
-              onFieldEdit?.("update", name, {
+              onFieldEdit?.(name, {
                 ...field,
                 enumOptions: {
                   enumNameMapping: {
@@ -362,7 +354,7 @@ export const FieldEditor: React.FC<IFieldEditorProp> = ({
           multiline
           rows={2}
           onChange={(e) =>
-            onFieldEdit?.("update", name, {
+            onFieldEdit?.(name, {
               ...field,
               description: e.target.value,
             })

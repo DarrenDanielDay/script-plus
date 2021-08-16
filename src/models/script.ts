@@ -121,11 +121,15 @@ export const isArgumentField = defineValidator<ArgumentField>(
     isEnumArgumentField
   )
 );
+export type ArgumentConfig = Record<string, ArgumentField>;
+export const isArgumentConfig = record(isArgumentField);
+
+export type PassedParameter = Record<string, boolean | number | string>;
 export interface UserScript {
   name: string;
   description: string;
   lang: "js" | "ts";
-  argumentConfig: Record<string, ArgumentField>;
+  argumentConfig: ArgumentConfig;
 }
 export const isUserScript = defineValidator<UserScript>(
   isObject({

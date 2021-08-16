@@ -5,12 +5,12 @@
     "outDir": "out",
     "lib": ["es6"],
     "sourceMap": true,
-    "rootDir": "src",
     "strict": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "importsNotUsedAsValues": "error",
     "preserveWatchOutput": true
   },
+  "include": ["src", "esbuild-env.d.ts"],
   "exclude": ["node_modules", "src/app/src"]
 }

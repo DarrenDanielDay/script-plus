@@ -5,6 +5,7 @@
 const config = {
   mount: {
     src: { url: "/" },
+    "../models": { url: "/" },
   },
   plugins: ["@snowpack/plugin-react-refresh"],
   packageOptions: {

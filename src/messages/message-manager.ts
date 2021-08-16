@@ -31,10 +31,10 @@ export function createMessageHandler<APIs, Events>({
   moduleManager: IModuleManager<APIs>;
   eventAdapter: IEventHubAdapter<Events>;
 }) {
-  return (e: unknown) => {
+  return async (e: unknown) => {
     try {
       if (isRequest(e)) {
-        return moduleManager.requestHandler(e.payload.path, e);
+        return await moduleManager.requestHandler(e.payload.path, e);
       }
       if (isEvent(e)) {
         return eventAdapter.eventHandler(e);
