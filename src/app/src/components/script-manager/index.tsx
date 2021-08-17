@@ -13,6 +13,7 @@ import * as R from "ramda";
 import {
   AddOutlined,
   DeleteOutline,
+  EditOutlined,
   RefreshOutlined,
 } from "@material-ui/icons";
 import React, { useEffect, useState } from "react";
@@ -74,6 +75,15 @@ export const ScriptManager: React.FC<IScriptManagerProp> = ({}) => {
           }
         >
           <DeleteOutline></DeleteOutline>
+        </IconButton>
+        <IconButton
+          style={{ color: colors.amber[500] }}
+          onClick={() =>
+            editingScript &&
+            SessionInvoker.ScriptService.editScript(editingScript)
+          }
+        >
+          <EditOutlined></EditOutlined>
         </IconButton>
         <TextField
           value={newScriptName}

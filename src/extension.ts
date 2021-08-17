@@ -10,8 +10,10 @@ import type { CoreEvents } from "./app/message-protocol";
 import { createModuleManager } from "./modules/module-manager";
 
 export function activate(context: vscode.ExtensionContext) {
-  const globalModuleManager = createModuleManager(createCoreAPI(context));
   const globalEventHubAdapter = createEventHubAdapter<CoreEvents>();
+  const globalModuleManager = createModuleManager(
+    createCoreAPI(context, globalEventHubAdapter)
+  );
   const globalMessageHandler = createMessageHandler({
     moduleManager: globalModuleManager,
     eventAdapter: globalEventHubAdapter,
@@ -24,11 +26,15 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(webviewManager);
   context.subscriptions.push(globalEventHubAdapter);
   const { open: doOpen, reload, close } = webviewManager;
-  const open = function (this: IWebviewManager) {
+  const open = async function (this: IWebviewManager) {
+    await globalModuleManager.api.ScriptService.check();
     doOpen.call(this);
     webviewManager.messageHandler ??
       webviewManager.attach(globalMessageHandler);
     globalEventHubAdapter.attach(webviewManager.panel!.webview);
+    webviewManager.onClose(() =>
+      globalEventHubAdapter.detach(webviewManager.panel!.webview)
+    );
   };
   context.subscriptions.push(
     vscode.commands.registerCommand(
@@ -46,6 +52,12 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(
       Commands.WebviewControll.Reload,
       reload.bind(webviewManager)
+    )
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      Commands.ScriptControl.ExecuteCurrentScript,
+      () => globalModuleManager.api.ScriptService.executeCurrent()
     )
   );
   if (env.ENV === "dev") {

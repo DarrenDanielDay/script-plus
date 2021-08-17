@@ -46,15 +46,15 @@ window.SessionHubs = new Proxy(
         const method: keyof EventHub<any> = path[path.length - 1];
         if (method === "on") {
           // @ts-expect-error Skip real arguments check
-          globalMessageManager.onEvent(...argArray);
+          return globalMessageManager.onEvent(...argArray);
         }
         if (method === "off") {
           // @ts-expect-error Skip real arguments check
-          globalMessageManager.offEvent(...argArray);
+          return globalMessageManager.offEvent(...argArray);
         }
         if (method === "emit") {
           // @ts-expect-error Skip real arguments check
-          globalMessageManager.dispatchToExtension(...argArray);
+          return globalMessageManager.dispatchToExtension(...argArray);
         }
       });
     },

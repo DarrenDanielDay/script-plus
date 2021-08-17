@@ -1,25 +1,49 @@
-import type { ScriptService } from "../../app/message-protocol";
+import type { CoreEvents, ScriptService } from "../../app/message-protocol";
 import {
   isBooleanArgumentField,
   isEnumArgumentField,
   isNumberArgumentField,
   isStringArgumentField,
   isUserScript,
+  PassedParameter,
   UserScript,
 } from "../../models/script";
 import * as vscode from "vscode";
 import { names, paths } from "../constant";
 import { existDir, fsextra, glob, path, randomString } from "../node-utils";
-import * as ts from "typescript";
+import esbuild from "esbuild";
+import ts from "typescript";
+import vm from "vm";
 import { die } from "taio/build/utils/internal/exceptions";
 import { enumValues } from "taio/build/utils/enum";
 import { isNumber, isString } from "taio/build/utils/validator/primitive";
 import type { ExecutionTask } from "../../models/execution-task";
+import { defineValidator } from "taio/build/utils/validator/utils";
+import { isObject } from "taio/build/utils/validator/object";
+import type { AnyFunc } from "taio/build/types/concepts";
+import type { IEventHubAdapter } from "../../events/event-manager";
+import { openEdit } from "../vscode-utils";
 const f = ts.factory;
+interface ScriptModule {
+  main: (config: PassedParameter) => Promise<void> | void;
+}
+
+interface LocalExecutionTask extends ExecutionTask {
+  promise: Promise<unknown>;
+  running: boolean;
+}
+
+const isScriptModule = defineValidator<ScriptModule>(
+  isObject({
+    main: (fn): fn is AnyFunc => typeof fn === "function" && fn.length === 1,
+  })
+);
+
 export function createScriptService(
-  context: vscode.ExtensionContext
+  context: vscode.ExtensionContext,
+  eventHub: IEventHubAdapter<CoreEvents>
 ): ScriptService {
-  const activeTasks = new Map<string, ExecutionTask>();
+  const activeTasks = new Map<string, LocalExecutionTask>();
   function basedOnExtension(...fragments: string[]) {
     return path.resolve(context.extensionPath, ...fragments);
   }
@@ -33,6 +57,20 @@ export function createScriptService(
   function getScriptFileName(script: UserScript): string {
     return `${paths.mainScript}.${script.lang}`;
   }
+  function getScriptAbsolutePath(script: UserScript): string {
+    return basedOnScripts(script.name, getScriptFileName(script));
+  }
+
+  async function getMeta(folder: string): Promise<UserScript> {
+    const content: unknown = await fsextra.readJSON(
+      path.join(folder, paths.meta)
+    );
+    if (!isUserScript(content)) {
+      return die("Invalid meta file");
+    }
+    return content;
+  }
+
   function writeMeta(script: UserScript): Promise<void> {
     return fsextra.writeJSON(basedOnScripts(script.name, paths.meta), script, {
       spaces: 2,
@@ -48,7 +86,95 @@ export function createScriptService(
 ${getConfigTsDeclCodeOfUserScript(script)}`
     );
   }
-  return {
+
+  async function getScriptContent(script: UserScript) {
+    const content = await fsextra.promises.readFile(
+      getScriptAbsolutePath(script)
+    );
+    return content.toString("utf-8");
+  }
+
+  async function transformTsScript(content: string) {
+    const esbuildTransformed = await esbuild.transform(content, {
+      format: "cjs",
+      loader: "ts",
+    });
+    return esbuildTransformed.code;
+  }
+
+  async function transformJsScript(content: string) {
+    const esbuildTransformed = await esbuild.transform(content, {
+      format: "cjs",
+      loader: "js",
+    });
+    return esbuildTransformed.code;
+  }
+
+  function initExecutionContext(taskId: string) {
+    const exports = {};
+    const customRequire = (moduleId: string) => {
+      if (moduleId === "vscode") return vscode;
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      return require(moduleId);
+    };
+    const context = vm.createContext({
+      exports,
+      console: {
+        log: (...args: unknown[]) => {
+          eventHub.dispatcher.emit("task", {
+            type: "output",
+            taskId,
+            payload: args,
+          });
+        },
+      },
+      require: customRequire,
+    });
+    return {
+      exports,
+      context,
+    };
+  }
+
+  async function createScriptModule(
+    script: UserScript,
+    context: object,
+    exports: object
+  ): Promise<ScriptModule> {
+    const rawContent = await getScriptContent(script);
+    let content: string;
+    if (script.lang === "ts") {
+      content = await transformTsScript(rawContent);
+    } else {
+      content = await transformJsScript(rawContent);
+    }
+    const vmScript = new vm.Script(content, {
+      displayErrors: true,
+      filename: getScriptFileName(script),
+    });
+    vmScript.runInContext(context, {
+      microtaskMode: "afterEvaluate",
+      displayErrors: true,
+    });
+    if (isScriptModule(exports)) {
+      return exports;
+    } else {
+      return die(`Script "${script.name}" is not written in expected format`);
+    }
+  }
+
+  async function runScript(
+    script: UserScript,
+    args: PassedParameter,
+    taskId: string
+  ) {
+    const { context, exports } = initExecutionContext(taskId);
+    const scriptModule = await createScriptModule(script, context, exports);
+    const promise = scriptModule.main(args);
+    await promise;
+  }
+
+  const scriptService: ScriptService = {
     async check() {
       await fsextra.ensureDir(basedOnScripts());
     },
@@ -74,7 +200,7 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
         writeDeclaration(script),
         fsextra.writeFile(
           basedOnScripts(script.name, getScriptFileName(script)),
-          getTsTemplate()
+          script.lang === "ts" ? getTsTemplate() : getJsTemplate()
         ),
       ]);
     },
@@ -104,16 +230,51 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
       }
       await Promise.all([writeDeclaration(script), writeMeta(script)]);
     },
-    async execute(script) {
+    async editScript(script) {
+      await openEdit(getScriptAbsolutePath(script));
+    },
+    async execute(script, params) {
       const taskId = randomString(8);
       const executionTask = {
         taskId,
         taskName: script.name,
       };
-      activeTasks.set(taskId, executionTask);
+      const promise = runScript(script, params, taskId);
+      activeTasks.set(taskId, {
+        ...executionTask,
+        promise,
+        running: true,
+      });
+      promise.then((result) => {
+        const task = activeTasks.get(taskId);
+        if (task?.running) {
+          task.running = false;
+          eventHub.dispatcher.emit("task", {
+            taskId,
+            type: "terminate",
+            payload: "",
+          });
+          activeTasks.delete(taskId);
+        }
+      });
       return executionTask;
     },
+    async executeCurrent() {
+      const currentFile = vscode.window.activeTextEditor?.document.fileName;
+      if (currentFile) {
+        const folder = path.resolve(currentFile, "..");
+        const meta = await getMeta(folder);
+        const defaults = Object.entries(
+          meta.argumentConfig
+        ).reduce<PassedParameter>((defaultArgs, [key, value]) => {
+          defaultArgs[key] = value.defaultValue;
+          return defaultArgs;
+        }, {});
+        scriptService.execute(meta, defaults);
+      }
+    },
   };
+  return scriptService;
 }
 
 function getConfigTsDeclCodeOfUserScript(script: UserScript): string {
@@ -163,7 +324,10 @@ function getTsTemplate() {
       ts.EmitHint.Unspecified,
       f.createFunctionDeclaration(
         /** decorators */ undefined,
-        /** modifiers */ [f.createModifier(ts.SyntaxKind.ExportKeyword)],
+        /** modifiers */ [
+          f.createModifier(ts.SyntaxKind.ExportKeyword),
+          f.createModifier(ts.SyntaxKind.AsyncKeyword),
+        ],
         /** asterisk(*) */ undefined,
         /** name */ names.entry,
         /** type parameters <T> */ [],
@@ -182,9 +346,15 @@ function getTsTemplate() {
             )
           ),
         ],
-        f.createKeywordTypeNode(ts.SyntaxKind.VoidKeyword),
-        f.createBlock([])
+        /** return type */ f.createTypeReferenceNode("Promise", [
+          f.createKeywordTypeNode(ts.SyntaxKind.VoidKeyword),
+        ]),
+        /** function body */ f.createBlock([])
       ),
       ts.createSourceFile(paths.mainScript, "", ts.ScriptTarget.ES2015)
     );
+}
+
+function getJsTemplate() {
+  return `export async function main() {}`;
 }

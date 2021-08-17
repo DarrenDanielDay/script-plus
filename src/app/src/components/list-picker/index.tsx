@@ -5,9 +5,7 @@ import {
   SelectProps,
 } from "@material-ui/core";
 import React from "react";
-import { TypedReflect } from "taio/build/libs/typescript/reflect";
 import type { Mapper } from "taio/build/types/concepts";
-import { keyOf } from "taio/build/utils/typed-function";
 import type { IPickerProps } from "../common/schema";
 
 export interface IListPickerProp<T> extends IPickerProps<T> {
@@ -20,18 +18,16 @@ export interface IListPickerProp<T> extends IPickerProps<T> {
 export const ListPicker = <T extends unknown>(
   params: IListPickerProp<T>
 ): JSX.Element => {
-  const { list, value, onChange, displayMapping, selectProps, menuProps } =
-    params;
+  const { list, onChange, displayMapping, selectProps, menuProps } = params;
+  const value = params.value ?? "";
   const selectProp: SelectProps = {
     ...selectProps,
+    value,
     onChange: (e) => {
       // @ts-expect-error Generic value cannot be inferred
       onChange?.(e.target.value);
     },
   };
-  if (TypedReflect.has(params, keyOf<IListPickerProp<T>>("value"))) {
-    selectProp.value = value;
-  }
   const renderingList = [...list];
   return (
     <Select {...selectProp}>

@@ -53,7 +53,10 @@ export interface Event<T> extends Message<T> {
 }
 
 export interface EventHub<T> {
-  on<K extends PropertyKeys<T>>(event: K, handler: (value: T[K]) => void): void;
+  on<K extends PropertyKeys<T>>(
+    event: K,
+    handler: (value: T[K]) => void
+  ): () => void;
   off<K extends PropertyKeys<T>>(
     event: K,
     handler: (value: T[K]) => void

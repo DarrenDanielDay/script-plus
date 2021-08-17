@@ -4,6 +4,7 @@ src/**
 .prettierignore
 .eslintrc
 .yarnrc
+user-scripts
 .husky/**
 **/tsconfig.json
 **/*.map

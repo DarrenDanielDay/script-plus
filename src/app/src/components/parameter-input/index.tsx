@@ -54,7 +54,7 @@ export const ParameterInput: React.FC<IParameterInputProp> = ({
               <InputLabel>{fieldKey}</InputLabel>
               {isStringArgumentField(field) ? (
                 <Input
-                  value={fieldValue}
+                  value={fieldValue ?? ""}
                   onChange={(e) =>
                     onChange({ ...value, [fieldKey]: `${e.target.value}` })
                   }
@@ -62,7 +62,7 @@ export const ParameterInput: React.FC<IParameterInputProp> = ({
               ) : isNumberArgumentField(field) ? (
                 <Input
                   type="number"
-                  value={fieldValue}
+                  value={fieldValue ?? 0}
                   onChange={(e) =>
                     onChange({ ...value, [fieldKey]: +e.target.value })
                   }
@@ -81,7 +81,7 @@ export const ParameterInput: React.FC<IParameterInputProp> = ({
                   value={
                     isUnionThat(isString, isNumber)(fieldValue)
                       ? fieldValue
-                      : undefined
+                      : ""
                   }
                   onChange={(e) => onChange({ ...value, [fieldKey]: e })}
                 ></EnumPicker>

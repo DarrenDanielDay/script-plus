@@ -35,10 +35,11 @@ export function createDispatcher<T>(): IEventDispatcher<T> {
   function on<K extends PropertyKeys<T>>(
     event: K,
     handler: (value: T[K]) => void
-  ): void {
+  ): () => void {
     handlersMap.has(event) || handlersMap.set(event, new Set());
     // @ts-expect-error Key mapping
     handlersMap.get(event)!.add(handler);
+    return () => off(event, handler);
   }
   function off<K extends PropertyKeys<T>>(
     event: K,

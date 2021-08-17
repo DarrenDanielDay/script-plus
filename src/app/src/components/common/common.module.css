@@ -14,3 +14,7 @@
 .spinning {
   animation: spin infinite 1s linear;
 }
+
+.max-width {
+  width: 100%;
+}

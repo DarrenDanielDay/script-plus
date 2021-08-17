@@ -1042,10 +1042,10 @@ err-code@^2.0.2:
   resolved "https://registry.npmjs.org/err-code/-/err-code-2.0.3.tgz#23c2f3b756ffdfc608d30e27c9a941024807e7f9"
   integrity sha512-2bmlRpNKBxT/CRmPOlyISQpNj+qSeYvcym/uT0Jx2bMOlKLtSy1ZmLuVxSEKKyor/N5yhvp/ZiG1oE3DEYMSFA==
 
-esbuild@^0.12.4:
-  version "0.12.4"
-  resolved "https://registry.npmjs.org/esbuild/-/esbuild-0.12.4.tgz#a2a2769ee79af1ae0f605f59aed9d450e81740ec"
-  integrity sha512-HObgzMHbba5HzsHzxj1ccDIPWncCCCQjoruuLyS5geidwndqgLsjZEMt0XeSYIIbqoJFENGCEFQt4m2PtAFK2Q==
+esbuild@^0.12.20:
+  version "0.12.20"
+  resolved "https://registry.npmjs.org/esbuild/-/esbuild-0.12.20.tgz#4d3c9d83c99a4031e027b42a4c398c23b6827cb0"
+  integrity sha512-u7+0qTo9Z64MD9PhooEngCmzyEYJ6ovFhPp8PLNh3UasR5Ihjv6HWVXqm8uHmasdQlpsAf0IsY4U0YVUfCpt4Q==
 
 esbuild@^0.9.3:
   version "0.9.7"

@@ -1,11 +1,11 @@
 {
   "name": "script-plus",
   "displayName": "Script Plus",
-  "description": "A demo for creating vscode plugin with webview powered by React.",
+  "description": "A vscode plugin for running JS/TS scripts to call vscode API.",
   "extensionKind": [
     "ui"
   ],
-  "version": "1.3.0",
+  "version": "0.1.0",
   "author": {
     "email": "Darren_Daniel_Day@hotmail.com",
     "name": "Darren Daniel Day",
@@ -30,15 +30,19 @@
     "commands": [
       {
         "command": "script-plus.open",
-        "title": "VSCode React UI Demo: Open Webview"
+        "title": "Script Plus: Open Webview"
       },
       {
         "command": "script-plus.close",
-        "title": "VSCode React UI Demo: Close Webview"
+        "title": "Script Plus: Close Webview"
       },
       {
         "command": "script-plus.reload",
-        "title": "VSCode React UI Demo: Reload Webview"
+        "title": "Script Plus: Reload Webview"
+      },
+      {
+        "command": "script-plus.executeCurrentScript",
+        "title": "Script Plus: Execute Current Script (Using default configs)"
       }
     ],
     "viewsContainers": {
@@ -52,7 +56,7 @@
     },
     "viewsWelcome": [
       {
-        "contents": "Welcome to script-plus!\n[Open Webview UI built with react](command:script-plus.open)",
+        "contents": "Welcome to script-plus!\n[Open Script Plus UI](command:script-plus.open)",
         "view": "script-plus.view.startup",
         "when": "config.git.enabled"
       }
@@ -84,24 +88,24 @@
     "@snowpack/plugin-react-refresh": "^2.5.0",
     "@types/fs-extra": "^9.0.12",
     "@types/glob": "^7.1.3",
+    "@types/ramda": "^0.27.44",
     "@types/vscode": "^1.46.0",
     "@typescript-eslint/eslint-plugin": "^4.29.0",
     "@typescript-eslint/parser": "^4.29.0",
-    "esbuild": "^0.12.4",
     "eslint": "^7.32.0",
     "glob": "^7.1.6",
     "husky": "^6.0.0",
     "prettier": "^2.3.0",
     "pretty-quick": "^3.1.0",
+    "ramda": "^0.27.1",
+    "rxjs": "^7.3.0",
     "snowpack": "^3.6.2",
+    "taio": "^0.4.0",
     "typescript": "^4.3.2",
     "vsce": "^1.88.0"
   },
   "dependencies": {
-    "@types/ramda": "^0.27.44",
-    "fs-extra": "^10.0.0",
-    "ramda": "^0.27.1",
-    "rxjs": "^7.3.0",
-    "taio": "^0.4.0"
+    "esbuild": "^0.12.20",
+    "fs-extra": "^10.0.0"
   }
 }

@@ -48,7 +48,7 @@ export interface IMessageManager {
   onEvent<K extends PropertyKeys<CoreEvents>>(
     name: K,
     handler: (value: CoreEvents[K]) => void
-  ): void;
+  ): () => void;
   offEvent<K extends PropertyKeys<CoreEvents>>(
     name: K,
     handler: (value: CoreEvents[K]) => void
@@ -141,6 +141,7 @@ export function createMessageManager(): IMessageManager {
   ) {
     handlerMap.has(name) || handlerMap.set(name, new Set());
     handlerMap.get(name)!.add(handler);
+    return () => offEvent(name, handler);
   }
 
   function offEvent<K extends PropertyKeys<CoreEvents>>(

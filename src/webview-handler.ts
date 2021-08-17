@@ -23,6 +23,7 @@ export interface IWebviewManager extends vscode.Disposable {
   open: () => Promise<void>;
   reload: () => Promise<void>;
   close: () => void;
+  onClose: (callback: () => void) => void;
   attach: (handler: OnDidReceiveMessageHandler) => IWebviewManager;
   detach: () => void;
 }
@@ -36,6 +37,7 @@ export function createWebviewManager(
   let panel: vscode.WebviewPanel | undefined = undefined;
   let messageHandler: OnDidReceiveMessageHandler | undefined = undefined;
   let devServerConfig: DevServerConfig | undefined = undefined;
+  let onCloseHook: (() => void) | undefined = undefined;
   function processUrlOfHtml(html: string, baseUrl: string): string {
     return html.replace("%BASE_URL%", baseUrl);
   }
@@ -146,6 +148,7 @@ export function createWebviewManager(
     panel.webview.html = html;
   }
   function close() {
+    onCloseHook?.();
     if (!panel) {
       return;
     }
@@ -197,6 +200,9 @@ export function createWebviewManager(
     },
     open,
     close,
+    onClose(callback) {
+      onCloseHook = callback;
+    },
     reload,
     attach,
     detach,
