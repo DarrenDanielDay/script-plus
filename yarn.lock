@@ -381,10 +381,10 @@
   dependencies:
     ts-toolbelt "^6.15.1"
 
-"@types/vscode@^1.46.0":
-  version "1.55.0"
-  resolved "https://registry.npm.taobao.org/@types/vscode/download/@types/vscode-1.55.0.tgz#58cfbebbd32b3e374e07e7858b1fd0e92b1a1d2b"
-  integrity sha1-WM++u9MrPjdOB+eFix/Q6SsaHSs=
+"@types/vscode@^1.59.0":
+  version "1.59.0"
+  resolved "https://registry.npmjs.org/@types/vscode/-/vscode-1.59.0.tgz#11c93f5016926126bf30b47b9ece3bd617eeef31"
+  integrity sha512-Zg38rusx2nU6gy6QdF7v4iqgxNfxzlBlDhrRCjOiPQp+sfaNrp3f9J6OHIhpGNN1oOAca4+9Hq0+8u3jwzPMlQ==
 
 "@typescript-eslint/eslint-plugin@^4.29.0":
   version "4.29.0"
