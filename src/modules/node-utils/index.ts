@@ -5,6 +5,9 @@ import * as path from "path";
 import * as fs from "fs";
 import type { PathLike } from "fs";
 import * as R from "ramda";
+import * as child_process from "child_process";
+import { platform } from "os";
+import { isString } from "taio/build/utils/validator/primitive";
 export const existFile = (pathLike: PathLike) =>
   fsextra.promises
     .stat(pathLike)
@@ -39,3 +42,12 @@ export const randomString = R.pipe(
   ),
   R.join("")
 );
+export const execFile = promisify(child_process.execFile);
+const yarn = platform() === "win32" ? "yarn.cmd" : "yarn";
+export const installPackage = (
+  moduleId: string,
+  config: { cwd: string; global?: boolean }
+) =>
+  execFile(yarn, ["add", moduleId, config.global && "-D"].filter(isString), {
+    cwd: config.cwd,
+  });

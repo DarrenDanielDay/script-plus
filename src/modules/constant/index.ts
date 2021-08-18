@@ -4,6 +4,7 @@ export const paths = {
   declaration: "config.d.ts",
   declarationBase: "config",
   mainScript: "index",
+  packageJson: "package.json",
 } as const;
 
 export const names = {

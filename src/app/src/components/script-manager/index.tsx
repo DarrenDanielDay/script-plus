@@ -37,8 +37,7 @@ export const ScriptManager: React.FC<IScriptManagerProp> = ({}) => {
     () => SessionInvoker.ScriptService.getList(),
     R.pipe(
       setStateEffect(setScripts),
-      R.always(undefined),
-      setStateEffect(setEditingScript)
+      R.tap((scripts) => setEditingScript(scripts[0]))
     )
   );
   useEffect(R.pipe(fetchScripts, R.always(undefined)), []);
@@ -67,12 +66,20 @@ export const ScriptManager: React.FC<IScriptManagerProp> = ({}) => {
         </FormControl>
         <IconButton
           style={{ color: colors.red[500] }}
-          onClick={() =>
-            editingScript &&
-            SessionInvoker.ScriptService.delete(editingScript).then(
-              fetchScripts
-            )
-          }
+          onClick={async () => {
+            if (!editingScript) return;
+            const result =
+              await SessionInvoker.vscode.window.showWarningMessage(
+                `Are you sure to delete script "${editingScript.name}" ? It will be permanently lost!`,
+                { modal: true },
+                { title: "Yes" },
+                { title: "No" }
+              );
+            if (result?.title === "Yes") {
+              await SessionInvoker.ScriptService.delete(editingScript);
+              await fetchScripts();
+            }
+          }}
         >
           <DeleteOutline></DeleteOutline>
         </IconButton>
@@ -111,15 +118,17 @@ export const ScriptManager: React.FC<IScriptManagerProp> = ({}) => {
               lang: newScriptLang,
               name: newScriptName,
             }),
-            R.tap((script) =>
-              SessionInvoker.ScriptService.create(script).then(fetchScripts)
-            )
+            R.tap(async (script) => {
+              await SessionInvoker.ScriptService.create(script);
+              const newScripts = await fetchScripts();
+              setEditingScript(newScripts.find(R.propEq("name", script.name)));
+            })
           )}
         >
           <AddOutlined></AddOutlined>
         </IconButton>
       </Box>
-      <Box>
+      <Box position="relative">
         {!!editingScript && (
           <>
             <Typography variant="h6">

@@ -19,4 +19,8 @@ export interface ScriptService {
   delete(script: UserScript): Promise<void>;
   execute(script: UserScript, params: PassedParameter): Promise<ExecutionTask>;
   executeCurrent(): Promise<void>;
+  installPackage(
+    moduleId: string,
+    options?: { global?: boolean }
+  ): Promise<void>;
 }

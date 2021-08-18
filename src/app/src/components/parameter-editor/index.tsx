@@ -12,6 +12,7 @@ import {
   FormLabel,
   Fab,
   useTheme,
+  makeStyles,
 } from "@material-ui/core";
 import { AddOutlined, DeleteOutlined, Save } from "@material-ui/icons";
 import classNames from "classnames";
@@ -29,6 +30,14 @@ import { ListPicker } from "../list-picker";
 import styles from "./style.module.css";
 import { useStyles } from "../common/common-mui-styles";
 
+const useCustomStyles = makeStyles((theme) => ({
+  saveFab: {
+    position: "absolute",
+    right: theme.spacing(2),
+    top: theme.spacing(2),
+  },
+}));
+
 export interface ParameterEditorProp {
   configObject: ArgumentConfig;
   onDone?: (fields: ArgumentConfig, description: string) => void;
@@ -40,6 +49,7 @@ export const ParameterEditor: React.FC<ParameterEditorProp> = ({
 }) => {
   const theme = useTheme();
   const classes = useStyles();
+  const customClasses = useCustomStyles();
   const [fields, setFields] = useState<ArgumentConfig>(configObject);
   const fieldKeys = Object.keys(fields);
   const [scriptDescription, setScriptDescription] = useState("");
@@ -76,7 +86,7 @@ export const ParameterEditor: React.FC<ParameterEditorProp> = ({
       <Fab
         color="primary"
         onClick={() => onDone?.(fields, scriptDescription)}
-        className={classes.saveFab}
+        className={customClasses.saveFab}
       >
         <Save />
       </Fab>

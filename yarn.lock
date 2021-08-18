@@ -352,6 +352,13 @@
     "@types/minimatch" "*"
     "@types/node" "*"
 
+"@types/global-dirs@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/@types/global-dirs/-/global-dirs-1.0.0.tgz#d30f833d6ad2265d9132a705d375e861511e7d10"
+  integrity sha512-07HbnPoikFCcPmeTLSktvyP63hV/h6wFBwfaq0e2LargSuNuomkBdj2R4DRKFFay4LWuB46tI0RE1simJ4R4gQ==
+  dependencies:
+    global-dirs "*"
+
 "@types/json-schema@^7.0.7":
   version "7.0.9"
   resolved "https://registry.npmjs.org/@types/json-schema/-/json-schema-7.0.9.tgz#97edc9037ea0c38585320b28964dde3b39e4660d"
@@ -1426,6 +1433,13 @@ glob@^7.1.6:
     once "^1.3.0"
     path-is-absolute "^1.0.0"
 
+global-dirs@*, global-dirs@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.npmjs.org/global-dirs/-/global-dirs-3.0.0.tgz#70a76fe84ea315ab37b1f5576cbde7d48ef72686"
+  integrity sha512-v8ho2DS5RiCjftj1nD9NmnfaOzTdud7RRnVd9kFNOjqZbISlx5DQ+OrTkywgd0dIt7oFCvKetZSHoHcP3sDdiA==
+  dependencies:
+    ini "2.0.0"
+
 globals@^11.1.0:
   version "11.12.0"
   resolved "https://registry.npmjs.org/globals/-/globals-11.12.0.tgz#ab8795338868a0babd8525758018c2a7eb95c42e"
@@ -1624,6 +1638,11 @@ inherits@2, inherits@~2.0.3:
   version "2.0.4"
   resolved "https://registry.npm.taobao.org/inherits/download/inherits-2.0.4.tgz#0fa2c64f932917c3433a0ded55363aae37416b7c"
   integrity sha1-D6LGT5MpF8NDOg3tVTY6rjdBa3w=
+
+ini@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npmjs.org/ini/-/ini-2.0.0.tgz#e5fd556ecdd5726be978fa1001862eacb0a94bc5"
+  integrity sha512-7PnF4oN3CvZF23ADhA5wRaYEQpJ8qygSkbtTXWBeXWXmEVRXK+1ITciHWwHhsjv1TmW0MgacIv6hEi5pX5NQdA==
 
 ip@^1.1.5:
   version "1.1.5"

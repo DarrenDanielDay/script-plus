@@ -14,9 +14,4 @@ export const useStyles = makeStyles((theme) => ({
   selectControl: {
     width: theme.spacing(12),
   },
-  saveFab: {
-    position: "absolute",
-    right: theme.spacing(2),
-    top: theme.spacing(2),
-  },
 }));

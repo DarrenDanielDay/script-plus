@@ -4,6 +4,7 @@ import { darkTheme } from "./themes/dark";
 import SwipeableViews from "react-swipeable-views";
 import { ScriptRunner } from "./components/script-runner";
 import { ScriptManager } from "./components/script-manager";
+import { ModuleManager } from "./components/module-manager";
 
 const theme = darkTheme;
 
@@ -19,14 +20,18 @@ export const App: React.FC = () => {
         >
           <Tab label="run script" value={0}></Tab>
           <Tab label="manage script" value={1}></Tab>
+          <Tab label="manage modules" value={2}></Tab>
         </Tabs>
       </AppBar>
       <SwipeableViews index={activeTabIndex} onChangeIndex={setActiveTabIndex}>
         <Box>
           <ScriptRunner></ScriptRunner>
         </Box>
-        <Box position="relative">
+        <Box>
           <ScriptManager></ScriptManager>
+        </Box>
+        <Box>
+          <ModuleManager></ModuleManager>
         </Box>
       </SwipeableViews>
     </ThemeProvider>

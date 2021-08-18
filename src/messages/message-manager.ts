@@ -40,10 +40,11 @@ export function createMessageHandler<APIs, Events>({
         return eventAdapter.eventHandler(e);
       }
     } catch (error) {
-      vscode.window.showErrorMessage(
-        `Internal error:
-${JSON.stringify(error)}`
-      );
+      const message =
+        error instanceof Error
+          ? error.message
+          : JSON.stringify(error, undefined, 2);
+      vscode.window.showErrorMessage(`Internal error: ${message}`);
     }
   };
 }

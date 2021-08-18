@@ -88,12 +88,15 @@
     "@snowpack/plugin-react-refresh": "^2.5.0",
     "@types/fs-extra": "^9.0.12",
     "@types/glob": "^7.1.3",
+    "@types/global-dirs": "^1.0.0",
     "@types/ramda": "^0.27.44",
     "@types/vscode": "^1.46.0",
     "@typescript-eslint/eslint-plugin": "^4.29.0",
     "@typescript-eslint/parser": "^4.29.0",
     "eslint": "^7.32.0",
+    "fs-extra": "^10.0.0",
     "glob": "^7.1.6",
+    "global-dirs": "^3.0.0",
     "husky": "^6.0.0",
     "prettier": "^2.3.0",
     "pretty-quick": "^3.1.0",
@@ -105,7 +108,6 @@
     "vsce": "^1.88.0"
   },
   "dependencies": {
-    "esbuild": "^0.12.20",
-    "fs-extra": "^10.0.0"
+    "esbuild": "^0.12.20"
   }
 }

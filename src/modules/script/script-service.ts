@@ -10,10 +10,19 @@ import {
 } from "../../models/script";
 import * as vscode from "vscode";
 import { names, paths } from "../constant";
-import { existDir, fsextra, glob, path, randomString } from "../node-utils";
+import {
+  existDir,
+  existFile,
+  fsextra,
+  glob,
+  installPackage,
+  path,
+  randomString,
+} from "../node-utils";
 import esbuild from "esbuild";
 import ts from "typescript";
 import vm from "vm";
+import { createRequire } from "module";
 import { die } from "taio/build/utils/internal/exceptions";
 import { enumValues } from "taio/build/utils/enum";
 import { isNumber, isString } from "taio/build/utils/validator/primitive";
@@ -23,6 +32,8 @@ import { isObject } from "taio/build/utils/validator/object";
 import type { AnyFunc } from "taio/build/types/concepts";
 import type { IEventHubAdapter } from "../../events/event-manager";
 import { openEdit } from "../vscode-utils";
+import globalDirectories from "global-dirs";
+
 const f = ts.factory;
 interface ScriptModule {
   main: (config: PassedParameter) => Promise<void> | void;
@@ -112,12 +123,36 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
 
   function initExecutionContext(taskId: string) {
     const exports = {};
+    const globalYarnRequire = createRequire(globalDirectories.yarn.packages);
+    const globalNpmRequire = createRequire(globalDirectories.npm.packages);
+    const tryRequire = (
+      nodeRequire: NodeRequire,
+      moduleId: string
+    ): { module: unknown } | null => {
+      try {
+        return {
+          module: nodeRequire(moduleId),
+        };
+      } catch (error) {
+        return null;
+      }
+    };
     const customRequire = (moduleId: string) => {
       if (moduleId === "vscode") return vscode;
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      return require(moduleId);
+      for (const nodeRequire of [
+        require,
+        globalYarnRequire,
+        globalNpmRequire,
+      ]) {
+        const result = tryRequire(nodeRequire, moduleId);
+        if (result) return result.module;
+      }
+      return die(
+        `Cannot find module "${moduleId}", have you installed it as global module?`
+      );
     };
     const context = vm.createContext({
+      ...globalThis,
       exports,
       console: {
         log: (...args: unknown[]) => {
@@ -177,11 +212,23 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
   const scriptService: ScriptService = {
     async check() {
       await fsextra.ensureDir(basedOnScripts());
+      const packageJsonFile = basedOnScripts(paths.packageJson);
+      if (!(await existFile(packageJsonFile))) {
+        await fsextra.writeJSON(
+          packageJsonFile,
+          {
+            name: "user-scripts",
+            version: "0.0.0",
+            description: "Script folder for vscode plugin `Script Plus`.",
+            license: "MIT",
+          },
+          { spaces: 2, encoding: "utf-8" }
+        );
+      }
     },
     async create(script) {
       if (!isValidScriptName(script.name)) {
-        vscode.window.showErrorMessage(`Invalid script name!`);
-        return;
+        return die(`Invalid script name!`);
       }
       if (!isUserScript(script)) {
         vscode.window.showInformationMessage(`Invalid script object!`);
@@ -207,8 +254,7 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
     async delete(script) {
       const scriptHost = basedOnScripts(script.name);
       if (!(await existDir(scriptHost))) {
-        vscode.window.showErrorMessage(`Script ${script.name} not found!`);
-        return;
+        return die(`Script ${script.name} not found!`);
       }
       fsextra.rmSync(scriptHost, { force: true, recursive: true });
       vscode.window.showInformationMessage(`Script ${script.name} Removed.`);
@@ -225,8 +271,7 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
     },
     async updateScript(script) {
       if (!isUserScript(script)) {
-        vscode.window.showErrorMessage(`Invalid script object!`);
-        return;
+        return die(`Invalid script object!`);
       }
       await Promise.all([writeDeclaration(script), writeMeta(script)]);
     },
@@ -273,13 +318,28 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
         scriptService.execute(meta, defaults);
       }
     },
+    async installPackage(script, options) {
+      await installPackage(script, {
+        cwd: basedOnScripts(),
+        global: options?.global,
+      });
+    },
   };
   return scriptService;
 }
 
+function getTextOfTsAstNode(node: ts.Node) {
+  return ts
+    .createPrinter()
+    .printNode(
+      ts.EmitHint.Unspecified,
+      node,
+      ts.createSourceFile(paths.declaration, "", ts.ScriptTarget.ES2015)
+    );
+}
+
 function getConfigTsDeclCodeOfUserScript(script: UserScript): string {
-  return ts.createPrinter().printNode(
-    ts.EmitHint.Unspecified,
+  return getTextOfTsAstNode(
     f.createInterfaceDeclaration(
       /** decorators */ undefined,
       /** modifiers */ [f.createModifier(ts.SyntaxKind.ExportKeyword)],
@@ -312,49 +372,68 @@ function getConfigTsDeclCodeOfUserScript(script: UserScript): string {
             : die()
         )
       )
-    ),
-    ts.createSourceFile(paths.declaration, "", ts.ScriptTarget.ES2015)
+    )
   );
 }
 
 function getTsTemplate() {
-  return ts
-    .createPrinter()
-    .printNode(
-      ts.EmitHint.Unspecified,
-      f.createFunctionDeclaration(
-        /** decorators */ undefined,
-        /** modifiers */ [
-          f.createModifier(ts.SyntaxKind.ExportKeyword),
-          f.createModifier(ts.SyntaxKind.AsyncKeyword),
-        ],
-        /** asterisk(*) */ undefined,
-        /** name */ names.entry,
-        /** type parameters <T> */ [],
-        /** parameters */ [
-          f.createParameterDeclaration(
-            /** decorators */ [],
-            /** modifiers */ [],
-            /** ... */ undefined,
-            /** name */ names.param,
-            /** ? */ undefined,
-            /** type */ f.createImportTypeNode(
-              /** import(xxx) */ f.createLiteralTypeNode(
-                f.createStringLiteral(`./${paths.declarationBase}`)
-              ),
-              /** .yyy */ f.createIdentifier(names.configName)
-            )
+  const importVscodeNode = f.createImportDeclaration(
+    [],
+    [],
+    f.createImportClause(
+      false,
+      undefined,
+      f.createNamespaceImport(f.createIdentifier("vscode"))
+    ),
+    f.createStringLiteral("vscode")
+  );
+  const mainFunctionNode = f.createFunctionDeclaration(
+    /** decorators */ undefined,
+    /** modifiers */ [
+      f.createModifier(ts.SyntaxKind.ExportKeyword),
+      f.createModifier(ts.SyntaxKind.AsyncKeyword),
+    ],
+    /** asterisk(*) */ undefined,
+    /** name */ names.entry,
+    /** type parameters <T> */ [],
+    /** parameters */ [
+      f.createParameterDeclaration(
+        /** decorators */ [],
+        /** modifiers */ [],
+        /** ... */ undefined,
+        /** name */ names.param,
+        /** ? */ undefined,
+        /** type */ f.createImportTypeNode(
+          /** import(xxx) */ f.createLiteralTypeNode(
+            f.createStringLiteral(`./${paths.declarationBase}`)
           ),
-        ],
-        /** return type */ f.createTypeReferenceNode("Promise", [
-          f.createKeywordTypeNode(ts.SyntaxKind.VoidKeyword),
-        ]),
-        /** function body */ f.createBlock([])
+          /** .yyy */ f.createIdentifier(names.configName)
+        )
       ),
-      ts.createSourceFile(paths.mainScript, "", ts.ScriptTarget.ES2015)
-    );
+    ],
+    /** return type */ f.createTypeReferenceNode("Promise", [
+      f.createKeywordTypeNode(ts.SyntaxKind.VoidKeyword),
+    ]),
+    /** function body */ f.createBlock([
+      f.createExpressionStatement(
+        f.createCallExpression(
+          f.createPropertyAccessExpression(
+            f.createPropertyAccessExpression(
+              f.createIdentifier("vscode"),
+              "window"
+            ),
+            "showInformationMessage"
+          ),
+          [],
+          [f.createStringLiteral("Hello, Script Plus!")]
+        )
+      ),
+    ])
+  );
+  return `${getTextOfTsAstNode(importVscodeNode)}
+${getTextOfTsAstNode(mainFunctionNode)}`;
 }
-
+vscode.window.showInformationMessage;
 function getJsTemplate() {
   return `export async function main() {}`;
 }

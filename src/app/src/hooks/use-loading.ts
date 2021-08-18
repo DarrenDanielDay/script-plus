@@ -22,9 +22,9 @@ export function useLoading(): [
   return [loading, loadingScope, setLoading];
 }
 
-export function useLoadingPipe<T>(
+export function useLoadingPipe<T, R>(
   getter: Func<[], Promise<T>>,
-  reciever: Func<[T], void>
+  reciever: Func<[T], R>
 ) {
   const [loading, setLoading] = useState(false);
   const fire = R.pipe(R.T, setLoading, getter, (promise) =>
