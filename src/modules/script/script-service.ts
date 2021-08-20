@@ -154,7 +154,10 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
       );
     };
     const context = vm.createContext({
-      ...globalThis,
+      ...Object.getOwnPropertyNames(globalThis).reduce((globalMixin, key) => {
+        Reflect.set(globalMixin, key, Reflect.get(globalThis, key));
+        return globalMixin;
+      }, {}),
       exports,
       console: {
         log: (...args: unknown[]) => {
