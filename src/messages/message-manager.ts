@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import type { IModuleManager } from "../modules/module-manager";
 import type { IEventHubAdapter } from "../events/event-manager";
 import type { Event, Message, Request } from "../app/communication";
+import { globalErrorHandler } from "../modules/vscode-utils";
 
 function isMessage(obj: unknown): obj is Message<unknown> {
   return (
@@ -40,11 +41,7 @@ export function createMessageHandler<APIs, Events>({
         return eventAdapter.eventHandler(e);
       }
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : JSON.stringify(error, undefined, 2);
-      vscode.window.showErrorMessage(`Internal error: ${message}`);
+      globalErrorHandler(error);
     }
   };
 }

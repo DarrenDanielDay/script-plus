@@ -23,7 +23,7 @@ import { setStateEffect } from "../../utils/well-typed";
 import { noop } from "taio/build/utils/typed-function";
 import { ExpandMore, PlayArrowRounded } from "@material-ui/icons";
 import type { ExecutionTask } from "../../../../models/execution-task";
-import styles from "../common/common.module.css";
+import styles from "../../components/common/common.module.css";
 
 export interface IScriptRunnerProp {}
 

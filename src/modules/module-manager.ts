@@ -1,5 +1,6 @@
 import type { Error, Request, Response } from "../app/communication";
 import { access } from "../utils";
+import { getErrorMessage, globalErrorHandler } from "./vscode-utils";
 
 export interface IModuleManager<T> {
   readonly api: T;
@@ -28,14 +29,13 @@ export function createModuleManager<T>(api: T): IModuleManager<T> {
         id,
       };
     } catch (error: unknown) {
-      const newLocal =
-        error instanceof Error ? error.message : JSON.stringify(error);
+      globalErrorHandler(error);
       return {
         id,
         type: "error",
         payload: {
           error,
-          message: newLocal,
+          message: getErrorMessage(error),
         },
       };
     }

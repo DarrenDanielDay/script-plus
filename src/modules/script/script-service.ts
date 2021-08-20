@@ -31,7 +31,7 @@ import { defineValidator } from "taio/build/utils/validator/utils";
 import { isObject } from "taio/build/utils/validator/object";
 import type { AnyFunc } from "taio/build/types/concepts";
 import type { IEventHubAdapter } from "../../events/event-manager";
-import { openEdit } from "../vscode-utils";
+import { globalErrorHandler, openEdit } from "../vscode-utils";
 import globalDirectories from "global-dirs";
 
 const f = ts.factory;
@@ -140,9 +140,9 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
     const customRequire = (moduleId: string) => {
       if (moduleId === "vscode") return vscode;
       for (const nodeRequire of [
-        require,
         globalYarnRequire,
         globalNpmRequire,
+        require,
       ]) {
         const result = tryRequire(nodeRequire, moduleId);
         if (result) return result.module;
@@ -290,18 +290,22 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
         promise,
         running: true,
       });
-      promise.then((result) => {
-        const task = activeTasks.get(taskId);
-        if (task?.running) {
-          task.running = false;
-          eventHub.dispatcher.emit("task", {
-            taskId,
-            type: "terminate",
-            payload: "",
-          });
-          activeTasks.delete(taskId);
-        }
-      });
+      promise
+        .then((result) => {
+          const task = activeTasks.get(taskId);
+          if (task?.running) {
+            task.running = false;
+            eventHub.dispatcher.emit("task", {
+              taskId,
+              type: "terminate",
+              payload: "",
+            });
+            activeTasks.delete(taskId);
+          }
+        })
+        .catch((e) => {
+          globalErrorHandler(e);
+        });
       return executionTask;
     },
     async executeCurrent() {

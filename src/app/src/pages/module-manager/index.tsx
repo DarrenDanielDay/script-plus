@@ -3,7 +3,7 @@ import { AddOutlined, RefreshOutlined } from "@material-ui/icons";
 import React, { useState } from "react";
 import { useLoadingPipe } from "../../hooks/use-loading";
 import { useStyles } from "../../components/common/common-mui-styles";
-import styles from "../common/common.module.css";
+import styles from "../../components/common/common.module.css";
 
 export const ModuleManager: React.FC = () => {
   const classes = useStyles();
@@ -11,7 +11,7 @@ export const ModuleManager: React.FC = () => {
   const [loading, fire] = useLoadingPipe(
     () =>
       Promise.all([
-        SessionInvoker.ScriptService.installPackage(moduleId),
+        SessionInvoker.ScriptService.installPackage(moduleId, { global: true }),
         SessionInvoker.ScriptService.installPackage(`@types/${moduleId}`),
       ]),
     () => {

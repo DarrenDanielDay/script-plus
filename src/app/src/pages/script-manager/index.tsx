@@ -22,9 +22,9 @@ import { ParameterEditor } from "../../components/parameter-editor";
 import { setStateEffect } from "../../utils/well-typed";
 import { useLoadingPipe } from "../../hooks/use-loading";
 import { ListPicker } from "../../components/list-picker";
-import styles from "../common/common.module.css";
 import { useStyles } from "../../components/common/common-mui-styles";
 import classNames from "classnames";
+import styles from "../../components/common/common.module.css";
 
 export interface IScriptManagerProp {}
 
