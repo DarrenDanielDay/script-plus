@@ -18,12 +18,12 @@ import {
 } from "@material-ui/icons";
 import React, { useEffect, useState } from "react";
 import type { UserScript } from "../../../../models/script";
-import { ParameterEditor } from "../parameter-editor";
+import { ParameterEditor } from "../../components/parameter-editor";
 import { setStateEffect } from "../../utils/well-typed";
 import { useLoadingPipe } from "../../hooks/use-loading";
-import { ListPicker } from "../list-picker";
+import { ListPicker } from "../../components/list-picker";
 import styles from "../common/common.module.css";
-import { useStyles } from "../common/common-mui-styles";
+import { useStyles } from "../../components/common/common-mui-styles";
 import classNames from "classnames";
 
 export interface IScriptManagerProp {}

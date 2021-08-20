@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { AppBar, Box, Tab, Tabs, ThemeProvider } from "@material-ui/core";
 import { darkTheme } from "./themes/dark";
 import SwipeableViews from "react-swipeable-views";
-import { ScriptRunner } from "./components/script-runner";
-import { ScriptManager } from "./components/script-manager";
-import { ModuleManager } from "./components/module-manager";
+import { ScriptRunner } from "./pages/script-runner";
+import { ScriptManager } from "./pages/script-manager";
+import { ModuleManager } from "./pages/module-manager";
 
 const theme = darkTheme;
 

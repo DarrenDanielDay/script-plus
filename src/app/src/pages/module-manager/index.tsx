@@ -2,7 +2,7 @@ import { Box, Button, FormControl, TextField } from "@material-ui/core";
 import { AddOutlined, RefreshOutlined } from "@material-ui/icons";
 import React, { useState } from "react";
 import { useLoadingPipe } from "../../hooks/use-loading";
-import { useStyles } from "../common/common-mui-styles";
+import { useStyles } from "../../components/common/common-mui-styles";
 import styles from "../common/common.module.css";
 
 export const ModuleManager: React.FC = () => {

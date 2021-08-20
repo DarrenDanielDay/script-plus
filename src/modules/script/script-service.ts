@@ -62,7 +62,7 @@ export function createScriptService(
     return basedOnExtension(paths.userScripts, ...fragments);
   }
   function isValidScriptName(name: string) {
-    const special = new Set([..."~`!@#$%^&*()_+-={}|[]\\:;\"'<>?,./"]);
+    const special = new Set([..."~`!@#$%^&*()_+={}|[]\\:;\"'<>?,./"]);
     return ![...name].some((char) => special.has(char));
   }
   function getScriptFileName(script: UserScript): string {

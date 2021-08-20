@@ -17,8 +17,8 @@ import type {
   PassedParameter,
   UserScript,
 } from "../../../../models/script";
-import { ParameterInput } from "../parameter-input";
-import { ScriptPicker } from "../script-picker";
+import { ParameterInput } from "../../components/parameter-input";
+import { ScriptPicker } from "../../components/script-picker";
 import { setStateEffect } from "../../utils/well-typed";
 import { noop } from "taio/build/utils/typed-function";
 import { ExpandMore, PlayArrowRounded } from "@material-ui/icons";
