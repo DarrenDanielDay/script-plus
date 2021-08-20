@@ -1,19 +1,42 @@
-import { Box, Button, FormControl, TextField } from "@material-ui/core";
+import {
+  Box,
+  Button,
+  FormControl,
+  FormLabel,
+  Input,
+  CircularProgress,
+  useTheme,
+} from "@material-ui/core";
 import { AddOutlined, RefreshOutlined } from "@material-ui/icons";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLoadingPipe } from "../../hooks/use-loading";
 import { useStyles } from "../../components/common/common-mui-styles";
 import styles from "../../components/common/common.module.css";
+import { ListPicker } from "../../components/list-picker";
+import * as R from "ramda";
+import { debounceTime, filter, Subject } from "rxjs";
+import classNames from "classnames";
+import { isString } from "taio/build/utils/validator/primitive";
 
 export const ModuleManager: React.FC = () => {
   const classes = useStyles();
+  const theme = useTheme();
+  const moduleIdInput$ = useRef<Subject<string>>();
   const [moduleId, setModuleId] = useState("");
+  const [versions, setVersions] = useState<string[]>([]);
+  const [version, setVersion] = useState("");
   const [loading, fire] = useLoadingPipe(
-    () =>
-      Promise.all([
-        SessionInvoker.ScriptService.installPackage(moduleId, { global: true }),
-        SessionInvoker.ScriptService.installPackage(`@types/${moduleId}`),
-      ]),
+    () => {
+      const packagePromise = SessionInvoker.ScriptService.installPackage(
+        moduleId,
+        version,
+        { global: true }
+      );
+      const typesPromise = moduleId.startsWith("@types")
+        ? Promise.resolve()
+        : SessionInvoker.ScriptService.installPackage(`@types/${moduleId}`, "");
+      return Promise.all([packagePromise, typesPromise]);
+    },
     () => {
       SessionInvoker.vscode.window.showInformationMessage(
         `Module "${moduleId}" installed`,
@@ -21,23 +44,51 @@ export const ModuleManager: React.FC = () => {
       );
     }
   );
+  const [versionSearching, getVersions] = useLoadingPipe(
+    (moduleId: string) => SessionInvoker.ScriptService.listVersions(moduleId),
+    setVersions
+  );
+  useEffect(() => {
+    moduleIdInput$.current = new Subject<string>();
+    const moduleIdInput$$ = moduleIdInput$.current
+      .pipe(debounceTime(1000), filter(isString))
+      .subscribe((moduleId) => getVersions(moduleId));
+    return () => moduleIdInput$$.unsubscribe();
+  }, []);
   return (
     <Box className={styles["center-row"]}>
-      <TextField
-        className={classes.formControl}
-        value={moduleId}
-        onChange={(e) => setModuleId(e.target.value)}
-        label="package/module identifier"
-        placeholder="example: glob@latest"
-        helperText="The package will be installed globally. Version specifier is optional."
-        disabled={loading}
-      ></TextField>
+      <FormControl className={classes.formControl}>
+        <FormLabel>npm package/module name</FormLabel>
+        <Input
+          value={moduleId}
+          onChange={(e) => {
+            setModuleId(e.target.value);
+            moduleIdInput$.current?.next(e.target.value);
+          }}
+        ></Input>
+      </FormControl>
+      <FormControl
+        className={classNames(classes.formControl, classes.selectControl)}
+      >
+        <FormLabel>version</FormLabel>
+        {versionSearching ? (
+          <CircularProgress />
+        ) : (
+          <ListPicker
+            value={version}
+            onChange={setVersion}
+            list={versions}
+            displayMapping={R.identity}
+          ></ListPicker>
+        )}
+      </FormControl>
       <FormControl className={classes.formControl}>
         <Button
           color="primary"
           variant="outlined"
           onClick={fire}
           disabled={loading || !moduleId}
+          style={{ color: theme.palette.primary.main }}
           startIcon={
             loading ? (
               <RefreshOutlined className={styles.spinning}></RefreshOutlined>
@@ -46,7 +97,7 @@ export const ModuleManager: React.FC = () => {
             )
           }
         >
-          Install
+          {loading ? "Installing" : "Install"}
         </Button>
       </FormControl>
     </Box>

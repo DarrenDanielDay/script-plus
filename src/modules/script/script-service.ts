@@ -23,6 +23,7 @@ import esbuild from "esbuild";
 import ts from "typescript";
 import vm from "vm";
 import { createRequire } from "module";
+import packageJson from "package-json";
 import { die } from "taio/build/utils/internal/exceptions";
 import { enumValues } from "taio/build/utils/enum";
 import { isNumber, isString } from "taio/build/utils/validator/primitive";
@@ -31,8 +32,9 @@ import { defineValidator } from "taio/build/utils/validator/utils";
 import { isObject } from "taio/build/utils/validator/object";
 import type { AnyFunc } from "taio/build/types/concepts";
 import type { IEventHubAdapter } from "../../events/event-manager";
-import { globalErrorHandler, openEdit } from "../vscode-utils";
+import { globalErrorHandler, openEdit, output } from "../vscode-utils";
 import globalDirectories from "global-dirs";
+import { SemVer } from "semver";
 
 const f = ts.factory;
 interface ScriptModule {
@@ -322,11 +324,41 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
         scriptService.execute(meta, defaults);
       }
     },
-    async installPackage(script, options) {
-      await installPackage(script, {
-        cwd: basedOnScripts(),
-        global: options?.global,
-      });
+    async listVersions(moduleId) {
+      try {
+        const packageMeta = await packageJson(moduleId, { allVersions: true });
+        return [
+          ...Object.keys(packageMeta.versions)
+            .map((version) => new SemVer(version, { includePrerelease: true }))
+            .filter((version) => !version.prerelease.length)
+            .reduce((set, semver) => {
+              set.add(semver.format());
+              return set;
+            }, new Set<string>())
+            .keys(),
+        ]
+          .sort()
+          .reverse();
+      } catch (error) {
+        if (error instanceof packageJson.PackageNotFoundError) {
+          return [];
+        } else {
+          throw error;
+        }
+      }
+    },
+    async installPackage(script, version, options) {
+      const { stdout, stderr } = await installPackage(
+        `${script}${version ? `@${version}` : ""}`,
+        {
+          cwd: basedOnScripts(),
+          global: options?.global,
+        }
+      );
+      output.appendLine(`${"=".repeat(10)}install stdout${"=".repeat(10)}`);
+      output.appendLine(stdout);
+      output.appendLine(`${"=".repeat(10)}install stderr${"=".repeat(10)}`);
+      output.appendLine(stderr);
     },
   };
   return scriptService;

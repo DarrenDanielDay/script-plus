@@ -116,11 +116,18 @@ export const ScriptRunner: React.FC<IScriptRunnerProp> = ({}) => {
             <AccordionDetails>
               <div className={styles["max-width"]}>
                 {outputs.map((val, i) => (
-                  <Typography key={i} variant="h6" display="block" gutterBottom>
-                    {Array.isArray(val)
-                      ? val.map((v) => JSON.stringify(v)).join(", ")
-                      : JSON.stringify(val)}
-                  </Typography>
+                  <div
+                    style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}
+                    key={i}
+                  >
+                    <Typography variant="h6" display="block" gutterBottom>
+                      {Array.isArray(val)
+                        ? val
+                            .map((v) => JSON.stringify(v, undefined, 2))
+                            .join(", ")
+                        : JSON.stringify(val)}
+                    </Typography>
+                  </div>
                 ))}
               </div>
             </AccordionDetails>

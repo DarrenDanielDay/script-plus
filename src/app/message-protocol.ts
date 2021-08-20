@@ -19,8 +19,10 @@ export interface ScriptService {
   delete(script: UserScript): Promise<void>;
   execute(script: UserScript, params: PassedParameter): Promise<ExecutionTask>;
   executeCurrent(): Promise<void>;
+  listVersions(moduleId: string): Promise<string[]>;
   installPackage(
     moduleId: string,
+    version: string,
     options?: { global?: boolean }
   ): Promise<void>;
 }

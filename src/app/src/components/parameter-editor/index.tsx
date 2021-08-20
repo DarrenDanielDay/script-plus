@@ -332,7 +332,6 @@ export const FieldEditor: React.FC<IFieldEditorProp> = ({
           <EnumValueEditor
             enumObject={field.enumOptions.enumObject}
             onAdd={(key, value, display) => {
-              console.log("add");
               onFieldEdit?.(name, {
                 ...field,
                 enumOptions: {

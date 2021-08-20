@@ -1,5 +1,6 @@
 import * as R from "ramda";
 import { useCallback, useState } from "react";
+import type { AnyArray } from "taio/build/types/array";
 import type { Func } from "taio/build/types/concepts";
 import { useSafeState } from "./use-safe-state";
 
@@ -22,13 +23,17 @@ export function useLoading(): [
   return [loading, loadingScope, setLoading];
 }
 
-export function useLoadingPipe<T, R>(
-  getter: Func<[], Promise<T>>,
+export function useLoadingPipe<P extends AnyArray, T, R>(
+  getter: Func<P, Promise<T>>,
   reciever: Func<[T], R>
 ) {
   const [loading, setLoading] = useState(false);
-  const fire = R.pipe(R.T, setLoading, getter, (promise) =>
+  const fire: Func<P, Promise<R>> = R.pipe(getter, (promise) =>
     promise.then(reciever).finally(R.pipe(R.F, setLoading))
   );
-  return [loading, fire] as const;
+  const doFire = (...args: P) => {
+    setLoading(true);
+    return fire(...args);
+  };
+  return [loading, doFire] as const;
 }

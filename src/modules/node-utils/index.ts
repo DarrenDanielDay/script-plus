@@ -48,6 +48,10 @@ export const installPackage = (
   moduleId: string,
   config: { cwd: string; global?: boolean }
 ) =>
-  execFile(yarn, ["add", moduleId, config.global && "-D"].filter(isString), {
-    cwd: config.cwd,
-  });
+  execFile(
+    yarn,
+    [config.global && "global", "add", moduleId].filter(isString),
+    {
+      cwd: config.cwd,
+    }
+  );
