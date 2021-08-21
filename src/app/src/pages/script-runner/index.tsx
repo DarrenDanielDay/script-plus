@@ -22,7 +22,10 @@ import { ScriptPicker } from "../../components/script-picker";
 import { setStateEffect } from "../../utils/well-typed";
 import { noop } from "taio/build/utils/typed-function";
 import { ExpandMore, PlayArrowRounded } from "@material-ui/icons";
-import type { ExecutionTask } from "../../../../models/execution-task";
+import type {
+  ExecutionTask,
+  TaskConsoleOutput,
+} from "../../../../models/execution-task";
 import styles from "../../components/common/common.module.css";
 
 export interface IScriptRunnerProp {}
@@ -32,7 +35,7 @@ export const ScriptRunner: React.FC<IScriptRunnerProp> = ({}) => {
   const [script, setScript] = useState<UserScript | undefined>();
   const [argument, setArgument] = useState<PassedParameter>({});
   const [running, setRunning] = useState(false);
-  const [outputs, setOutputs] = useState<unknown[]>([]);
+  const [outputs, setOutputs] = useState<TaskConsoleOutput[]>([]);
   const [exectionTask, setExectionTask] = useState<ExecutionTask | undefined>();
   useEffect(
     !script
@@ -61,7 +64,7 @@ export const ScriptRunner: React.FC<IScriptRunnerProp> = ({}) => {
               return;
             }
             if (value.type === "output") {
-              setOutputs((outputs) => [...outputs, value.payload]);
+              setOutputs((outputs) => [...outputs, value.output]);
               return;
             }
           })
@@ -115,20 +118,23 @@ export const ScriptRunner: React.FC<IScriptRunnerProp> = ({}) => {
             </AccordionSummary>
             <AccordionDetails>
               <div className={styles["max-width"]}>
-                {outputs.map((val, i) => (
-                  <div
-                    style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}
-                    key={i}
-                  >
-                    <Typography variant="h6" display="block" gutterBottom>
-                      {Array.isArray(val)
-                        ? val
-                            .map((v) => JSON.stringify(v, undefined, 2))
-                            .join(", ")
-                        : JSON.stringify(val)}
-                    </Typography>
-                  </div>
-                ))}
+                {outputs.map((val, i) => {
+                  return (
+                    <div
+                      style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}
+                      key={i}
+                    >
+                      <Typography variant="h6" display="block" gutterBottom>
+                        [ {val.level.toUpperCase()} ]{": "}
+                        {Array.isArray(val.payload)
+                          ? val.payload
+                              .map((v) => JSON.stringify(v, undefined, 2))
+                              .join(", ")
+                          : JSON.stringify(val.payload, undefined, 2)}
+                      </Typography>
+                    </div>
+                  );
+                })}
               </div>
             </AccordionDetails>
           </Accordion>

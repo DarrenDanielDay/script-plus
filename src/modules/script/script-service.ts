@@ -27,7 +27,8 @@ import packageJson from "package-json";
 import { die } from "taio/build/utils/internal/exceptions";
 import { enumValues } from "taio/build/utils/enum";
 import { isNumber, isString } from "taio/build/utils/validator/primitive";
-import type { ExecutionTask } from "../../models/execution-task";
+import { typed } from "taio/build/utils/typed-function";
+import { ExecutionTask, isLogLevel } from "../../models/execution-task";
 import { defineValidator } from "taio/build/utils/validator/utils";
 import { isObject } from "taio/build/utils/validator/object";
 import type { AnyFunc } from "taio/build/types/concepts";
@@ -159,15 +160,32 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
         return globalMixin;
       }, {}),
       exports,
-      console: {
-        log: (...args: unknown[]) => {
-          eventHub.dispatcher.emit("task", {
-            type: "output",
-            taskId,
-            payload: args,
-          });
+      console: new Proxy(console, {
+        get(target, methodName: keyof typeof console, receiver) {
+          const originalMethod: unknown = Reflect.get(
+            target,
+            methodName,
+            receiver
+          );
+          if (isLogLevel(methodName)) {
+            return (...args: unknown[]) => {
+              if (typeof originalMethod !== "function") {
+                return die("Impossible case.");
+              }
+              eventHub.dispatcher.emit("task", {
+                type: "output",
+                output: {
+                  level: methodName,
+                  payload: args,
+                },
+                taskId,
+              });
+              return originalMethod.apply(target, args);
+            };
+          }
+          return originalMethod;
         },
-      },
+      }),
       require: customRequire,
     });
     return {
@@ -303,7 +321,6 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
             eventHub.dispatcher.emit("task", {
               taskId,
               type: "terminate",
-              payload: "",
             });
             activeTasks.delete(taskId);
           }

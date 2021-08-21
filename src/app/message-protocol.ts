@@ -1,13 +1,16 @@
 // Define your protocol here, and implement them in `modules` with best practice!
 import type { PassedParameter, UserScript } from "../models/script";
-import type { ExecutionTask } from "../models/execution-task";
+import type {
+  ExecutionTask,
+  TaskExecutionSignal,
+} from "../models/execution-task";
 export interface CoreAPI {
   vscode: typeof import("vscode");
   ScriptService: ScriptService;
 }
 
 export interface CoreEvents {
-  task: { type: "output" | "terminate"; payload: unknown; taskId: string };
+  task: TaskExecutionSignal;
 }
 
 export interface ScriptService {
