@@ -49,7 +49,7 @@ interface LocalExecutionTask extends ExecutionTask {
 
 const isScriptModule = defineValidator<ScriptModule>(
   isObject({
-    main: (fn): fn is AnyFunc => typeof fn === "function" && fn.length === 1,
+    main: (fn): fn is AnyFunc => typeof fn === "function",
   })
 );
 
@@ -491,5 +491,9 @@ ${getTextOfTsAstNode(mainFunctionNode)}`;
 }
 vscode.window.showInformationMessage;
 function getJsTemplate() {
-  return `export async function main() {}`;
+  return `\
+/**
+ * @param config {import("./config").Config}
+ */
+export async function main(config) {}`;
 }
