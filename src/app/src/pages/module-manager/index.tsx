@@ -45,7 +45,8 @@ export const ModuleManager: React.FC = () => {
     }
   );
   const [versionSearching, getVersions] = useLoadingPipe(
-    (moduleId: string) => SessionInvoker.ScriptService.listVersions(moduleId),
+    async (moduleId: string) =>
+      moduleId ? SessionInvoker.ScriptService.listVersions(moduleId) : [],
     setVersions
   );
   useEffect(() => {

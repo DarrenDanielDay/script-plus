@@ -27,7 +27,6 @@ import packageJson from "package-json";
 import { die } from "taio/build/utils/internal/exceptions";
 import { enumValues } from "taio/build/utils/enum";
 import { isNumber, isString } from "taio/build/utils/validator/primitive";
-import { typed } from "taio/build/utils/typed-function";
 import { ExecutionTask, isLogLevel } from "../../models/execution-task";
 import { defineValidator } from "taio/build/utils/validator/utils";
 import { isObject } from "taio/build/utils/validator/object";
