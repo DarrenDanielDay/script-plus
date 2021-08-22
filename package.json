@@ -5,7 +5,14 @@
   "extensionKind": [
     "ui"
   ],
-  "version": "0.3.0",
+  "keywords": [
+    "javascrpt",
+    "typescript",
+    "run script",
+    "nodejs",
+    "vscode API"
+  ],
+  "version": "0.3.1",
   "author": {
     "email": "Darren_Daniel_Day@hotmail.com",
     "name": "Darren Daniel Day",
