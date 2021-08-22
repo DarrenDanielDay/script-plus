@@ -12,3 +12,7 @@ export const names = {
   entry: "main",
   param: "config",
 } as const;
+
+export const globalStateKeys = {
+  checked: "START_UP_CHECKED",
+} as const;

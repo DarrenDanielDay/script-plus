@@ -6,6 +6,13 @@ export const output = vscode.window.createOutputChannel(
   `${env.EXTENSION_BASE_NAME} Logger`
 );
 
+export const divider = (title: string, char = "=", length = 50) => {
+  const left = Math.floor((length - title.length) / 2);
+  output.appendLine(
+    `${char[0].repeat(left)}${title.padEnd(length - left, char[0])}`
+  );
+};
+
 export async function openEdit(
   fileAbsolutePath: string,
   focusPosition?: vscode.Position

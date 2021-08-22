@@ -14,7 +14,7 @@ export interface CoreEvents {
 }
 
 export interface ScriptService {
-  check(): Promise<void>;
+  check(force?: boolean): Promise<void>;
   create(script: UserScript): Promise<void>;
   getList(): Promise<UserScript[]>;
   updateScript(script: UserScript): Promise<void>;

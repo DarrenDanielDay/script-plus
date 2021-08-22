@@ -1,0 +1,19 @@
+/* @type */
+@keyframes wave {
+  0% {
+    background-color: rgb(88, 88, 88);
+  }
+  50% {
+    background-color: gray;
+  }
+  100% {
+    background-color: rgb(88, 88, 88);
+  }
+}
+
+.waving {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: wave 2s cubic-bezier(0.39, 0.575, 0.565, 1) infinite;
+}

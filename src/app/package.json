@@ -1,7 +1,7 @@
 {
-  "name": "vscode-extension-react",
+  "name": "script-plus-app",
   "version": "1.0.0",
-  "description": "A best practice on developing Webview UI in Visual Studio Code extension with React.",
+  "description": "The UI package for script plus",
   "main": "dist/index.js",
   "author": "Darren Daniel Day",
   "license": "MIT",

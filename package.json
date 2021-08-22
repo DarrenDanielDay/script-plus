@@ -10,9 +10,10 @@
     "typescript",
     "run script",
     "nodejs",
+    "yarn",
     "vscode API"
   ],
-  "version": "0.3.2",
+  "version": "0.3.3",
   "author": {
     "email": "Darren_Daniel_Day@hotmail.com",
     "name": "Darren Daniel Day",
@@ -51,6 +52,10 @@
       {
         "command": "script-plus.executeCurrentScript",
         "title": "Script Plus: Execute Current Script (Using default configs)"
+      },
+      {
+        "command": "script-plus.forceCheckUserScriptsFolder",
+        "title": "Script Plus: Check user-scripts folder"
       }
     ],
     "viewsContainers": {
@@ -102,6 +107,7 @@
     "@types/semver": "^7.3.8",
     "@typescript-eslint/eslint-plugin": "^4.29.0",
     "@typescript-eslint/parser": "^4.29.0",
+    "date-fns": "^2.23.0",
     "eslint": "^7.32.0",
     "fs-extra": "^10.0.0",
     "glob": "^7.1.6",

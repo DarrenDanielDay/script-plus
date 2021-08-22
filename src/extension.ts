@@ -60,6 +60,12 @@ export function activate(context: vscode.ExtensionContext) {
       () => globalModuleManager.api.ScriptService.executeCurrent()
     )
   );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      Commands.ScriptControl.ForceCheckUserScriptsFolder,
+      () => globalModuleManager.api.ScriptService.check(true)
+    )
+  );
   if (env.ENV === "dev") {
     loadSnowpackConfig(context).then((config) => {
       webviewManager.devServerConfig = {

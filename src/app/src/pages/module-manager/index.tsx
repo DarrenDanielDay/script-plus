@@ -4,8 +4,9 @@ import {
   FormControl,
   FormLabel,
   Input,
-  CircularProgress,
   useTheme,
+  Checkbox,
+  FormControlLabel,
 } from "@material-ui/core";
 import { AddOutlined, RefreshOutlined } from "@material-ui/icons";
 import React, { useEffect, useRef, useState } from "react";
@@ -17,7 +18,12 @@ import * as R from "ramda";
 import { debounceTime, filter, Subject } from "rxjs";
 import classNames from "classnames";
 import { isString } from "taio/build/utils/validator/primitive";
-
+import { Skeleton } from "../../components/skeleton";
+import { EnumPicker } from "../../components/enum-picker";
+enum InstallPosition {
+  Local = "local",
+  Global = "global",
+}
 export const ModuleManager: React.FC = () => {
   const classes = useStyles();
   const theme = useTheme();
@@ -25,16 +31,18 @@ export const ModuleManager: React.FC = () => {
   const [moduleId, setModuleId] = useState("");
   const [versions, setVersions] = useState<string[]>([]);
   const [version, setVersion] = useState("");
-  const [loading, fire] = useLoadingPipe(
+  const [includeTypes, setIncludeTypes] = useState(true);
+  const [installPosition, setInstallPosition] = useState(InstallPosition.Local);
+  const [installing, install] = useLoadingPipe(
     () => {
       const packagePromise = SessionInvoker.ScriptService.installPackage(
         moduleId,
         version,
-        { global: true }
+        { global: installPosition === InstallPosition.Global }
       );
-      const typesPromise = moduleId.startsWith("@types")
-        ? Promise.resolve()
-        : SessionInvoker.ScriptService.installPackage(`@types/${moduleId}`, "");
+      const typesPromise = includeTypes
+        ? SessionInvoker.ScriptService.installPackage(`@types/${moduleId}`, "")
+        : Promise.resolve();
       return Promise.all([packagePromise, typesPromise]);
     },
     () => {
@@ -57,50 +65,81 @@ export const ModuleManager: React.FC = () => {
     return () => moduleIdInput$$.unsubscribe();
   }, []);
   return (
-    <Box className={styles["center-row"]}>
-      <FormControl className={classes.formControl}>
-        <FormLabel>npm package/module name</FormLabel>
-        <Input
-          value={moduleId}
-          onChange={(e) => {
-            setModuleId(e.target.value);
-            moduleIdInput$.current?.next(e.target.value);
-          }}
-        ></Input>
-      </FormControl>
-      <FormControl
-        className={classNames(classes.formControl, classes.selectControl)}
-      >
-        <FormLabel>version</FormLabel>
-        {versionSearching ? (
-          <CircularProgress />
-        ) : (
-          <ListPicker
-            value={version}
-            onChange={setVersion}
-            list={versions}
-            displayMapping={R.identity}
-          ></ListPicker>
-        )}
-      </FormControl>
-      <FormControl className={classes.formControl}>
-        <Button
-          color="primary"
-          variant="outlined"
-          onClick={fire}
-          disabled={loading || !moduleId}
-          style={{ color: theme.palette.primary.main }}
-          startIcon={
-            loading ? (
-              <RefreshOutlined className={styles.spinning}></RefreshOutlined>
-            ) : (
-              <AddOutlined></AddOutlined>
-            )
-          }
+    <Box>
+      <Box className={styles["center-row"]}>
+        <FormControl className={classes.formControl}>
+          <FormLabel>npm package/module name</FormLabel>
+          <Input
+            value={moduleId}
+            onChange={(e) => {
+              setModuleId(e.target.value);
+              moduleIdInput$.current?.next(e.target.value);
+            }}
+          ></Input>
+        </FormControl>
+        <FormControl
+          className={classNames(classes.formControl, classes.selectControl)}
         >
-          {loading ? "Installing" : "Install"}
-        </Button>
-      </FormControl>
+          <FormLabel>version</FormLabel>
+          {versionSearching ? (
+            <Skeleton width={100} height={theme.spacing(6)}></Skeleton>
+          ) : (
+            <ListPicker
+              value={version}
+              onChange={setVersion}
+              list={versions}
+              displayMapping={R.identity}
+            ></ListPicker>
+          )}
+        </FormControl>
+        <FormControl className={classes.formControl}>
+          <Button
+            color="primary"
+            variant="outlined"
+            onClick={install}
+            disabled={installing || !moduleId}
+            style={{ color: theme.palette.primary.main }}
+            startIcon={
+              installing ? (
+                <RefreshOutlined className={styles.spinning}></RefreshOutlined>
+              ) : (
+                <AddOutlined></AddOutlined>
+              )
+            }
+          >
+            {installing ? "Installing" : "Install"}
+          </Button>
+        </FormControl>
+      </Box>
+      <Box>
+        <FormControl
+          className={classNames(classes.formControl, classes.selectControl)}
+        >
+          <FormLabel>Install scope</FormLabel>
+          <EnumPicker
+            value={installPosition}
+            onChange={setInstallPosition}
+            enumObject={InstallPosition}
+            enumNameMapping={{
+              [InstallPosition.Local]: "extension",
+              [InstallPosition.Global]: "global",
+            }}
+          ></EnumPicker>
+        </FormControl>
+        {moduleId && (
+          <FormControl className={classes.formControl}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={includeTypes}
+                  onChange={(e) => setIncludeTypes(e.target.checked)}
+                ></Checkbox>
+              }
+              label={`also install @types/${moduleId} for typings`}
+            ></FormControlLabel>
+          </FormControl>
+        )}
+      </Box>
     </Box>
   );
 };
