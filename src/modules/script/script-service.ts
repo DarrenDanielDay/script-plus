@@ -397,9 +397,7 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
               return set;
             }, new Set<string>())
             .keys(),
-        ]
-          .sort()
-          .reverse();
+        ].sort((a, b) => (semver.lt(a, b) ? 1 : semver.gt(a, b) ? -1 : 0));
       } catch (error) {
         if (error instanceof packageJson.PackageNotFoundError) {
           vscode.window.showErrorMessage(error.message);
