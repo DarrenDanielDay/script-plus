@@ -128,7 +128,11 @@ export const ScriptRunner: React.FC<IScriptRunnerProp> = ({}) => {
                         [ {val.level.toUpperCase()} ]{": "}
                         {Array.isArray(val.payload)
                           ? val.payload
-                              .map((v) => JSON.stringify(v, undefined, 2))
+                              .map((v) =>
+                                typeof v === "string"
+                                  ? v
+                                  : JSON.stringify(v, undefined, 2)
+                              )
                               .join(", ")
                           : JSON.stringify(val.payload, undefined, 2)}
                       </Typography>

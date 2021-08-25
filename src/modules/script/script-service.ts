@@ -360,6 +360,10 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
         })
         .catch((e) => {
           globalErrorHandler(e);
+          eventHub.dispatcher.emit("task", {
+            taskId,
+            type: "terminate",
+          });
         });
       return executionTask;
     },
