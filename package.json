@@ -6,14 +6,14 @@
     "ui"
   ],
   "keywords": [
-    "javascrpt",
+    "javascript",
     "typescript",
     "run script",
     "nodejs",
     "yarn",
     "vscode API"
   ],
-  "version": "0.3.3",
+  "version": "0.4.0",
   "author": {
     "email": "Darren_Daniel_Day@hotmail.com",
     "name": "Darren Daniel Day",
