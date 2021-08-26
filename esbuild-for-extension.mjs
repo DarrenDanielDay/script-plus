@@ -2,18 +2,35 @@
 /// <reference path="esbuild-env.d.ts" />
 import esbuild from "esbuild";
 import path from "path";
+import fs from "fs";
+/** @param file {string} */
+const readFile = (file) => fs.readFileSync(file).toString("utf-8");
+/** @param paths {string[]} */
+const resolve = (...paths) => path.resolve(process.cwd(), ...paths);
+/** @type {import('@esbuild-env').ESBuildEnv['TEMPLATES']} */
+const templates = {
+  API_D_TS: readFile(resolve("src", "templates", "api.d.ts")),
+  JS_TEMPLATE: readFile(
+    resolve("src", "templates", "script-name", "js-template.mjs")
+  ),
+  TS_TEMPLATE: readFile(
+    resolve("src", "templates", "script-name", "ts-template.ts")
+  ),
+};
 //#region Environment variables
 /** @type {import('@esbuild-env').ESBuildEnv} */
 const devEnv = {
   ENV: "dev",
   STATIC_FILE_BASE_DIR_NAMES: ["src", "app", "src"],
   EXTENSION_BASE_NAME: "script-plus",
+  TEMPLATES: templates,
 };
 /** @type {import("@esbuild-env").ESBuildEnv} */
 const prodEnv = {
   ENV: "prod",
   STATIC_FILE_BASE_DIR_NAMES: ["out", "ui"],
   EXTENSION_BASE_NAME: "script-plus",
+  TEMPLATES: templates,
 };
 //#endregion
 

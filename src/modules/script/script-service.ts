@@ -26,8 +26,17 @@ import { createRequire } from "module";
 import packageJson from "package-json";
 import { die } from "taio/build/utils/internal/exceptions";
 import { enumValues } from "taio/build/utils/enum";
-import { isNumber, isString } from "taio/build/utils/validator/primitive";
-import { ExecutionTask, isLogLevel } from "../../models/execution-task";
+import {
+  isNullish,
+  isNumber,
+  isString,
+} from "taio/build/utils/validator/primitive";
+import {
+  ExecutionTask,
+  isCleanUp,
+  isLogLevel,
+  isScriptRunResultObject,
+} from "../../models/execution-task";
 import { defineValidator } from "taio/build/utils/validator/utils";
 import { isObject } from "taio/build/utils/validator/object";
 import type { AnyFunc } from "taio/build/types/concepts";
@@ -36,13 +45,16 @@ import { divider, globalErrorHandler, openEdit, output } from "../vscode-utils";
 import globalDirectories from "global-dirs";
 import * as semver from "semver";
 import subMonths from "date-fns/subMonths";
+import type { CleanUp, ScriptRunResult } from "../../templates/api";
+import env from "@esbuild-env";
 const f = ts.factory;
 interface ScriptModule {
-  main: (config: PassedParameter) => Promise<void> | void;
+  main: (config: PassedParameter) => ScriptRunResult;
 }
 
 interface LocalExecutionTask extends ExecutionTask {
-  promise: Promise<unknown>;
+  promise: Promise<ScriptRunResult>;
+  cleanUp?: CleanUp;
   running: boolean;
 }
 
@@ -80,6 +92,10 @@ export function createScriptService(
         { spaces: 2, encoding: "utf-8" }
       );
     }
+    await fsextra.promises.writeFile(
+      basedOnScripts(paths.apiDeclaration),
+      env.TEMPLATES.API_D_TS
+    );
     const version = new semver.SemVer(vscode.version);
     const { stdout, stderr } = await installPackage(
       `@types/vscode@${version.major}.${version.minor}`,
@@ -260,11 +276,47 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
   ) {
     const { context, exports } = initExecutionContext(taskId);
     const scriptModule = await createScriptModule(script, context, exports);
-    const promise = scriptModule.main(args);
-    await promise;
+    return scriptModule.main(args);
+  }
+  function finishTask(taskId: string, result: unknown, hasError?: boolean) {
+    const task = activeTasks.get(taskId);
+    if (task?.running) {
+      task.running = false;
+      let trueResult: unknown;
+      if (isCleanUp(result)) {
+        task.cleanUp = result;
+        trueResult = undefined;
+      } else if (isScriptRunResultObject(result)) {
+        task.cleanUp = result.cleanUp;
+        trueResult = result.custom;
+      } else if (!isNullish(result) && !hasError) {
+        return die("Invalid script return value!");
+      }
+      eventHub.dispatcher.emit("task", {
+        taskId,
+        type: "terminate",
+        result: trueResult,
+      });
+    }
+  }
+  async function cleanUpTaskResource(taskId: string) {
+    const task = activeTasks.get(taskId);
+    if (!task) {
+      return die(`Task id ${taskId} does not exist!`);
+    }
+    if (task.running) {
+      return die(`Task id ${taskId} is still running!`);
+    }
+    await task.cleanUp?.();
+    activeTasks.delete(taskId);
   }
 
   const scriptService: ScriptService = {
+    dispose() {
+      activeTasks.forEach((task) => {
+        task.cleanUp?.();
+      });
+    },
     async check(force) {
       const checked = context.globalState.get(globalStateKeys.checked);
       if (checked && !force) {
@@ -348,24 +400,16 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
       });
       promise
         .then((result) => {
-          const task = activeTasks.get(taskId);
-          if (task?.running) {
-            task.running = false;
-            eventHub.dispatcher.emit("task", {
-              taskId,
-              type: "terminate",
-            });
-            activeTasks.delete(taskId);
-          }
+          finishTask(taskId, result);
         })
-        .catch((e) => {
-          globalErrorHandler(e);
-          eventHub.dispatcher.emit("task", {
-            taskId,
-            type: "terminate",
-          });
+        .catch((error) => {
+          globalErrorHandler(error);
+          finishTask(taskId, error, true);
         });
       return executionTask;
+    },
+    async cleanUp(taskId) {
+      await cleanUpTaskResource(taskId);
     },
     async executeCurrent() {
       const currentFile = vscode.window.activeTextEditor?.document.fileName;
@@ -475,67 +519,9 @@ function getConfigTsDeclCodeOfUserScript(script: UserScript): string {
 }
 
 function getTsTemplate() {
-  const importVscodeNode = f.createImportDeclaration(
-    [],
-    [],
-    f.createImportClause(
-      false,
-      undefined,
-      f.createNamespaceImport(f.createIdentifier("vscode"))
-    ),
-    f.createStringLiteral("vscode")
-  );
-  const mainFunctionNode = f.createFunctionDeclaration(
-    /** decorators */ undefined,
-    /** modifiers */ [
-      f.createModifier(ts.SyntaxKind.ExportKeyword),
-      f.createModifier(ts.SyntaxKind.AsyncKeyword),
-    ],
-    /** asterisk(*) */ undefined,
-    /** name */ names.entry,
-    /** type parameters <T> */ [],
-    /** parameters */ [
-      f.createParameterDeclaration(
-        /** decorators */ [],
-        /** modifiers */ [],
-        /** ... */ undefined,
-        /** name */ names.param,
-        /** ? */ undefined,
-        /** type */ f.createImportTypeNode(
-          /** import(xxx) */ f.createLiteralTypeNode(
-            f.createStringLiteral(`./${paths.declarationBase}`)
-          ),
-          /** .yyy */ f.createIdentifier(names.configName)
-        )
-      ),
-    ],
-    /** return type */ f.createTypeReferenceNode("Promise", [
-      f.createKeywordTypeNode(ts.SyntaxKind.VoidKeyword),
-    ]),
-    /** function body */ f.createBlock([
-      f.createExpressionStatement(
-        f.createCallExpression(
-          f.createPropertyAccessExpression(
-            f.createPropertyAccessExpression(
-              f.createIdentifier("vscode"),
-              "window"
-            ),
-            "showInformationMessage"
-          ),
-          [],
-          [f.createStringLiteral("Hello, Script Plus!")]
-        )
-      ),
-    ])
-  );
-  return `${getTextOfTsAstNode(importVscodeNode)}
-${getTextOfTsAstNode(mainFunctionNode)}`;
+  return env.TEMPLATES.TS_TEMPLATE;
 }
-vscode.window.showInformationMessage;
+
 function getJsTemplate() {
-  return `\
-/**
- * @param config {import("./config").Config}
- */
-export async function main(config) {}`;
+  return env.TEMPLATES.JS_TEMPLATE;
 }

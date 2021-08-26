@@ -14,6 +14,7 @@ export interface CoreEvents {
 }
 
 export interface ScriptService {
+  dispose(): void;
   check(force?: boolean): Promise<void>;
   create(script: UserScript): Promise<void>;
   getList(): Promise<UserScript[]>;
@@ -22,6 +23,7 @@ export interface ScriptService {
   delete(script: UserScript): Promise<void>;
   execute(script: UserScript, params: PassedParameter): Promise<ExecutionTask>;
   executeCurrent(): Promise<void>;
+  cleanUp(taskId: string): Promise<void>;
   listVersions(moduleId: string): Promise<string[]>;
   installPackage(
     moduleId: string,

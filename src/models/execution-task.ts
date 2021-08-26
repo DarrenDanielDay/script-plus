@@ -1,9 +1,19 @@
 import { typed } from "taio/build/utils/typed-function";
-import { isAnyOf } from "taio/build/utils/validator/array";
+import { isAnyOf, isUnionThat } from "taio/build/utils/validator/array";
 import { isObject } from "taio/build/utils/validator/object";
-import { isString } from "taio/build/utils/validator/primitive";
-import { defineValidator, is } from "taio/build/utils/validator/utils";
+import { isString, isUndefined } from "taio/build/utils/validator/primitive";
+import {
+  defineValidator,
+  is,
+  optional,
+} from "taio/build/utils/validator/utils";
+import type {
+  CleanUp,
+  ScriptRunObjectResult,
+  ScriptRunResult,
+} from "../templates/api";
 
+const nocheck = (obj: unknown): obj is unknown => !obj || !!obj;
 export interface ExecutionTask {
   taskId: string;
   taskName: string;
@@ -37,7 +47,7 @@ export const isLogLevel = defineValidator<LogLevels>(
 const isTaskConsoleOutput = defineValidator<TaskConsoleOutput>(
   isObject({
     level: isLogLevel,
-    payload: (obj): obj is unknown => !obj || !!obj,
+    payload: nocheck,
   })
 );
 
@@ -56,6 +66,7 @@ export const isTaskExecutionOutput = defineValidator<TaskExecutionOutput>(
 
 export interface TaskExecutionTerminateSignal extends TaskExecutionMessage {
   type: "terminate";
+  result: unknown;
 }
 
 export const isTaskExecutionTerminateSignal =
@@ -63,9 +74,23 @@ export const isTaskExecutionTerminateSignal =
     isObject({
       type: is("terminate"),
       taskId: isString,
+      result: nocheck,
     })
   );
 
 export type TaskExecutionSignal =
   | TaskExecutionOutput
   | TaskExecutionTerminateSignal;
+
+export const isCleanUp = (obj: unknown): obj is CleanUp =>
+  typeof obj === "function";
+export const isScriptRunResultObject = defineValidator<ScriptRunObjectResult>(
+  isObject({
+    custom: nocheck,
+    cleanUp: optional(isCleanUp),
+  })
+);
+
+export const isScriptRunResult = defineValidator<ScriptRunResult>(
+  isUnionThat(isScriptRunResultObject, isCleanUp, isUndefined)
+);

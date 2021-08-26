@@ -21,12 +21,13 @@ import { ParameterInput } from "../../components/parameter-input";
 import { ScriptPicker } from "../../components/script-picker";
 import { setStateEffect } from "../../utils/well-typed";
 import { noop } from "taio/build/utils/typed-function";
-import { ExpandMore, PlayArrowRounded } from "@material-ui/icons";
+import { ClearAll, ExpandMore, PlayArrowRounded } from "@material-ui/icons";
 import type {
   ExecutionTask,
   TaskConsoleOutput,
 } from "../../../../models/execution-task";
 import styles from "../../components/common/common.module.css";
+import { useLoadingPipe } from "../../hooks/use-loading";
 
 export interface IScriptRunnerProp {}
 
@@ -37,6 +38,17 @@ export const ScriptRunner: React.FC<IScriptRunnerProp> = ({}) => {
   const [running, setRunning] = useState(false);
   const [outputs, setOutputs] = useState<TaskConsoleOutput[]>([]);
   const [exectionTask, setExectionTask] = useState<ExecutionTask | undefined>();
+  const [cleaning, cleanUp] = useLoadingPipe(async () => {
+    const taskId = exectionTask?.taskId;
+    if (taskId) {
+      await SessionInvoker.ScriptService.cleanUp(taskId);
+    }
+  }, noop);
+  const cleanTask = async () => {
+    await cleanUp();
+    setExectionTask(undefined);
+    setOutputs([]);
+  };
   useEffect(
     !script
       ? noop
@@ -90,16 +102,16 @@ export const ScriptRunner: React.FC<IScriptRunnerProp> = ({}) => {
             <AccordionActions>
               <Button
                 startIcon={
-                  running ? (
+                  running || cleaning ? (
                     <CircularProgress size={theme.spacing(1.5)} />
                   ) : (
                     <PlayArrowRounded />
                   )
                 }
-                disabled={running}
+                disabled={running || cleaning}
                 style={{ color: theme.palette.primary.main }}
                 onClick={async () => {
-                  setOutputs([]);
+                  await cleanTask();
                   const task = await SessionInvoker.ScriptService.execute(
                     script,
                     argument
@@ -108,7 +120,7 @@ export const ScriptRunner: React.FC<IScriptRunnerProp> = ({}) => {
                   setExectionTask(task);
                 }}
               >
-                Run
+                {cleaning ? "Cleaning" : running ? "Running" : "Run"}
               </Button>
             </AccordionActions>
           </Accordion>
@@ -141,6 +153,16 @@ export const ScriptRunner: React.FC<IScriptRunnerProp> = ({}) => {
                 })}
               </div>
             </AccordionDetails>
+            <AccordionActions>
+              <Button
+                color="secondary"
+                startIcon={<ClearAll />}
+                onClick={cleanTask}
+                disabled={cleaning || running}
+              >
+                {cleaning ? "Cleaning" : "Clean Up"}
+              </Button>
+            </AccordionActions>
           </Accordion>
         </>
       )}
