@@ -18,11 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
     moduleManager: globalModuleManager,
     eventAdapter: globalEventHubAdapter,
   });
-  const webviewManager = createWebviewManager(
-    "ui",
-    "Extension UI of React",
-    context
-  );
+  const webviewManager = createWebviewManager("ui", "Script Plus", context);
   context.subscriptions.push(webviewManager);
   context.subscriptions.push(globalEventHubAdapter);
   context.subscriptions.push(globalModuleManager.api.ScriptService);
