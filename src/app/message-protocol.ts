@@ -21,6 +21,8 @@ export interface ScriptService {
   updateScript(script: UserScript): Promise<void>;
   editScript(script: UserScript): Promise<void>;
   delete(script: UserScript): Promise<void>;
+  export(script: UserScript): Promise<void>;
+  import(): Promise<void>;
   execute(script: UserScript, params: PassedParameter): Promise<ExecutionTask>;
   executeCurrent(): Promise<void>;
   getTasks(): Promise<ExecutionTask[]>;

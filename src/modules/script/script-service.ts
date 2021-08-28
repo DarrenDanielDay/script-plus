@@ -3,13 +3,15 @@ import {
   isBooleanArgumentField,
   isEnumArgumentField,
   isNumberArgumentField,
+  isScriptPlusBundle,
   isStringArgumentField,
   isUserScript,
   PassedParameter,
+  ScriptPlusBundle,
   UserScript,
 } from "../../models/script";
 import * as vscode from "vscode";
-import { names, paths } from "../constant";
+import { names, paths, scriptBundleFilter } from "../constant";
 import { glob, installPackage, path, randomString } from "../node-utils";
 import esbuild from "esbuild";
 import ts from "typescript";
@@ -154,6 +156,23 @@ export function createScriptService(
 
 ${getConfigTsDeclCodeOfUserScript(script)}`
     );
+  }
+
+  async function installScript(bundle: ScriptPlusBundle) {
+    const { content, meta } = bundle;
+    const scriptHome = basedOnScripts(meta.name);
+    if (await existDir(scriptHome)) {
+      vscode.window.showInformationMessage(
+        `Script <${meta.name}> already exists`
+      );
+      return;
+    }
+    await vscode.workspace.fs.createDirectory(scriptHome);
+    await Promise.all([
+      writeMeta(meta),
+      writeDeclaration(meta),
+      writeFile(basedOnScripts(meta.name, getScriptFileName(meta)), content),
+    ]);
   }
 
   async function getScriptContent(script: UserScript) {
@@ -341,22 +360,10 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
         vscode.window.showInformationMessage(`Invalid script object!`);
         return;
       }
-      const scriptHome = basedOnScripts(script.name);
-      if (await existDir(scriptHome)) {
-        vscode.window.showInformationMessage(
-          `Script <${script.name}> already exists`
-        );
-        return;
-      }
-      await vscode.workspace.fs.createDirectory(scriptHome);
-      await Promise.all([
-        writeMeta(script),
-        writeDeclaration(script),
-        writeFile(
-          basedOnScripts(script.name, getScriptFileName(script)),
-          script.lang === "ts" ? getTsTemplate() : getJsTemplate()
-        ),
-      ]);
+      await installScript({
+        meta: script,
+        content: script.lang === "js" ? getJsTemplate() : getTsTemplate(),
+      });
     },
     async delete(script) {
       const scriptHost = basedOnScripts(script.name);
@@ -389,6 +396,46 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
     },
     async editScript(script) {
       await openEdit(getScriptAbsolutePath(script));
+    },
+    async import() {
+      const spps = await vscode.window.showOpenDialog({
+        title: "Import script",
+        filters: scriptBundleFilter,
+        canSelectFiles: true,
+        canSelectFolders: false,
+      });
+      if (spps) {
+        await Promise.all(
+          spps.map(async (spp) => {
+            const content = await readFile(spp);
+            try {
+              const bundle: unknown = JSON.parse(content);
+              if (!isScriptPlusBundle(bundle)) {
+                return die();
+              }
+              await installScript(bundle);
+            } catch (error) {
+              vscode.window.showWarningMessage(
+                `File "${spp.fsPath}" is not a valid script plus bundle`
+              );
+              return;
+            }
+          })
+        );
+      }
+    },
+    async export(script) {
+      const askLocation = await vscode.window.showSaveDialog({
+        title: `Export script "${script.name}"`,
+        filters: scriptBundleFilter,
+      });
+      if (askLocation) {
+        const bundle: ScriptPlusBundle = {
+          meta: script,
+          content: await getScriptContent(script),
+        };
+        await writeFile(askLocation, JSON.stringify(bundle));
+      }
     },
     async execute(script, params) {
       const taskId = randomString(8);

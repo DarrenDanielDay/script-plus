@@ -6,6 +6,7 @@ import {
   IconButton,
   InputLabel,
   TextField,
+  Tooltip,
   Typography,
   useTheme,
 } from "@material-ui/core";
@@ -14,6 +15,8 @@ import {
   AddOutlined,
   DeleteOutline,
   EditOutlined,
+  GetAppRounded,
+  LaunchOutlined,
   RefreshOutlined,
 } from "@material-ui/icons";
 import React, { useEffect, useState } from "react";
@@ -46,13 +49,23 @@ export const ScriptManager: React.FC<IScriptManagerProp> = ({}) => {
   return (
     <Box>
       <Box className={styles["center-row"]}>
-        <IconButton
-          style={{ color: colors.green[500] }}
-          onClick={fetchScripts}
-          className={loading ? styles.spinning : undefined}
-        >
-          <RefreshOutlined></RefreshOutlined>
-        </IconButton>
+        <Tooltip title="import scripts">
+          <IconButton
+            style={{ color: theme.palette.primary.main }}
+            onClick={() => SessionInvoker.ScriptService.import()}
+          >
+            <GetAppRounded />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="refresh list">
+          <IconButton
+            style={{ color: colors.green[500] }}
+            onClick={fetchScripts}
+            className={loading ? styles.spinning : undefined}
+          >
+            <RefreshOutlined></RefreshOutlined>
+          </IconButton>
+        </Tooltip>
         <FormControl
           className={classNames(classes.selectControl, classes.formControl)}
         >
@@ -64,34 +77,51 @@ export const ScriptManager: React.FC<IScriptManagerProp> = ({}) => {
             displayMapping={R.prop<"name", UserScript>("name")}
           ></ListPicker>
         </FormControl>
-        <IconButton
-          style={{ color: colors.red[500] }}
-          onClick={async () => {
-            if (!editingScript) return;
-            const result =
-              await SessionInvoker.vscode.window.showWarningMessage(
-                `Are you sure to delete script "${editingScript.name}" ? It will be permanently lost!`,
-                { modal: true },
-                { title: "Yes" },
-                { title: "No" }
-              );
-            if (result?.title === "Yes") {
-              await SessionInvoker.ScriptService.delete(editingScript);
-              await fetchScripts();
+        <Tooltip title="delete">
+          <IconButton
+            style={{ color: colors.red[500] }}
+            onClick={async () => {
+              if (!editingScript) return;
+              const result =
+                await SessionInvoker.vscode.window.showWarningMessage(
+                  `Are you sure to delete script "${editingScript.name}" ? It will be permanently lost!`,
+                  { modal: true },
+                  { title: "Yes" },
+                  { title: "No" }
+                );
+              if (result?.title === "Yes") {
+                await SessionInvoker.ScriptService.delete(editingScript);
+                await fetchScripts();
+              }
+            }}
+          >
+            <DeleteOutline></DeleteOutline>
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="edit">
+          <IconButton
+            style={{ color: colors.amber[500] }}
+            onClick={() =>
+              editingScript &&
+              SessionInvoker.ScriptService.editScript(editingScript)
             }
-          }}
-        >
-          <DeleteOutline></DeleteOutline>
-        </IconButton>
-        <IconButton
-          style={{ color: colors.amber[500] }}
-          onClick={() =>
-            editingScript &&
-            SessionInvoker.ScriptService.editScript(editingScript)
-          }
-        >
-          <EditOutlined></EditOutlined>
-        </IconButton>
+          >
+            <EditOutlined></EditOutlined>
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="export">
+          <IconButton
+            style={{ color: colors.green[500] }}
+            onClick={() =>
+              editingScript &&
+              SessionInvoker.ScriptService.export(editingScript)
+            }
+          >
+            <LaunchOutlined></LaunchOutlined>
+          </IconButton>
+        </Tooltip>
+      </Box>
+      <Box className={styles["center-row"]}>
         <TextField
           value={newScriptName}
           onChange={(e) => setNewScriptName(e.target.value)}

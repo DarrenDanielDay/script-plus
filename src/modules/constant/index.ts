@@ -10,3 +10,7 @@ export const paths = {
 export const names = {
   configName: "Config",
 } as const;
+
+export const scriptBundleFilter = {
+  "Script Plus Bundle": ["spp"],
+};
