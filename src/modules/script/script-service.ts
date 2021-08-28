@@ -49,7 +49,10 @@ import type { CleanUp, ScriptRunResult } from "../../templates/api";
 import env from "@esbuild-env";
 const f = ts.factory;
 interface ScriptModule {
-  main: (config: PassedParameter) => ScriptRunResult;
+  main: (
+    config: PassedParameter,
+    context: vscode.ExtensionContext
+  ) => ScriptRunResult;
 }
 
 interface LocalExecutionTask extends ExecutionTask {
@@ -274,9 +277,13 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
     args: PassedParameter,
     taskId: string
   ) {
-    const { context, exports } = initExecutionContext(taskId);
-    const scriptModule = await createScriptModule(script, context, exports);
-    return scriptModule.main(args);
+    const { context: executionContext, exports } = initExecutionContext(taskId);
+    const scriptModule = await createScriptModule(
+      script,
+      executionContext,
+      exports
+    );
+    return scriptModule.main(args, context);
   }
   function finishTask(taskId: string, result: unknown, hasError?: boolean) {
     const task = activeTasks.get(taskId);
