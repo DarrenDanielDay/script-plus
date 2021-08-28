@@ -28,10 +28,15 @@ export function activate(context: vscode.ExtensionContext) {
     doOpen();
     webviewManager.messageHandler ??
       webviewManager.attach(globalMessageHandler);
-    globalEventHubAdapter.attach(webviewManager.panel!.webview);
-    webviewManager.onClose(() =>
-      globalEventHubAdapter.detach(webviewManager.panel!.webview)
-    );
+    globalEventHubAdapter.attach(webviewManager.panel!);
+    webviewManager.onClose(() => {
+      globalModuleManager.api.ScriptService.getTasks().then((tasks) =>
+        tasks.forEach((task) =>
+          globalModuleManager.api.ScriptService.cleanUp(task.taskId)
+        )
+      );
+      globalEventHubAdapter.detach(webviewManager.panel!);
+    });
   };
   context.subscriptions.push(
     vscode.commands.registerCommand(

@@ -1,7 +1,7 @@
 import env from "@esbuild-env";
 import * as vscode from "vscode";
 import { json } from "../../app/src/json-serializer";
-
+import { TextEncoder, TextDecoder } from "util";
 export const output = vscode.window.createOutputChannel(
   `${env.EXTENSION_BASE_NAME} Logger`
 );
@@ -14,10 +14,9 @@ export const divider = (title: string, char = "=", length = 50) => {
 };
 
 export async function openEdit(
-  fileAbsolutePath: string,
+  fileUri: vscode.Uri,
   focusPosition?: vscode.Position
 ) {
-  const fileUri = vscode.Uri.file(fileAbsolutePath);
   await vscode.commands.executeCommand("vscode.open", fileUri, {
     viewColumn: vscode.ViewColumn.One,
   });
@@ -30,6 +29,35 @@ export async function openEdit(
       "gotoAndPeek"
     );
   }
+}
+
+export const existFile = async (uri: vscode.Uri) => {
+  try {
+    const stat = await vscode.workspace.fs.stat(uri);
+    return stat.type === vscode.FileType.File;
+  } catch (error) {
+    return false;
+  }
+};
+
+export const existDir = async (uri: vscode.Uri) => {
+  try {
+    const stat = await vscode.workspace.fs.stat(uri);
+    return stat.type === vscode.FileType.Directory;
+  } catch (error) {
+    return false;
+  }
+};
+
+export async function readFile(uri: vscode.Uri) {
+  const decoder = new TextDecoder("utf-8");
+  const uint8Array = await vscode.workspace.fs.readFile(uri);
+  return decoder.decode(uint8Array);
+}
+
+export async function writeFile(uri: vscode.Uri, content: string) {
+  const encoder = new TextEncoder();
+  vscode.workspace.fs.writeFile(uri, encoder.encode(content));
 }
 
 export function getErrorMessage(error: unknown): string {

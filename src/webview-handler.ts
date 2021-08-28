@@ -83,8 +83,9 @@ export function createWebviewManager(
       );
 
       panel.onDidDispose((e) => {
-        panel = undefined;
+        onCloseHook?.();
         detach();
+        panel = undefined;
       });
       await reload();
     }
@@ -148,13 +149,11 @@ export function createWebviewManager(
     panel.webview.html = html;
   }
   function close() {
-    onCloseHook?.();
     if (!panel) {
       return;
     }
     detach();
     panel.dispose();
-    panel = undefined;
   }
   function attach(handler: OnDidReceiveMessageHandler) {
     if (messageHandler) {

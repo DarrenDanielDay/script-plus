@@ -69,43 +69,44 @@ export function createDispatcher<T>(): IEventDispatcher<T> {
 }
 
 export interface IEventHubAdapter<T> extends vscode.Disposable {
-  webviews: Set<vscode.Webview>;
+  panels: Set<vscode.WebviewPanel>;
   dispatcher: IEventDispatcher<T>;
   eventHandler: (event: Event<unknown>) => void;
-  attach(webview: vscode.Webview): void;
-  detach(webview: vscode.Webview): void;
+  attach(panel: vscode.WebviewPanel): void;
+  detach(panel: vscode.WebviewPanel): void;
 }
 
 export function createEventHubAdapter<T>(): IEventHubAdapter<T> {
-  const webviews = new Set<vscode.Webview>();
+  const panels = new Set<vscode.WebviewPanel>();
   const dispatcher = createDispatcher<T>();
   const eventHandler = (event: Event<unknown>) => {
     // @ts-expect-error Cannot expect the name to be statically checked
     dispatcher.emit(event.name, event.payload);
   };
   dispatcher.onEach((name, payload) => {
-    webviews.forEach((webview) => {
+    panels.forEach((panel) => {
       const event: Event<unknown> = {
         id: 0,
         name,
         payload,
         type: "event",
       };
-      webview.postMessage(json.serialize(event));
+      panel.webview.postMessage(json.serialize(event));
     });
   });
-  return {
-    webviews,
+  const adapter: IEventHubAdapter<T> = {
+    panels,
     dispatcher,
     dispose() {
       dispatcher.dispose();
     },
-    attach(webview: vscode.Webview) {
-      webviews.add(webview);
+    attach(panel) {
+      panels.add(panel);
     },
-    detach(webview: vscode.Webview) {
-      webviews.delete(webview);
+    detach(panel) {
+      panels.delete(panel);
     },
     eventHandler,
   };
+  return adapter;
 }
