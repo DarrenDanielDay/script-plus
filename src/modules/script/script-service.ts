@@ -9,7 +9,7 @@ import {
   UserScript,
 } from "../../models/script";
 import * as vscode from "vscode";
-import { globalStateKeys, names, paths } from "../constant";
+import { names, paths } from "../constant";
 import { glob, installPackage, path, randomString } from "../node-utils";
 import esbuild from "esbuild";
 import ts from "typescript";
@@ -330,20 +330,7 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
     },
     async check(force) {
       await scriptFolderCheck();
-      const checked = context.globalState.get(globalStateKeys.checked);
-      if (checked && !force) {
-        const lastChecked = new Date(`${checked}`);
-        if (lastChecked > subMonths(new Date(), 1)) {
-          // Skip @types/vscode update if checked in one month.
-          return;
-        }
-      }
-      try {
-        await vscodeVersionCheck();
-        await context.globalState.update(globalStateKeys.checked, new Date());
-      } catch (error) {
-        globalErrorHandler(error);
-      }
+      await vscodeVersionCheck();
     },
     async create(script) {
       if (!isValidScriptName(script.name)) {
