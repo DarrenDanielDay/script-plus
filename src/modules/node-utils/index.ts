@@ -44,13 +44,13 @@ export const randomString = R.pipe(
 );
 export const execFile = promisify(child_process.execFile);
 const yarn = platform() === "win32" ? "yarn.cmd" : "yarn";
-export const installPackage = (
-  moduleId: string,
+export const installPackages = (
+  moduleIds: string[],
   config: { cwd: string; global?: boolean }
 ) =>
   execFile(
     yarn,
-    [config.global && "global", "add", moduleId].filter(isString),
+    [config.global && "global", "add", ...moduleIds].filter(isString),
     {
       cwd: config.cwd,
     }

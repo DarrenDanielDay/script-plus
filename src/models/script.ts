@@ -140,14 +140,18 @@ export const isUserScript = defineValidator<UserScript>(
   })
 );
 export type ScriptParameter = Record<string, boolean | number | string>;
+export type Dependencies = Record<string, string>;
+
 export interface ScriptPlusBundle {
   meta: UserScript;
   content: string;
+  dependencies: Dependencies;
 }
 
 export const isScriptPlusBundle = defineValidator<ScriptPlusBundle>(
   isObject({
     content: isString,
     meta: isUserScript,
+    dependencies: record(primitiveOf("string")),
   })
 );

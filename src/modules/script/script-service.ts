@@ -1,5 +1,6 @@
 import type { CoreEvents, ScriptService } from "../../app/message-protocol";
 import {
+  Dependencies,
   isBooleanArgumentField,
   isEnumArgumentField,
   isNumberArgumentField,
@@ -12,10 +13,11 @@ import {
 } from "../../models/script";
 import * as vscode from "vscode";
 import { names, paths, scriptBundleFilter } from "../constant";
-import { glob, installPackage, path, randomString } from "../node-utils";
+import { glob, installPackages, path, randomString } from "../node-utils";
 import esbuild from "esbuild";
 import ts from "typescript";
 import vm from "vm";
+import { tmpdir, homedir } from "os";
 import { createRequire } from "module";
 import packageJson from "package-json";
 import { die } from "taio/build/utils/internal/exceptions";
@@ -36,6 +38,7 @@ import { isObject } from "taio/build/utils/validator/object";
 import type { AnyFunc } from "taio/build/types/concepts";
 import type { IEventHubAdapter } from "../../events/event-manager";
 import {
+  askYesNoQuestion,
   divider,
   existDir,
   existFile,
@@ -47,7 +50,6 @@ import {
 } from "../vscode-utils";
 import globalDirectories from "global-dirs";
 import * as semver from "semver";
-import subMonths from "date-fns/subMonths";
 import type { CleanUp, ScriptRunResult } from "../../templates/api";
 import env from "@esbuild-env";
 const f = ts.factory;
@@ -108,8 +110,8 @@ export function createScriptService(
   }
   async function vscodeVersionCheck() {
     const version = new semver.SemVer(vscode.version);
-    const { stdout, stderr } = await installPackage(
-      `@types/vscode@${version.major}.${version.minor}`,
+    const { stdout, stderr } = await installPackages(
+      [`@types/vscode@${version.major}.${version.minor}`],
       {
         cwd: basedOnScripts().fsPath,
         global: false,
@@ -122,7 +124,10 @@ export function createScriptService(
   }
   function isValidScriptName(name: string) {
     const special = new Set([..."~`!@#$%^&*()_+={}|[]\\:;\"'<>?,./ "]);
-    return ![...name].some((char) => special.has(char));
+    return [...name].some((char) => special.has(char))
+      ? `Script name should not include the following symbols and white spaces (kebab-case is recommended):
+    ~\`!@#$%^&*()_+={}|[]\\:;\"\'<>?,./`
+      : "";
   }
   function getScriptFileName(script: UserScript): string {
     return `${paths.mainScript}.${script.lang}`;
@@ -158,21 +163,171 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
     );
   }
 
+  function logInstallPackage(
+    packageName: string,
+    stdout: string,
+    stderr: string
+  ) {
+    divider(`install ${packageName}`);
+    divider("stdout");
+    output.appendLine(stdout);
+    divider("stderr");
+    output.appendLine(stderr);
+    output.show();
+  }
+
   async function installScript(bundle: ScriptPlusBundle) {
-    const { content, meta } = bundle;
+    const { content, meta, dependencies } = bundle;
     const scriptHome = basedOnScripts(meta.name);
     if (await existDir(scriptHome)) {
-      vscode.window.showInformationMessage(
-        `Script <${meta.name}> already exists`
-      );
-      return;
+      const message = `Script "${meta.name}" already exists, use another name?`;
+      if (await askYesNoQuestion(message)) {
+        const newName = await vscode.window.showInputBox({
+          prompt: `Input a new script name instead of ${meta.name}`,
+          value: meta.name,
+          async validateInput(value) {
+            return isValidScriptName(value) ||
+              (await scriptService.getList()).some(
+                (script) => script.name === value
+              )
+              ? `Script "${value}" already exists`
+              : "";
+          },
+        });
+        if (newName) {
+          meta.name = newName;
+        } else {
+          vscode.window.showInformationMessage(
+            `Install script "${meta.name}" aborted.`
+          );
+          return;
+        }
+      } else {
+        return;
+      }
     }
     await vscode.workspace.fs.createDirectory(scriptHome);
     await Promise.all([
       writeMeta(meta),
       writeDeclaration(meta),
       writeFile(basedOnScripts(meta.name, getScriptFileName(meta)), content),
+      (async () => {
+        const packages = Object.entries(dependencies).map(
+          ([pkg, version]) => `${pkg}@${version}`
+        );
+        if (packages.length) {
+          const userSayYes = await askYesNoQuestion(
+            `Script "${meta.name}" has the following dependencies:
+${packages.join("\n")}
+Do you want to install them?`
+          );
+          if (userSayYes) {
+            const { stderr, stdout } = await installPackages(packages, {
+              cwd: basedOnScripts().fsPath,
+            });
+            logInstallPackage(
+              `dependencies of script "${meta.name}"`,
+              stdout,
+              stderr
+            );
+          }
+        }
+      })(),
     ]);
+  }
+
+  async function findInstalledVersionFor(importPath: string) {
+    const tryFindWith = async (
+      packageJsonFolderUri: vscode.Uri
+    ): Promise<{ name: string; version: semver.SemVer } | null> => {
+      try {
+        const uri = vscode.Uri.joinPath(packageJsonFolderUri, "package.json");
+        const content = await readFile(uri);
+        const packageJSONContent: unknown = JSON.parse(content);
+        if (
+          isObject({ version: isString, name: isString })(packageJSONContent) &&
+          importPath.startsWith(packageJSONContent.name)
+        ) {
+          const version = semver.parse(packageJSONContent.version);
+          if (version) {
+            return {
+              name: packageJSONContent.name,
+              version,
+            };
+          }
+        }
+        output.appendLine(`Invalid package.json found: ${uri.fsPath}`);
+      } catch (error) {}
+      return null;
+    };
+    const requirePaths = getRequirePaths();
+    for (const requirePath of requirePaths) {
+      const baseUri = vscode.Uri.file(requirePath);
+      for (
+        let packageJsonFolderUri = vscode.Uri.joinPath(baseUri, importPath);
+        packageJsonFolderUri.fsPath !== baseUri.fsPath;
+        packageJsonFolderUri = vscode.Uri.joinPath(packageJsonFolderUri, "..")
+      ) {
+        const trial = await tryFindWith(packageJsonFolderUri);
+        if (trial) {
+          return trial;
+        }
+      }
+    }
+    return null;
+  }
+
+  async function analyseDependencies(
+    script: UserScript,
+    contents: string
+  ): Promise<Dependencies> {
+    const importPaths = new Set<string>();
+    const dependencies: Dependencies = {};
+    await esbuild.build({
+      stdin: {
+        contents,
+        loader: script.lang === "ts" ? "ts" : "js",
+      },
+      bundle: true,
+      outfile: path.resolve(tmpdir(), "script-plus-esbuild-temp.js"),
+      plugins: [
+        {
+          name: "dependency-analyser-plugin",
+          setup(build) {
+            build.onResolve({ filter: /.*/ }, ({ path }) => {
+              importPaths.add(path);
+              return {
+                external: true,
+              };
+            });
+          },
+        },
+      ],
+    });
+    const notResolvedPackages = (
+      await Promise.all(
+        [...importPaths].map(async (importPath) => {
+          if (importPath === "vscode") {
+            return;
+          }
+          const installedVersion = await findInstalledVersionFor(importPath);
+          if (!installedVersion) {
+            dependencies[importPath] = "latest";
+            return importPath;
+          }
+          const { name, version } = installedVersion;
+          dependencies[name] = version.format();
+        })
+      )
+    ).filter(isString);
+    if (notResolvedPackages.length) {
+      vscode.window.showWarningMessage(
+        `Versions for the following import path can not be resolved, marked as "latest": ${notResolvedPackages
+          .map((pkg) => `"${pkg}"`)
+          .join(",")}`
+      );
+    }
+    return dependencies;
   }
 
   async function getScriptContent(script: UserScript) {
@@ -196,18 +351,27 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
     return esbuildTransformed.code;
   }
 
+  function getRequirePaths(): string[] {
+    return [
+      basedOnScripts("node_modules").fsPath,
+      globalDirectories.yarn.packages,
+      globalDirectories.npm.packages,
+    ];
+  }
+
   function initExecutionContext(taskId: string) {
     const exports = {};
-    const localRequire = createRequire(basedOnScripts("node_modules").fsPath);
-    const globalYarnRequire = createRequire(globalDirectories.yarn.packages);
-    const globalNpmRequire = createRequire(globalDirectories.npm.packages);
+
     const tryRequire = (
-      nodeRequire: NodeRequire,
+      packagesPath: string,
       moduleId: string
     ): { module: unknown } | null => {
       try {
         return {
-          module: nodeRequire(moduleId),
+          module: require.call(
+            undefined,
+            require.resolve(moduleId, { paths: [packagesPath] })
+          ),
         };
       } catch (error) {
         return null;
@@ -215,13 +379,8 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
     };
     const customRequire = (moduleId: string) => {
       if (moduleId === "vscode") return vscode;
-      for (const nodeRequire of [
-        localRequire,
-        globalYarnRequire,
-        globalNpmRequire,
-        require,
-      ]) {
-        const result = tryRequire(nodeRequire, moduleId);
+      for (const packagesPath of getRequirePaths()) {
+        const result = tryRequire(packagesPath, moduleId);
         if (result) return result.module;
       }
       return die(
@@ -352,9 +511,9 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
       await vscodeVersionCheck();
     },
     async create(script) {
-      if (!isValidScriptName(script.name)) {
-        return die(`Script name should not include the following symbols and white spaces (kebab-case is recommended):
-~\`!@#$%^&*()_+={}|[]\\:;\"\'<>?,./`);
+      const validateMessage = isValidScriptName(script.name);
+      if (validateMessage) {
+        return die(validateMessage);
       }
       if (!isUserScript(script)) {
         vscode.window.showInformationMessage(`Invalid script object!`);
@@ -363,6 +522,7 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
       await installScript({
         meta: script,
         content: script.lang === "js" ? getJsTemplate() : getTsTemplate(),
+        dependencies: {},
       });
     },
     async delete(script) {
@@ -428,11 +588,17 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
       const askLocation = await vscode.window.showSaveDialog({
         title: `Export script "${script.name}"`,
         filters: scriptBundleFilter,
+        defaultUri: vscode.Uri.joinPath(
+          vscode.Uri.file(homedir()),
+          `${script.name}.${names.extension}`
+        ),
       });
       if (askLocation) {
+        const content = await getScriptContent(script);
         const bundle: ScriptPlusBundle = {
           meta: script,
-          content: await getScriptContent(script),
+          content,
+          dependencies: await analyseDependencies(script, content),
         };
         await writeFile(askLocation, JSON.stringify(bundle));
       }
@@ -510,19 +676,14 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
       }
     },
     async installPackage(packageName, version, options) {
-      const { stdout, stderr } = await installPackage(
-        `${packageName}${version ? `@${version}` : ""}`,
+      const { stdout, stderr } = await installPackages(
+        [`${packageName}${version ? `@${version}` : "latest"}`],
         {
           cwd: basedOnScripts().fsPath,
           global: options?.global,
         }
       );
-      divider(`install ${packageName}`);
-      divider("stdout");
-      output.appendLine(stdout);
-      divider("stderr");
-      output.appendLine(stderr);
-      output.show();
+      logInstallPackage(packageName, stdout, stderr);
     },
   };
   return scriptService;

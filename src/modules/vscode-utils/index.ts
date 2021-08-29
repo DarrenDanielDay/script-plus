@@ -76,3 +76,12 @@ export function globalErrorHandler(error: unknown): void {
   let displayMessage: string = getErrorMessage(error);
   vscode.window.showErrorMessage(displayMessage);
 }
+
+export async function askYesNoQuestion(
+  question: string
+): Promise<boolean | undefined> {
+  const result = await vscode.window.showInformationMessage<{
+    title: "No" | "Yes";
+  }>(question, { modal: true }, { title: "Yes" }, { title: "No" });
+  return result && result.title === "Yes";
+}

@@ -15,9 +15,9 @@ import {
   AddOutlined,
   DeleteOutline,
   EditOutlined,
-  GetAppRounded,
   LaunchOutlined,
   RefreshOutlined,
+  SaveAlt,
 } from "@material-ui/icons";
 import React, { useEffect, useState } from "react";
 import type { UserScript } from "../../../../models/script";
@@ -54,7 +54,7 @@ export const ScriptManager: React.FC<IScriptManagerProp> = ({}) => {
             style={{ color: theme.palette.primary.main }}
             onClick={() => SessionInvoker.ScriptService.import()}
           >
-            <GetAppRounded />
+            <SaveAlt />
           </IconButton>
         </Tooltip>
         <Tooltip title="refresh list">
