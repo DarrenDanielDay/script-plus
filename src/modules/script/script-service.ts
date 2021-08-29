@@ -18,7 +18,7 @@ import esbuild from "esbuild";
 import ts from "typescript";
 import vm from "vm";
 import { tmpdir, homedir } from "os";
-import { createRequire } from "module";
+import { builtinModules } from "module";
 import packageJson from "package-json";
 import { die } from "taio/build/utils/internal/exceptions";
 import { enumValues } from "taio/build/utils/enum";
@@ -291,13 +291,16 @@ Do you want to install them?`
         loader: script.lang === "ts" ? "ts" : "js",
       },
       bundle: true,
+      platform: "node",
       outfile: path.resolve(tmpdir(), "script-plus-esbuild-temp.js"),
       plugins: [
         {
           name: "dependency-analyser-plugin",
           setup(build) {
             build.onResolve({ filter: /.*/ }, ({ path }) => {
-              importPaths.add(path);
+              if (!builtinModules.includes(path)) {
+                importPaths.add(path);
+              }
               return {
                 external: true,
               };
