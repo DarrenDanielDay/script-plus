@@ -40,9 +40,11 @@ import type { IEventHubAdapter } from "../../events/event-manager";
 import {
   askYesNoQuestion,
   divider,
+  dumpObjectToFile,
   existDir,
   existFile,
   globalErrorHandler,
+  loadObjectFromFile,
   openEdit,
   output,
   readFile,
@@ -567,9 +569,8 @@ Do you want to install them?`
       if (spps) {
         await Promise.all(
           spps.map(async (spp) => {
-            const content = await readFile(spp);
             try {
-              const bundle: unknown = JSON.parse(content);
+              const bundle = await loadObjectFromFile(spp);
               if (!isScriptPlusBundle(bundle)) {
                 return die();
               }
@@ -600,7 +601,7 @@ Do you want to install them?`
           content,
           dependencies: await analyseDependencies(script, content),
         };
-        await writeFile(askLocation, JSON.stringify(bundle));
+        await dumpObjectToFile(askLocation, bundle);
       }
     },
     async execute(script, params) {

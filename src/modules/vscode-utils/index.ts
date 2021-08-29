@@ -1,5 +1,6 @@
 import env from "@esbuild-env";
 import * as vscode from "vscode";
+import v8 from "v8";
 import { json } from "../../app/src/json-serializer";
 import { TextEncoder, TextDecoder } from "util";
 export const output = vscode.window.createOutputChannel(
@@ -58,6 +59,16 @@ export async function readFile(uri: vscode.Uri) {
 export async function writeFile(uri: vscode.Uri, content: string) {
   const encoder = new TextEncoder();
   vscode.workspace.fs.writeFile(uri, encoder.encode(content));
+}
+
+export async function dumpObjectToFile(uri: vscode.Uri, obj: unknown) {
+  const buf = v8.serialize(obj);
+  await vscode.workspace.fs.writeFile(uri, buf);
+}
+
+export async function loadObjectFromFile(uri: vscode.Uri): Promise<unknown> {
+  const buf = await vscode.workspace.fs.readFile(uri);
+  return v8.deserialize(buf);
 }
 
 export function getErrorMessage(error: unknown): string {
