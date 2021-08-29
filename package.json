@@ -32,7 +32,7 @@
   ],
   "icon": "logo.png",
   "activationEvents": [
-    "*"
+    "onCommand:script-plus.open"
   ],
   "main": "./out/extension.js",
   "contributes": {
