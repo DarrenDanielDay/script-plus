@@ -32,7 +32,14 @@
   ],
   "icon": "logo.png",
   "activationEvents": [
-    "onCommand:script-plus.open"
+    "onCommand:script-plus.open",
+    "onCommand:script-plus.close",
+    "onCommand:script-plus.reload",
+    "onCommand:script-plus.execute",
+    "onCommand:script-plus.executeCurrentScript",
+    "onCommand:script-plus.forceCheckUserScriptsFolder",
+    "onCommand:script-plus.cleanUp",
+    "onCommand:script-plus.cleanUpAllSideEffects"
   ],
   "main": "./out/extension.js",
   "contributes": {
