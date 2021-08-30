@@ -27,6 +27,7 @@ export interface ScriptService {
   executeCurrent(): Promise<void>;
   getTasks(): Promise<ExecutionTask[]>;
   cleanUp(taskId: string): Promise<void>;
+  cleanUpAll(): Promise<void>;
   listVersions(moduleId: string): Promise<string[]>;
   installPackage(
     moduleId: string,

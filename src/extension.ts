@@ -8,6 +8,8 @@ import { createCoreAPI } from "./modules/core-module";
 import { createMessageHandler } from "./messages/message-manager";
 import type { CoreEvents } from "./app/message-protocol";
 import { createModuleManager } from "./modules/module-manager";
+import type { UserScript } from "./models/script";
+import { askScript, cleanUp, execute } from "./actions/script";
 
 export function activate(context: vscode.ExtensionContext) {
   const globalEventHubAdapter = createEventHubAdapter<CoreEvents>();
@@ -57,6 +59,11 @@ export function activate(context: vscode.ExtensionContext) {
     )
   );
   context.subscriptions.push(
+    vscode.commands.registerCommand(Commands.ScriptControl.Execute, () =>
+      execute({ scriptService: globalModuleManager.api.ScriptService })
+    )
+  );
+  context.subscriptions.push(
     vscode.commands.registerCommand(
       Commands.ScriptControl.ExecuteCurrentScript,
       () => globalModuleManager.api.ScriptService.executeCurrent()
@@ -68,15 +75,23 @@ export function activate(context: vscode.ExtensionContext) {
       () => globalModuleManager.api.ScriptService.check(true)
     )
   );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(Commands.ScriptControl.CleanUp, () =>
+      cleanUp({ scriptService: globalModuleManager.api.ScriptService })
+    )
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      Commands.ScriptControl.CleanUpAllSideEffects,
+      () => globalModuleManager.api.ScriptService.cleanUpAll()
+    )
+  );
   if (env.ENV === "dev") {
     loadSnowpackConfig(context).then((config) => {
       webviewManager.devServerConfig = {
         port: config.devOptions.port,
         hmrSocketPort: config.devOptions.hmrPort ?? config.devOptions.port,
       };
-      vscode.commands.executeCommand(Commands.WebviewControll.Open).then(() => {
-        console.log("Successfully opened webview");
-      });
     });
   }
 }

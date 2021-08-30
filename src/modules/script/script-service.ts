@@ -31,6 +31,7 @@ import {
   ExecutionTask,
   isCleanUp,
   isLogLevel,
+  isScriptRunResult,
   isScriptRunResultObject,
 } from "../../models/execution-task";
 import { defineValidator } from "taio/build/utils/validator/utils";
@@ -54,6 +55,7 @@ import globalDirectories from "global-dirs";
 import * as semver from "semver";
 import type { CleanUp, ScriptRunResult } from "../../templates/api";
 import env from "@esbuild-env";
+import { noop } from "taio/build/utils/typed-function";
 const f = ts.factory;
 interface ScriptModule {
   main: (
@@ -185,7 +187,7 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
       const message = `Script "${meta.name}" already exists, use another name?`;
       if (await askYesNoQuestion(message)) {
         const newName = await vscode.window.showInputBox({
-          prompt: `Input a new script name instead of ${meta.name}`,
+          prompt: `Input a new script name instead of "${meta.name}"`,
           value: meta.name,
           async validateInput(value) {
             return isValidScriptName(value) ||
@@ -533,13 +535,13 @@ Do you want to install them?`
     async delete(script) {
       const scriptHost = basedOnScripts(script.name);
       if (!(await existDir(scriptHost))) {
-        return die(`Script ${script.name} not found!`);
+        return die(`Script "${script.name}" not found!`);
       }
       await vscode.workspace.fs.delete(scriptHost, {
         useTrash: false,
         recursive: true,
       });
-      vscode.window.showInformationMessage(`Script ${script.name} Removed.`);
+      vscode.window.showInformationMessage(`Script "${script.name}" Removed.`);
     },
     async getList() {
       const base = basedOnScripts();
@@ -608,10 +610,14 @@ Do you want to install them?`
       }
     },
     async execute(script, params) {
-      const taskId = randomString(8);
-      const executionTask = {
+      let taskId = randomString(8);
+      while (activeTasks.has(taskId)) {
+        taskId = randomString(8);
+      }
+      const executionTask: ExecutionTask = {
         taskId,
         taskName: script.name,
+        startTime: new Date().toLocaleString(),
       };
       const promise = runScript(script, params, taskId);
       activeTasks.set(taskId, {
@@ -641,17 +647,40 @@ Do you want to install them?`
           defaultArgs[key] = value.defaultValue;
           return defaultArgs;
         }, {});
-        scriptService.execute(meta, defaults);
+        const { taskId, taskName } = await scriptService.execute(
+          meta,
+          defaults
+        );
+        const { promise } = activeTasks.get(taskId)!;
+        promise.then(async (result) => {
+          if (isCleanUp(result) || isScriptRunResultObject(result)) {
+            const userSayYes = await askYesNoQuestion(
+              `Do you want to clean up side effect of task "${taskName}" (taskId=${taskId}) now?`,
+              false
+            );
+            if (userSayYes) {
+              await cleanUpTaskResource(taskId);
+            }
+          }
+        });
       }
     },
     async getTasks() {
       return [...activeTasks.values()].map((localTask) => ({
         taskId: localTask.taskId,
         taskName: localTask.taskName,
+        startTime: localTask.startTime,
       }));
     },
     async cleanUp(taskId) {
       await cleanUpTaskResource(taskId);
+    },
+    cleanUpAll() {
+      return Promise.all(
+        [...activeTasks.keys()].map((taskId) => cleanUpTaskResource(taskId))
+      )
+        .then(noop)
+        .catch(noop);
     },
     async listVersions(moduleId) {
       try {

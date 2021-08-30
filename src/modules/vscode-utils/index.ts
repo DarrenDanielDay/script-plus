@@ -89,10 +89,11 @@ export function globalErrorHandler(error: unknown): void {
 }
 
 export async function askYesNoQuestion(
-  question: string
+  question: string,
+  modal = true
 ): Promise<boolean | undefined> {
   const result = await vscode.window.showInformationMessage<{
     title: "No" | "Yes";
-  }>(question, { modal: true }, { title: "Yes" }, { title: "No" });
+  }>(question, { modal }, { title: "Yes" }, { title: "No" });
   return result && result.title === "Yes";
 }

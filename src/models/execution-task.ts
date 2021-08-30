@@ -17,12 +17,14 @@ const nocheck = (obj: unknown): obj is unknown => !obj || !!obj;
 export interface ExecutionTask {
   taskId: string;
   taskName: string;
+  startTime: string;
 }
 
 export const isExecutionTask = defineValidator<ExecutionTask>(
   isObject({
     taskId: isString,
     taskName: isString,
+    startTime: isString,
   })
 );
 

@@ -50,12 +50,24 @@
         "title": "Script Plus: Reload Webview"
       },
       {
+        "command": "script-plus.execute",
+        "title": "Script Plus: Execute Script"
+      },
+      {
         "command": "script-plus.executeCurrentScript",
         "title": "Script Plus: Execute Current Script (Using default configs)"
       },
       {
         "command": "script-plus.forceCheckUserScriptsFolder",
         "title": "Script Plus: Check user-scripts folder"
+      },
+      {
+        "command": "script-plus.cleanUp",
+        "title": "Script Plus: Clean up side effects"
+      },
+      {
+        "command": "script-plus.cleanUpAllSideEffects",
+        "title": "Script Plus: Clean up all side effects"
       }
     ],
     "viewsContainers": {
