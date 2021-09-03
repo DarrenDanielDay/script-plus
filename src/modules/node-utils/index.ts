@@ -44,10 +44,13 @@ export const randomString = R.pipe(
 );
 export const execFile = promisify(child_process.execFile);
 const yarn = platform() === "win32" ? "yarn.cmd" : "yarn";
-export const installPackages = (
-  moduleIds: string[],
-  config: { cwd: string; global?: boolean }
-) =>
+const npm = platform() === "win32" ? "npm.cmd" : "npm";
+export interface InstallConfig {
+  cwd: string;
+  global?: boolean;
+}
+
+export const yarnAddPackages = (moduleIds: string[], config: InstallConfig) =>
   execFile(
     yarn,
     [config.global && "global", "add", ...moduleIds].filter(isString),
@@ -55,3 +58,19 @@ export const installPackages = (
       cwd: config.cwd,
     }
   );
+
+export const npmInstallPackages = (
+  moduleIds: string[],
+  config: InstallConfig
+) =>
+  execFile(
+    npm,
+    ["install", config.global && "-g", ...moduleIds].filter(isString),
+    {
+      cwd: config.cwd,
+    }
+  );
+
+export const detectYarn = () => execFile(yarn, ["-v"]).then(R.T).catch(R.F);
+
+export const detectNpm = () => execFile(npm, ["-v"]).then(R.T).catch(R.F);

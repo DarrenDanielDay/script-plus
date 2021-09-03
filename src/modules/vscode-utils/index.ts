@@ -3,6 +3,8 @@ import * as vscode from "vscode";
 import v8 from "v8";
 import { json } from "../../app/src/json-serializer";
 import { TextEncoder, TextDecoder } from "util";
+import { isScriptPlusConfig, ScriptPlusConfig } from "../../configs";
+import { die } from "taio/build/utils/internal/exceptions";
 export const output = vscode.window.createOutputChannel(
   `${env.EXTENSION_BASE_NAME} Logger`
 );
@@ -96,4 +98,9 @@ export async function askYesNoQuestion(
     title: "No" | "Yes";
   }>(question, { modal }, { title: "Yes" }, { title: "No" });
   return result && result.title === "Yes";
+}
+
+export function getConfigs(): ScriptPlusConfig {
+  const config = vscode.workspace.getConfiguration("script-plus");
+  return isScriptPlusConfig(config) ? config : die("Impossible");
 }

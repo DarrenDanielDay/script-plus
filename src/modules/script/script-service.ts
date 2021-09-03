@@ -13,7 +13,16 @@ import {
 } from "../../models/script";
 import * as vscode from "vscode";
 import { names, paths, scriptBundleFilter } from "../constant";
-import { glob, installPackages, path, randomString } from "../node-utils";
+import {
+  glob,
+  yarnAddPackages,
+  path,
+  randomString,
+  detectYarn,
+  detectNpm,
+  npmInstallPackages,
+  InstallConfig,
+} from "../node-utils";
 import esbuild from "esbuild";
 import ts from "typescript";
 import vm from "vm";
@@ -44,6 +53,7 @@ import {
   dumpObjectToFile,
   existDir,
   existFile,
+  getConfigs,
   globalErrorHandler,
   loadObjectFromFile,
   openEdit,
@@ -56,6 +66,7 @@ import * as semver from "semver";
 import type { CleanUp, ScriptRunResult } from "../../templates/api";
 import env from "@esbuild-env";
 import { noop } from "taio/build/utils/typed-function";
+import { PackageManager } from "../../configs";
 const f = ts.factory;
 interface ScriptModule {
   main: (
@@ -114,7 +125,7 @@ export function createScriptService(
   }
   async function vscodeVersionCheck() {
     const version = new semver.SemVer(vscode.version);
-    const { stdout, stderr } = await installPackages(
+    const { stdout, stderr } = await yarnAddPackages(
       [`@types/vscode@${version.major}.${version.minor}`],
       {
         cwd: basedOnScripts().fsPath,
@@ -226,7 +237,7 @@ ${packages.join("\n")}
 Do you want to install them?`
           );
           if (userSayYes) {
-            const { stderr, stdout } = await installPackages(packages, {
+            const { stderr, stdout } = await yarnAddPackages(packages, {
               cwd: basedOnScripts().fsPath,
             });
             logInstallPackage(
@@ -368,27 +379,20 @@ Do you want to install them?`
 
   function initExecutionContext(taskId: string) {
     const exports = {};
-
-    const tryRequire = (
-      packagesPath: string,
-      moduleId: string
-    ): { module: unknown } | null => {
+    const tryResolve = (packagePath: string, moduelId: string) => {
       try {
-        return {
-          module: require.call(
-            undefined,
-            require.resolve(moduleId, { paths: [packagesPath] })
-          ),
-        };
+        return require.resolve(moduelId, { paths: [packagePath] });
       } catch (error) {
         return null;
       }
     };
-    const customRequire = (moduleId: string) => {
+    const customRequire = (moduleId: string): unknown => {
       if (moduleId === "vscode") return vscode;
       for (const packagesPath of getRequirePaths()) {
-        const result = tryRequire(packagesPath, moduleId);
-        if (result) return result.module;
+        const resolved = tryResolve(packagesPath, moduleId);
+        if (resolved != null) {
+          return require.call(undefined, moduleId);
+        }
       }
       return die(
         `Cannot find module "${moduleId}", have you installed it in extension or globally?`
@@ -505,6 +509,30 @@ Do you want to install them?`
     }
     await task.cleanUp?.();
     activeTasks.delete(taskId);
+  }
+
+  async function installModules(moduleIds: string[], configs: InstallConfig) {
+    const config = getConfigs();
+    const hasNpm = await detectNpm();
+    const hasYarn = await detectYarn();
+    if (config.node.packageManager === PackageManager.npm) {
+      if (!hasNpm) {
+        return die("Cannot find npm. Installation aborted.");
+      }
+      return npmInstallPackages(moduleIds, configs);
+    }
+    if (!hasYarn) {
+      if (hasNpm) {
+        const userSayYes = await askYesNoQuestion(
+          "Yarn is not detected. Use npm instead?"
+        );
+        if (userSayYes) {
+          return npmInstallPackages(moduleIds, configs);
+        }
+      }
+      return die("Cannot find yarn. Installation aborted.");
+    }
+    return yarnAddPackages(moduleIds, configs);
   }
 
   const scriptService: ScriptService = {
@@ -709,8 +737,8 @@ Do you want to install them?`
       }
     },
     async installPackage(packageName, version, options) {
-      const { stdout, stderr } = await installPackages(
-        [`${packageName}${version ? `@${version}` : "latest"}`],
+      const { stdout, stderr } = await installModules(
+        [`${packageName}${version ? `@${version}` : "@latest"}`],
         {
           cwd: basedOnScripts().fsPath,
           global: options?.global,

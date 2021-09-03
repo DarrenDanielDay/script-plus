@@ -3041,10 +3041,10 @@ table@^6.0.9:
     string-width "^4.2.0"
     strip-ansi "^6.0.0"
 
-taio@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.npmjs.org/taio/-/taio-0.4.0.tgz#5a01e52425efc66e0abf7571218f62c0bf9c4e4d"
-  integrity sha512-QYAidHUlFuEL0xKZeorlWnUuekt8Fni68zUYrBNrDk4Tjl+3daEZsy+3fPPyYBv8cryPYM7Z1YbjDlkEXrKcsw==
+taio@^0.4.1:
+  version "0.4.1"
+  resolved "https://registry.npmjs.org/taio/-/taio-0.4.1.tgz#d9546c8bcf4126ce781b53aa4ad9e5fed301a092"
+  integrity sha512-CigGsA6AWAayM5G1RI9WJYMw6fcnlvCbMFr/XXHepEhuph7HaSO9/NqCGrL2Rvlg38UPjlDYLCLiS1NRwhrFJw==
 
 tar@^6.0.2, tar@^6.1.0:
   version "6.1.0"
