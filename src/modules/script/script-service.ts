@@ -22,6 +22,7 @@ import {
   detectNpm,
   npmInstallPackages,
   InstallConfig,
+  Installer,
 } from "../node-utils";
 import esbuild from "esbuild";
 import ts from "typescript";
@@ -66,7 +67,7 @@ import * as semver from "semver";
 import type { CleanUp, ScriptRunResult } from "../../templates/api";
 import env from "@esbuild-env";
 import { noop } from "taio/build/utils/typed-function";
-import { PackageManager } from "../../configs";
+import { PackageManager } from "../../models/configurations";
 const f = ts.factory;
 interface ScriptModule {
   main: (
@@ -77,6 +78,7 @@ interface ScriptModule {
 
 interface LocalExecutionTask extends ExecutionTask {
   promise: Promise<ScriptRunResult>;
+  reqiredPaths: string[];
   cleanUp?: CleanUp;
   running: boolean;
 }
@@ -98,6 +100,9 @@ export function createScriptService(
       paths.userScripts,
       ...fragments
     );
+  }
+  async function determinePackageManager(): Promise<Installer> {
+    return die("No package manager can be found.");
   }
   async function scriptFolderCheck() {
     await vscode.workspace.fs.createDirectory(basedOnScripts());
@@ -124,8 +129,19 @@ export function createScriptService(
     );
   }
   async function vscodeVersionCheck() {
+    vscode.workspace.getConfiguration();
     const version = new semver.SemVer(vscode.version);
-    const { stdout, stderr } = await yarnAddPackages(
+    const detectedPackageManagers = await Promise.all([
+      detectYarn().then((ok) => [ok, yarnAddPackages] as const),
+      detectNpm().then((ok) => [ok, npmInstallPackages] as const),
+    ]);
+    const manager = detectedPackageManagers.find(([ok]) => ok)?.[1];
+    if (!manager) {
+      return die(
+        "No package manager detected. You need to install `npm` or `yarn` for this extension."
+      );
+    }
+    const { stdout, stderr } = await manager(
       [`@types/vscode@${version.major}.${version.minor}`],
       {
         cwd: basedOnScripts().fsPath,
@@ -386,11 +402,13 @@ Do you want to install them?`
         return null;
       }
     };
+    const task = activeTasks.get(taskId)!;
     const customRequire = (moduleId: string): unknown => {
       if (moduleId === "vscode") return vscode;
       for (const packagesPath of getRequirePaths()) {
         const resolved = tryResolve(packagesPath, moduleId);
         if (resolved != null) {
+          task.reqiredPaths.push(resolved);
           return require.call(undefined, moduleId);
         }
       }
@@ -508,6 +526,11 @@ Do you want to install them?`
       return die(`Task id ${taskId} is still running!`);
     }
     await task.cleanUp?.();
+    for (const requiredPath of task.reqiredPaths) {
+      // Delete module cache for pure context.
+      // When running a new script, the module should be reloaded.
+      delete require.cache[requiredPath];
+    }
     activeTasks.delete(taskId);
   }
 
@@ -642,17 +665,18 @@ Do you want to install them?`
       while (activeTasks.has(taskId)) {
         taskId = randomString(8);
       }
-      const executionTask: ExecutionTask = {
+      const executionTask: LocalExecutionTask = {
         taskId,
         taskName: script.name,
         startTime: new Date().toLocaleString(),
+        running: false,
+        promise: Promise.resolve({}),
+        reqiredPaths: [],
       };
+      activeTasks.set(taskId, executionTask);
       const promise = runScript(script, params, taskId);
-      activeTasks.set(taskId, {
-        ...executionTask,
-        promise,
-        running: true,
-      });
+      executionTask.running = true;
+      executionTask.promise = promise;
       promise
         .then((result) => {
           finishTask(taskId, result);

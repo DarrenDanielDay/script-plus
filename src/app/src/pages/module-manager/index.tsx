@@ -20,10 +20,7 @@ import classNames from "classnames";
 import { isString } from "taio/build/utils/validator/primitive";
 import { Skeleton } from "../../components/skeleton";
 import { EnumPicker } from "../../components/enum-picker";
-enum InstallPosition {
-  Local = "local",
-  Global = "global",
-}
+import { InstallPosition } from "../../../../models/configurations";
 export const ModuleManager: React.FC = () => {
   const classes = useStyles();
   const theme = useTheme();

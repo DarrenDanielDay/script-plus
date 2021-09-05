@@ -50,7 +50,18 @@ export interface InstallConfig {
   global?: boolean;
 }
 
-export const yarnAddPackages = (moduleIds: string[], config: InstallConfig) =>
+export type Installer = (
+  moduleIds: string[],
+  config: InstallConfig
+) => child_process.PromiseWithChild<{
+  stdout: string;
+  stderr: string;
+}>;
+
+export const yarnAddPackages: Installer = (
+  moduleIds: string[],
+  config: InstallConfig
+) =>
   execFile(
     yarn,
     [config.global && "global", "add", ...moduleIds].filter(isString),
@@ -59,7 +70,7 @@ export const yarnAddPackages = (moduleIds: string[], config: InstallConfig) =>
     }
   );
 
-export const npmInstallPackages = (
+export const npmInstallPackages: Installer = (
   moduleIds: string[],
   config: InstallConfig
 ) =>

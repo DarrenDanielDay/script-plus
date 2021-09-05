@@ -32,11 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
       webviewManager.attach(globalMessageHandler);
     globalEventHubAdapter.attach(webviewManager.panel!);
     webviewManager.onClose(() => {
-      globalModuleManager.api.ScriptService.getTasks().then((tasks) =>
-        tasks.forEach((task) =>
-          globalModuleManager.api.ScriptService.cleanUp(task.taskId)
-        )
-      );
+      globalModuleManager.api.ScriptService.cleanUpAll();
       globalEventHubAdapter.detach(webviewManager.panel!);
     });
   };

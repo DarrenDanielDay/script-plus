@@ -3,8 +3,15 @@ import * as vscode from "vscode";
 import v8 from "v8";
 import { json } from "../../app/src/json-serializer";
 import { TextEncoder, TextDecoder } from "util";
-import { isScriptPlusConfig, ScriptPlusConfig } from "../../configs";
+import {
+  isScriptPlusConfig,
+  ScriptPlusConfig,
+} from "../../configs/user-config";
 import { die } from "taio/build/utils/internal/exceptions";
+import type { DeepPartial } from "taio/build/types/object";
+import { defineValidator } from "taio/build/utils/validator/utils";
+import { isObject } from "taio/build/utils/validator/object";
+import { isString } from "taio/build/utils/validator/primitive";
 export const output = vscode.window.createOutputChannel(
   `${env.EXTENSION_BASE_NAME} Logger`
 );
@@ -73,10 +80,15 @@ export async function loadObjectFromFile(uri: vscode.Uri): Promise<unknown> {
   return v8.deserialize(buf);
 }
 
+const isErrorLike = isObject({
+  message: isString,
+  stack: isString,
+});
+
 export function getErrorMessage(error: unknown): string {
   let displayMessage: string;
-  if (error instanceof Error) {
-    displayMessage = error.message;
+  if (isErrorLike(error)) {
+    displayMessage = error.stack;
   } else if (typeof error === "object") {
     displayMessage = JSON.stringify(json.serialize(error), undefined, 2);
   } else {
@@ -99,8 +111,17 @@ export async function askYesNoQuestion(
   }>(question, { modal }, { title: "Yes" }, { title: "No" });
   return result && result.title === "Yes";
 }
+const configRootSection = "script-plus";
+function getExtensionConfiguration() {
+  return vscode.workspace.getConfiguration(configRootSection);
+}
 
 export function getConfigs(): ScriptPlusConfig {
-  const config = vscode.workspace.getConfiguration("script-plus");
+  const config = getExtensionConfiguration();
   return isScriptPlusConfig(config) ? config : die("Impossible");
+}
+
+export function updateConfig(patch: DeepPartial<ScriptPlusConfig>) {
+  const config = getExtensionConfiguration();
+  config.update(configRootSection, patch);
 }

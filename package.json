@@ -81,13 +81,29 @@
       "title": "Script Plus",
       "properties": {
         "script-plus.node.packageManager": {
-          "description": "Specifies the package manager to install packages.",
+          "description": "Specifies the package manager to install packages!",
           "type": "string",
           "enum": [
             "npm",
             "yarn"
           ],
           "default": "yarn"
+        },
+        "script-plus.node.packageName": {
+          "type": "string",
+          "default": "user-script"
+        },
+        "script-plus.packages.installPosition": {
+          "type": "string",
+          "enum": [
+            "local",
+            "global"
+          ],
+          "default": "local"
+        },
+        "script-plus.packages.installTypes": {
+          "type": "boolean",
+          "default": true
         }
       }
     },
@@ -153,7 +169,7 @@
     "rxjs": "^7.3.0",
     "semver": "^7.3.5",
     "snowpack": "^3.6.2",
-    "taio": "^0.4.1",
+    "taio": "^0.5.0-rc",
     "typescript": "^4.3.2",
     "vsce": "^1.88.0"
   },
