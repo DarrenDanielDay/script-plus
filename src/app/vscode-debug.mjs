@@ -12,6 +12,14 @@ const projectRoot = resolve(process.cwd(), "..", "..");
 (async () => {
   const config = await loadConfiguration({});
   await startServer({ config });
+  const now = new Date();
+  const nowString = `${now.toLocaleTimeString()}`;
+  process.stdout.write(
+    `${nowString} - Starting compilation in watch mode...\n\n`
+  );
+  process.stdout.write(
+    `${nowString} - Found 0 errors. Watching for file changes.\n\n`
+  );
   const esbuildProcess = spawn(yarn, ["watch:esbuild"], {
     cwd: projectRoot,
   });
