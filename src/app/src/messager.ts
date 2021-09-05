@@ -1,4 +1,5 @@
-import type { PropertyKeys } from "../../utils/types/property-key";
+import type { Func } from "taio/build/types/concepts";
+import type { StringKey } from "taio/build/types/converts";
 import type { AnyMessage, Event, Request, Response } from "../communication";
 import type { CoreEvents } from "../message-protocol";
 import { json } from "./json-serializer";
@@ -30,10 +31,11 @@ export interface PromiseHandler<T> {
   reject(error?: unknown): void;
 }
 
-export interface IMessageManager {
-  handlerMap: Map<
-    PropertyKeys<CoreEvents>,
-    Set<(value: CoreEvents[PropertyKeys<CoreEvents>]) => void>
+export interface IMessageManager<T> {
+  handlerMap: Partial<
+    {
+      [K in StringKey<T>]: Set<Func<[T[K]], void>>;
+    }
   >;
   messageQueue: Map<number, PromiseHandler<unknown>>;
   readonly seq: number;
@@ -41,28 +43,27 @@ export interface IMessageManager {
   accept(seq: number, payload: unknown): void;
   abort(seq: number, error?: unknown): void;
   request(path: string[], payload: unknown[]): Promise<Response<unknown>>;
-  dispatchToExtension<K extends PropertyKeys<CoreEvents>>(
+  dispatchToExtension<K extends StringKey<T>>(name: K, payload: T[K]): void;
+  onEvent<K extends StringKey<T>>(
     name: K,
-    payload: CoreEvents[K]
-  ): void;
-  onEvent<K extends PropertyKeys<CoreEvents>>(
-    name: K,
-    handler: (value: CoreEvents[K]) => void
+    handler: (value: T[K]) => void
   ): () => void;
-  offEvent<K extends PropertyKeys<CoreEvents>>(
+  offEvent<K extends StringKey<T>>(
     name: K,
-    handler: (value: CoreEvents[K]) => void
+    handler: (value: T[K]) => void
   ): void;
   listener: (event: { data: AnyMessage }) => void;
 }
 
-export function createMessageManager(): IMessageManager {
+export function createMessageManager<T>(): IMessageManager<T> {
+  type EventNames = StringKey<T>;
   let _seq = 0;
   const messageQueue = new Map<number, PromiseHandler<unknown>>();
-  const handlerMap = new Map<
-    PropertyKeys<CoreEvents>,
-    Set<(value: CoreEvents[PropertyKeys<CoreEvents>]) => void>
-  >();
+  const handlerMap: Partial<
+    {
+      [K in EventNames]: Set<Func<[T[K]], void>>;
+    }
+  > = {};
   function getNextSeq() {
     return _seq++;
   }
@@ -80,11 +81,8 @@ export function createMessageManager(): IMessageManager {
       dispatchEvent(message.name, message.payload);
     }
   };
-  function dispatchEvent<K extends PropertyKeys<CoreEvents>>(
-    name: K,
-    payload: CoreEvents[K]
-  ): void {
-    instance.handlerMap.get(name)?.forEach((handler) => {
+  function dispatchEvent<K extends EventNames>(name: K, payload: T[K]): void {
+    instance.handlerMap[name]?.forEach((handler) => {
       handler.call(undefined, payload);
     });
   }
@@ -121,11 +119,11 @@ export function createMessageManager(): IMessageManager {
     });
   }
 
-  function dispatchToExtension<K extends PropertyKeys<CoreEvents>>(
+  function dispatchToExtension<K extends EventNames>(
     name: K,
-    payload: CoreEvents[K]
+    payload: T[K]
   ): void {
-    const event: Event<CoreEvents[K]> = {
+    const event: Event<T[K]> = {
       id: 0,
       name,
       payload,
@@ -135,23 +133,23 @@ export function createMessageManager(): IMessageManager {
     window.vscodeAPI.postMessage(json.serialize(event));
   }
 
-  function onEvent<K extends PropertyKeys<CoreEvents>>(
+  function onEvent<K extends EventNames>(
     name: K,
-    handler: (value: CoreEvents[K]) => void
+    handler: (value: T[K]) => void
   ) {
-    handlerMap.has(name) || handlerMap.set(name, new Set());
-    handlerMap.get(name)!.add(handler);
+    handlerMap[name] ??= new Set();
+    handlerMap[name]!.add(handler);
     return () => offEvent(name, handler);
   }
 
-  function offEvent<K extends PropertyKeys<CoreEvents>>(
+  function offEvent<K extends EventNames>(
     name: K,
-    handler: (value: CoreEvents[K]) => void
+    handler: (value: T[K]) => void
   ) {
-    handlerMap.has(name) || handlerMap.set(name, new Set());
-    handlerMap.get(name)!.delete(handler);
+    handlerMap[name] ??= new Set();
+    handlerMap[name]!.delete(handler);
   }
-  const instance: IMessageManager = {
+  const instance: IMessageManager<T> = {
     get handlerMap() {
       return handlerMap;
     },
@@ -173,4 +171,4 @@ export function createMessageManager(): IMessageManager {
   return instance;
 }
 
-export const globalMessageManager = createMessageManager();
+export const globalMessageManager = createMessageManager<CoreEvents>();

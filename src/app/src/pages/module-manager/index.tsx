@@ -21,6 +21,8 @@ import { isString } from "taio/build/utils/validator/primitive";
 import { Skeleton } from "../../components/skeleton";
 import { EnumPicker } from "../../components/enum-picker";
 import { InstallPosition } from "../../../../models/configurations";
+import type { Mapper } from "taio/build/types/concepts";
+import type { ScriptPlusConfig } from "../../../../configs/user-config";
 export const ModuleManager: React.FC = () => {
   const classes = useStyles();
   const theme = useTheme();
@@ -54,14 +56,33 @@ export const ModuleManager: React.FC = () => {
       moduleId ? SessionInvoker.ScriptService.listVersions(moduleId) : [],
     setVersions
   );
+  const [configLoading, getConfig] = useLoadingPipe(
+    () => SessionInvoker.ConfigService.getConfigs(),
+    R.pipe(
+      R.identity<Mapper<ScriptPlusConfig, ScriptPlusConfig>>(R.identity),
+      R.tap((config) => setIncludeTypes(config.packages.installTypes)),
+      R.tap((config) => setInstallPosition(config.packages.installPosition))
+    )
+  );
   useEffect(() => {
+    getConfig();
     moduleIdInput$.current = new Subject<string>();
     const moduleIdInput$$ = moduleIdInput$.current
       .pipe(debounceTime(1000), filter(isString))
       .subscribe((moduleId) => getVersions(moduleId));
-    return () => moduleIdInput$$.unsubscribe();
+    const configChangeSubscribeCleanUp = SessionHubs.on(
+      "config",
+      ({ fullConfig }) => {
+        setIncludeTypes(fullConfig.packages.installTypes);
+        setInstallPosition(fullConfig.packages.installPosition);
+      }
+    );
+    return () => {
+      moduleIdInput$$.unsubscribe();
+      configChangeSubscribeCleanUp();
+    };
   }, []);
-  return (
+  return configLoading ? null : (
     <Box>
       <Box className={styles["center-row"]}>
         <FormControl className={classes.formControl}>
@@ -115,7 +136,11 @@ export const ModuleManager: React.FC = () => {
           <FormLabel>Install scope</FormLabel>
           <EnumPicker
             value={installPosition}
-            onChange={setInstallPosition}
+            onChange={(position) =>
+              SessionInvoker.ConfigService.updateConfigs({
+                packages: { installPosition: position },
+              })
+            }
             enumObject={InstallPosition}
             enumNameMapping={{
               [InstallPosition.Local]: "extension",
@@ -129,7 +154,11 @@ export const ModuleManager: React.FC = () => {
               control={
                 <Checkbox
                   checked={includeTypes}
-                  onChange={(e) => setIncludeTypes(e.target.checked)}
+                  onChange={(e) => {
+                    SessionInvoker.ConfigService.updateConfigs({
+                      packages: { installTypes: e.target.checked },
+                    });
+                  }}
                 ></Checkbox>
               }
               label={`also install @types/${moduleId} for typings`}

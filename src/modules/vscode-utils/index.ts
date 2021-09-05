@@ -10,7 +10,7 @@ import {
 import { die } from "taio/build/utils/internal/exceptions";
 import type { DeepPartial } from "taio/build/types/object";
 import { isObject, isObjectLike } from "taio/build/utils/validator/object";
-import { isString } from "taio/build/utils/validator/primitive";
+import { isPrimitive, isString } from "taio/build/utils/validator/primitive";
 import { dfs } from "taio/build/libs/custom/algorithms/search";
 import * as R from "ramda";
 export const output = vscode.window.createOutputChannel(
@@ -134,7 +134,10 @@ export async function updateConfig(patch: DeepPartial<ScriptPlusConfig>) {
     },
     R.identity
   );
+  const configPaths = [...iterator].filter(([, value]) => isPrimitive(value));
   await Promise.all(
-    [...iterator].map(([path, value]) => config.update(path.join("."), value))
+    configPaths.map(([path, value]) =>
+      config.update(path.join("."), value, vscode.ConfigurationTarget.Global)
+    )
   );
 }

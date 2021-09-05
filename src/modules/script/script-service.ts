@@ -41,7 +41,6 @@ import {
   ExecutionTask,
   isCleanUp,
   isLogLevel,
-  isScriptRunResult,
   isScriptRunResultObject,
 } from "../../models/execution-task";
 import { defineValidator } from "taio/build/utils/validator/utils";

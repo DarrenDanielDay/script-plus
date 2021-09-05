@@ -1,16 +1,21 @@
 // Define your protocol here, and implement them in `modules` with best practice!
 import type { PassedParameter, UserScript } from "../models/script";
+import type { ScriptPlusConfig } from "../configs/user-config";
 import type {
   ExecutionTask,
   TaskExecutionSignal,
 } from "../models/execution-task";
+import type { DeepPartial } from "taio/build/types/object";
+import type { ConfigUpdateSignal } from "../models/configurations";
 export interface CoreAPI {
   vscode: typeof import("vscode");
   ScriptService: ScriptService;
+  ConfigService: ConfigService;
 }
 
 export interface CoreEvents {
   task: TaskExecutionSignal;
+  config: ConfigUpdateSignal;
 }
 
 export interface ScriptService {
@@ -34,4 +39,10 @@ export interface ScriptService {
     version: string,
     options?: { global?: boolean }
   ): Promise<void>;
+}
+
+export interface ConfigService {
+  dispose(): void;
+  getConfigs(): Promise<ScriptPlusConfig>;
+  updateConfigs(patch: DeepPartial<ScriptPlusConfig>): Promise<void>;
 }
