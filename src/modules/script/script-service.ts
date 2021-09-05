@@ -557,8 +557,21 @@ Do you want to install them?`
       });
     },
     async check(force) {
-      await scriptFolderCheck();
-      await vscodeVersionCheck();
+      return vscode.window.withProgress(
+        {
+          cancellable: false,
+          location: vscode.ProgressLocation.Notification,
+          title: "Script Plus Start Up check",
+        },
+        async (report) => {
+          report.report({ message: "Checking script plus storage folder..." });
+          await scriptFolderCheck();
+          report.report({
+            message: "Checking vscode version and node version...",
+          });
+          await vscodeVersionCheck();
+        }
+      );
     },
     async create(script) {
       const validateMessage = isValidScriptName(script.name);
