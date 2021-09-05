@@ -9,9 +9,10 @@ import {
 } from "../../configs/user-config";
 import { die } from "taio/build/utils/internal/exceptions";
 import type { DeepPartial } from "taio/build/types/object";
-import { defineValidator } from "taio/build/utils/validator/utils";
-import { isObject } from "taio/build/utils/validator/object";
+import { isObject, isObjectLike } from "taio/build/utils/validator/object";
 import { isString } from "taio/build/utils/validator/primitive";
+import { dfs } from "taio/build/libs/custom/algorithms/search";
+import * as R from "ramda";
 export const output = vscode.window.createOutputChannel(
   `${env.EXTENSION_BASE_NAME} Logger`
 );
@@ -116,12 +117,24 @@ function getExtensionConfiguration() {
   return vscode.workspace.getConfiguration(configRootSection);
 }
 
-export function getConfigs(): ScriptPlusConfig {
+export function getConfigs(): ScriptPlusConfig & vscode.WorkspaceConfiguration {
   const config = getExtensionConfiguration();
   return isScriptPlusConfig(config) ? config : die("Impossible");
 }
 
-export function updateConfig(patch: DeepPartial<ScriptPlusConfig>) {
-  const config = getExtensionConfiguration();
-  config.update(configRootSection, patch);
+export async function updateConfig(patch: DeepPartial<ScriptPlusConfig>) {
+  const config = getConfigs();
+  type Pair = [string[], unknown];
+  const iterator = dfs<Pair, Pair>(
+    [[], patch],
+    ([path, obj]) => {
+      return isObjectLike(obj)
+        ? Object.entries(obj).map(([key, value]) => [[...path, key], value])
+        : [];
+    },
+    R.identity
+  );
+  await Promise.all(
+    [...iterator].map(([path, value]) => config.update(path.join("."), value))
+  );
 }

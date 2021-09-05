@@ -60,6 +60,7 @@ import {
   openEdit,
   output,
   readFile,
+  updateConfig,
   writeFile,
 } from "../vscode-utils";
 import globalDirectories from "global-dirs";
@@ -101,8 +102,30 @@ export function createScriptService(
       ...fragments
     );
   }
-  async function determinePackageManager(): Promise<Installer> {
-    return die("No package manager can be found.");
+  async function determinePackageInstaller(): Promise<Installer> {
+    const {
+      node: { packageManager },
+    } = getConfigs();
+    const [hasNpm, hasYarn] = await Promise.all([detectNpm(), detectYarn()]);
+    if (packageManager === PackageManager.yarn) {
+      if (hasYarn) {
+        return yarnAddPackages;
+      }
+      if (hasNpm) {
+        const userSayUseNpm = await askYesNoQuestion(
+          "Package manager `yarn` cannot be found, use `npm` instead?"
+        );
+        if (userSayUseNpm) {
+          await updateConfig({ node: { packageManager: PackageManager.npm } });
+          return npmInstallPackages;
+        }
+      }
+    }
+    if (hasNpm) {
+      return npmInstallPackages;
+    }
+    return die(`No package manager can be found. You need to install npm or yarn for this extension.
+If you have installed one of them, please ensure its location can be found in your environment variables.`);
   }
   async function scriptFolderCheck() {
     await vscode.workspace.fs.createDirectory(basedOnScripts());
@@ -129,35 +152,25 @@ export function createScriptService(
     );
   }
   async function vscodeVersionCheck() {
-    vscode.workspace.getConfiguration();
     const version = new semver.SemVer(vscode.version);
-    const detectedPackageManagers = await Promise.all([
-      detectYarn().then((ok) => [ok, yarnAddPackages] as const),
-      detectNpm().then((ok) => [ok, npmInstallPackages] as const),
-    ]);
-    const manager = detectedPackageManagers.find(([ok]) => ok)?.[1];
-    if (!manager) {
-      return die(
-        "No package manager detected. You need to install `npm` or `yarn` for this extension."
-      );
-    }
-    const { stdout, stderr } = await manager(
-      [`@types/vscode@${version.major}.${version.minor}`],
+    const { stdout, stderr } = await installModules(
+      [`@types/vscode@${version.major}.${version.minor}`, `@types/node@latest`],
       {
         cwd: basedOnScripts().fsPath,
         global: false,
       }
     );
-    divider("install @types/vscode stdout");
+    divider("install @types/vscode @types/node stdout");
     output.appendLine(stdout);
-    divider("install @types/vscode stderr");
+    divider("install @types/vscode @types/node stderr");
     output.appendLine(stderr);
   }
   function isValidScriptName(name: string) {
-    const special = new Set([..."~`!@#$%^&*()_+={}|[]\\:;\"'<>?,./ "]);
+    const specialChars = "~`!@#$%^&*()_+={}|[]\\:;\"'<>?,./ ";
+    const special = new Set([...specialChars]);
     return [...name].some((char) => special.has(char))
       ? `Script name should not include the following symbols and white spaces (kebab-case is recommended):
-    ~\`!@#$%^&*()_+={}|[]\\:;\"\'<>?,./`
+    ${specialChars}`
       : "";
   }
   function getScriptFileName(script: UserScript): string {
@@ -535,27 +548,7 @@ Do you want to install them?`
   }
 
   async function installModules(moduleIds: string[], configs: InstallConfig) {
-    const config = getConfigs();
-    const hasNpm = await detectNpm();
-    const hasYarn = await detectYarn();
-    if (config.node.packageManager === PackageManager.npm) {
-      if (!hasNpm) {
-        return die("Cannot find npm. Installation aborted.");
-      }
-      return npmInstallPackages(moduleIds, configs);
-    }
-    if (!hasYarn) {
-      if (hasNpm) {
-        const userSayYes = await askYesNoQuestion(
-          "Yarn is not detected. Use npm instead?"
-        );
-        if (userSayYes) {
-          return npmInstallPackages(moduleIds, configs);
-        }
-      }
-      return die("Cannot find yarn. Installation aborted.");
-    }
-    return yarnAddPackages(moduleIds, configs);
+    return (await determinePackageInstaller())(moduleIds, configs);
   }
 
   const scriptService: ScriptService = {

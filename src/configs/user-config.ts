@@ -14,9 +14,6 @@ export const scriptPlusConfigSchema = defineSchema({
           enumObject: PackageManager,
           description: "Specifies the package manager to install packages.",
         },
-        packageName: {
-          type: "string",
-        },
       },
     },
     packages: {
@@ -41,7 +38,6 @@ export type ScriptPlusConfig = CreateTypeBySchemaType<
 export const defaultConfig: ScriptPlusConfig = {
   node: {
     packageManager: PackageManager.yarn,
-    packageName: "user-script",
   },
   packages: {
     installPosition: InstallPosition.Local,

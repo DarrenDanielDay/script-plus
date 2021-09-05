@@ -81,17 +81,13 @@
       "title": "Script Plus",
       "properties": {
         "script-plus.node.packageManager": {
-          "description": "Specifies the package manager to install packages!",
+          "description": "Specifies the package manager to install packages.",
           "type": "string",
           "enum": [
             "npm",
             "yarn"
           ],
           "default": "yarn"
-        },
-        "script-plus.node.packageName": {
-          "type": "string",
-          "default": "user-script"
         },
         "script-plus.packages.installPosition": {
           "type": "string",
