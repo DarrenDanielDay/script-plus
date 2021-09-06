@@ -31,8 +31,9 @@ export interface ScriptService {
   execute(script: UserScript, params: PassedParameter): Promise<ExecutionTask>;
   executeCurrent(): Promise<void>;
   getTasks(): Promise<ExecutionTask[]>;
+  mountTask(taskId: string): Promise<void>;
   cleanUp(taskId: string): Promise<void>;
-  cleanUpAll(): Promise<void>;
+  cleanUpAll(config?: { includeMounted?: boolean }): Promise<void>;
   listVersions(moduleId: string): Promise<string[]>;
   installPackage(
     moduleId: string,

@@ -8,6 +8,8 @@ import {
   Box,
   Button,
   CircularProgress,
+  colors,
+  Tooltip,
   Typography,
   useTheme,
 } from "@material-ui/core";
@@ -21,7 +23,12 @@ import { ParameterInput } from "../../components/parameter-input";
 import { ScriptPicker } from "../../components/script-picker";
 import { setStateEffect } from "../../utils/well-typed";
 import { noop } from "taio/build/utils/typed-function";
-import { ClearAll, ExpandMore, PlayArrowRounded } from "@material-ui/icons";
+import {
+  ClearAll,
+  ExpandMore,
+  PlayArrowRounded,
+  Queue,
+} from "@material-ui/icons";
 import type {
   ExecutionTask,
   TaskConsoleOutput,
@@ -49,6 +56,11 @@ export const ScriptRunner: React.FC<IScriptRunnerProp> = ({}) => {
     setExectionTask(undefined);
     setOutputs([]);
   };
+  const mountTask = async (taskId: string) => {
+    await window.SessionInvoker.ScriptService.mountTask(taskId);
+    setExectionTask(undefined);
+    setOutputs([]);
+  };
   useEffect(
     !script
       ? noop
@@ -72,6 +84,9 @@ export const ScriptRunner: React.FC<IScriptRunnerProp> = ({}) => {
           SessionHubs.on("task", (value) => {
             if (task.taskId !== value.taskId) return;
             if (value.type === "terminate") {
+              if (!value.hasCleanUp) {
+                setExectionTask(undefined);
+              }
               setRunning(false);
               return;
             }
@@ -154,6 +169,16 @@ export const ScriptRunner: React.FC<IScriptRunnerProp> = ({}) => {
               </div>
             </AccordionDetails>
             <AccordionActions>
+              <Tooltip title="Mount your script to background for event listeners.">
+                <Button
+                  style={{ color: colors.yellow[400] }}
+                  startIcon={<Queue />}
+                  onClick={() => exectionTask && mountTask(exectionTask.taskId)}
+                  disabled={cleaning || running}
+                >
+                  Mount
+                </Button>
+              </Tooltip>
               <Button
                 color="secondary"
                 startIcon={<ClearAll />}

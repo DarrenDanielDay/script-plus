@@ -66,7 +66,6 @@ import globalDirectories from "global-dirs";
 import * as semver from "semver";
 import type { CleanUp, ScriptRunResult } from "../../templates/api";
 import env from "@esbuild-env";
-import { noop } from "taio/build/utils/typed-function";
 import { PackageManager } from "../../models/configurations";
 const f = ts.factory;
 interface ScriptModule {
@@ -79,6 +78,7 @@ interface ScriptModule {
 interface LocalExecutionTask extends ExecutionTask {
   promise: Promise<ScriptRunResult>;
   reqiredPaths: string[];
+  mount: boolean;
   cleanUp?: CleanUp;
   running: boolean;
 }
@@ -522,10 +522,14 @@ Do you want to install them?`
       } else if (!isNullish(result) && !hasError) {
         return die("Invalid script return value!");
       }
+      if (!task.cleanUp) {
+        activeTasks.delete(taskId);
+      }
       eventHub.dispatcher.emit("task", {
         taskId,
         type: "terminate",
         result: trueResult,
+        hasCleanUp: !!task.cleanUp,
       });
     }
   }
@@ -675,6 +679,7 @@ Do you want to install them?`
         taskName: script.name,
         startTime: new Date().toLocaleString(),
         running: false,
+        mount: false,
         promise: Promise.resolve({}),
         reqiredPaths: [],
       };
@@ -717,6 +722,8 @@ Do you want to install them?`
             );
             if (userSayYes) {
               await cleanUpTaskResource(taskId);
+            } else {
+              scriptService.mountTask(taskId);
             }
           }
         });
@@ -729,15 +736,27 @@ Do you want to install them?`
         startTime: localTask.startTime,
       }));
     },
+    async mountTask(taskId) {
+      const task = activeTasks.get(taskId);
+      if (task) {
+        task.mount = true;
+      }
+    },
     async cleanUp(taskId) {
       await cleanUpTaskResource(taskId);
     },
-    cleanUpAll() {
-      return Promise.all(
-        [...activeTasks.keys()].map((taskId) => cleanUpTaskResource(taskId))
-      )
-        .then(noop)
-        .catch(noop);
+    async cleanUpAll(config = { includeMounted: false }) {
+      try {
+        await Promise.all(
+          [...activeTasks.entries()].map(([taskId, task]) =>
+            config.includeMounted || !task.mount
+              ? cleanUpTaskResource(taskId)
+              : Promise.resolve()
+          )
+        );
+      } catch (error) {
+        // do nothing
+      }
     },
     async listVersions(moduleId) {
       try {

@@ -1,7 +1,11 @@
 import { typed } from "taio/build/utils/typed-function";
 import { isAnyOf, isUnionThat } from "taio/build/utils/validator/array";
 import { isObject } from "taio/build/utils/validator/object";
-import { isString, isUndefined } from "taio/build/utils/validator/primitive";
+import {
+  isBoolean,
+  isString,
+  isUndefined,
+} from "taio/build/utils/validator/primitive";
 import {
   defineValidator,
   is,
@@ -69,6 +73,7 @@ export const isTaskExecutionOutput = defineValidator<TaskExecutionOutput>(
 export interface TaskExecutionTerminateSignal extends TaskExecutionMessage {
   type: "terminate";
   result: unknown;
+  hasCleanUp: boolean;
 }
 
 export const isTaskExecutionTerminateSignal =
@@ -77,6 +82,7 @@ export const isTaskExecutionTerminateSignal =
       type: is("terminate"),
       taskId: isString,
       result: nocheck,
+      hasCleanUp: isBoolean,
     })
   );
 

@@ -31,7 +31,9 @@ export function activate(context: vscode.ExtensionContext) {
       webviewManager.attach(globalMessageHandler);
     globalEventHubAdapter.attach(webviewManager.panel!);
     webviewManager.onClose(() => {
-      globalModuleManager.api.ScriptService.cleanUpAll();
+      globalModuleManager.api.ScriptService.cleanUpAll({
+        includeMounted: false,
+      });
       globalEventHubAdapter.detach(webviewManager.panel!);
     });
   };
@@ -78,7 +80,10 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand(
       Commands.ScriptControl.CleanUpAllSideEffects,
-      () => globalModuleManager.api.ScriptService.cleanUpAll()
+      () =>
+        globalModuleManager.api.ScriptService.cleanUpAll({
+          includeMounted: true,
+        })
     )
   );
   if (env.ENV === "dev") {
