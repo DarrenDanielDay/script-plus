@@ -150,7 +150,7 @@ If you have installed one of them, please ensure its location can be found in yo
       env.TEMPLATES.API_D_TS
     );
   }
-  async function vscodeVersionCheck() {
+  async function vscodeAndNodeVersionCheck() {
     const version = new semver.SemVer(vscode.version);
     const { stdout, stderr } = await installModules(
       [`@types/vscode@${version.major}.${version.minor}`, `@types/node@latest`],
@@ -569,7 +569,7 @@ Do you want to install them?`
           report.report({
             message: "Checking vscode version and node version...",
           });
-          await vscodeVersionCheck();
+          await vscodeAndNodeVersionCheck();
         }
       );
     },
