@@ -90,6 +90,7 @@
           "default": "yarn"
         },
         "script-plus.packages.installPosition": {
+          "description": "Position to install packages.\nWhen set to `local`, packages will be installed in extension global storage.\nWhen set to `global`, packages will be installed in the pacakge manager's global folder.",
           "type": "string",
           "enum": [
             "local",
@@ -98,8 +99,14 @@
           "default": "local"
         },
         "script-plus.packages.installTypes": {
+          "description": "Auto install `@types` for packages.",
           "type": "boolean",
           "default": true
+        },
+        "script-plus.packages.includePrerelease": {
+          "description": "Whether to include pre-release version of packages in module search.\nWhen set to true, the version list of large packages may be very long.",
+          "type": "boolean",
+          "default": false
         }
       }
     },

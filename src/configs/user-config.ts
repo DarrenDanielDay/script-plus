@@ -21,10 +21,19 @@ export const scriptPlusConfigSchema = defineSchema({
       fields: {
         installTypes: {
           type: "boolean",
+          description: "Auto install `@types` for packages.",
         },
         installPosition: {
           type: "enum",
           enumObject: InstallPosition,
+          description: `Position to install packages.
+When set to \`local\`, packages will be installed in extension global storage.
+When set to \`global\`, packages will be installed in the pacakge manager's global folder.`,
+        },
+        includePrerelease: {
+          type: "boolean",
+          description: `Whether to include pre-release version of packages in module search.
+When set to true, the version list of large packages may be very long.`,
         },
       },
     },
@@ -42,6 +51,7 @@ export const defaultConfig: ScriptPlusConfig = {
   packages: {
     installPosition: InstallPosition.Local,
     installTypes: true,
+    includePrerelease: false,
   },
 };
 

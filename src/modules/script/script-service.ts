@@ -741,15 +741,17 @@ Do you want to install them?`
     },
     async listVersions(moduleId) {
       try {
+        const {
+          packages: { includePrerelease },
+        } = getConfigs();
         const packageMeta: Partial<packageJson.AbbreviatedMetadata> =
           await packageJson(moduleId, { allVersions: true });
         return [
           ...Object.keys(packageMeta.versions ?? {})
-            .map(
-              (version) =>
-                new semver.SemVer(version, { includePrerelease: true })
+            .map((version) => new semver.SemVer(version, { includePrerelease }))
+            .filter(
+              (version) => includePrerelease || !version.prerelease.length
             )
-            .filter((version) => !version.prerelease.length)
             .reduce((set, semver) => {
               set.add(semver.format());
               return set;
