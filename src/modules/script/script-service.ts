@@ -556,7 +556,7 @@ Do you want to install them?`
         task.cleanUp?.();
       });
     },
-    async check(force) {
+    async check() {
       return vscode.window.withProgress(
         {
           cancellable: false,

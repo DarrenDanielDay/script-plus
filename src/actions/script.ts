@@ -51,7 +51,7 @@ export async function askParameters({
 
 function askParameter(field: ArgumentField, fieldKey: string) {
   const pickOptions: vscode.QuickPickOptions = {
-    title: field.description,
+    title: field.description ?? `Give the value of "${fieldKey}"`,
     matchOnDetail: true,
     canPickMany: false,
   };

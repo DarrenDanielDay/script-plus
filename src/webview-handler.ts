@@ -82,7 +82,7 @@ export function createWebviewManager(
         }
       );
 
-      panel.onDidDispose((e) => {
+      panel.onDidDispose(() => {
         onCloseHook?.();
         detach();
         panel = undefined;
@@ -117,7 +117,7 @@ export function createWebviewManager(
       }
       const { port, hmrSocketPort } = devServerConfig;
       baseUrl = `http://localhost:${port}`;
-      html = await new Promise((resolve, reject) => {
+      html = await new Promise((resolve) => {
         http.get(baseUrl, (res) => {
           const body: Buffer[] = [];
           res.on("data", (chunk: Buffer) => {

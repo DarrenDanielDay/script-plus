@@ -1,4 +1,3 @@
-import * as vscode from "vscode";
 import type { IModuleManager } from "../modules/module-manager";
 import type { IEventHubAdapter } from "../events/event-manager";
 import type { Event, Message, Request } from "../app/communication";

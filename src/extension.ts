@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import env from "@esbuild-env";
-import { createWebviewManager, IWebviewManager } from "./webview-handler";
+import { createWebviewManager } from "./webview-handler";
 import { createEventHubAdapter } from "./events/event-manager";
 import { Commands } from "./commands";
 import { loadSnowpackConfig } from "./debug/snowpack-dev";
@@ -8,8 +8,7 @@ import { createCoreAPI } from "./modules/core-module";
 import { createMessageHandler } from "./messages/message-manager";
 import type { CoreEvents } from "./app/message-protocol";
 import { createModuleManager } from "./modules/module-manager";
-import type { UserScript } from "./models/script";
-import { askScript, cleanUp, execute } from "./actions/script";
+import { cleanUp, execute } from "./actions/script";
 
 export function activate(context: vscode.ExtensionContext) {
   const globalEventHubAdapter = createEventHubAdapter<CoreEvents>();

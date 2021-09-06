@@ -9,8 +9,10 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "importsNotUsedAsValues": "error",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "preserveWatchOutput": true
   },
   "include": ["src", "esbuild-env.d.ts"],
-  "exclude": ["node_modules", "src/app/src"]
+  "exclude": ["node_modules", "src/app/src", "src/templates"]
 }
