@@ -174,6 +174,7 @@ export const ScriptManager: React.FC<IScriptManagerProp> = ({}) => {
                 });
               }}
               configObject={editingScript.argumentConfig}
+              description={editingScript.description}
             ></ParameterEditor>
           </>
         )}

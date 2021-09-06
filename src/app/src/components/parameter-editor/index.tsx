@@ -40,11 +40,13 @@ const useCustomStyles = makeStyles((theme) => ({
 
 export interface ParameterEditorProp {
   configObject: ArgumentConfig;
+  description: string;
   onDone?: (fields: ArgumentConfig, description: string) => void;
 }
 
 export const ParameterEditor: React.FC<ParameterEditorProp> = ({
   configObject,
+  description,
   onDone,
 }) => {
   const theme = useTheme();
@@ -58,6 +60,9 @@ export const ParameterEditor: React.FC<ParameterEditorProp> = ({
   useEffect(() => {
     setFields(configObject);
   }, [configObject]);
+  useEffect(() => {
+    setScriptDescription(description);
+  }, [description]);
   const field =
     editingFieldKey !== null ? fields[editingFieldKey] ?? null : null;
   const isNameOccupied = newFieldName in fields;
