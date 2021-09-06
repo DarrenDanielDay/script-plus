@@ -421,7 +421,7 @@ Do you want to install them?`
         const resolved = tryResolve(packagesPath, moduleId);
         if (resolved != null) {
           task.reqiredPaths.push(resolved);
-          return require.call(undefined, moduleId);
+          return require.call(undefined, resolved);
         }
       }
       return die(
