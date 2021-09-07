@@ -48,6 +48,7 @@ import { isObject } from "taio/build/utils/validator/object";
 import type { AnyFunc } from "taio/build/types/concepts";
 import type { IEventHubAdapter } from "../../events/event-manager";
 import {
+  askForOptions,
   askYesNoQuestion,
   divider,
   dumpObjectToFile,
@@ -159,10 +160,7 @@ If you have installed one of them, please ensure its location can be found in yo
         global: false,
       }
     );
-    divider("install @types/vscode @types/node stdout");
-    output.appendLine(stdout);
-    divider("install @types/vscode @types/node stderr");
-    output.appendLine(stderr);
+    logInstallPackage("@types/vscode @types/node", stdout, stderr);
   }
   function isValidScriptName(name: string) {
     const specialChars = "~`!@#$%^&*()_+={}|[]\\:;\"'<>?,./ ";
@@ -222,19 +220,27 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
   async function installScript(bundle: ScriptPlusBundle) {
     const { content, meta, dependencies } = bundle;
     const scriptHome = basedOnScripts(meta.name);
+    const scripts = await scriptService.getList();
+    const scriptNameExists = (value: string): boolean => {
+      return scripts.some((script) => script.name === value);
+    };
     if (await existDir(scriptHome)) {
-      const message = `Script "${meta.name}" already exists, use another name?`;
-      if (await askYesNoQuestion(message)) {
+      const message = `Script "${meta.name}" already exists, overwrite or use another name?`;
+      const action = await askForOptions(message, true, "Overwrite", "Rename");
+      if (action === undefined) {
+        return;
+      }
+      if (action === "Rename") {
         const newName = await vscode.window.showInputBox({
           prompt: `Input a new script name instead of "${meta.name}"`,
           value: meta.name,
           async validateInput(value) {
-            return isValidScriptName(value) ||
-              (await scriptService.getList()).some(
-                (script) => script.name === value
-              )
-              ? `Script "${value}" already exists`
-              : "";
+            return (
+              isValidScriptName(value) ||
+              (scriptNameExists(value)
+                ? `Script "${value}" already exists`
+                : "")
+            );
           },
         });
         if (newName) {
@@ -245,8 +251,6 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
           );
           return;
         }
-      } else {
-        return;
       }
     }
     await vscode.workspace.fs.createDirectory(scriptHome);

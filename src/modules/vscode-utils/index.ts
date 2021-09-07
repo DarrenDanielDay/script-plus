@@ -13,6 +13,7 @@ import { isObject, isObjectLike } from "taio/build/utils/validator/object";
 import { isPrimitive, isString } from "taio/build/utils/validator/primitive";
 import { dfs } from "taio/build/libs/custom/algorithms/search";
 import * as R from "ramda";
+import type { ArrayItem } from "taio/build/types/array";
 export const output = vscode.window.createOutputChannel(
   `${env.EXTENSION_BASE_NAME} Logger`
 );
@@ -112,6 +113,18 @@ export async function askYesNoQuestion(
   }>(question, { modal }, { title: "Yes" }, { title: "No" });
   return result && result.title === "Yes";
 }
+
+export async function askForOptions<Options extends readonly string[]>(
+  question: string,
+  modal: boolean,
+  ...options: Options
+) {
+  const result = await vscode.window.showInformationMessage<{
+    title: ArrayItem<Options>;
+  }>(question, { modal }, ...options.map((option) => ({ title: option })));
+  return result?.title;
+}
+
 const configRootSection = "script-plus";
 function getExtensionConfiguration() {
   return vscode.workspace.getConfiguration(configRootSection);
