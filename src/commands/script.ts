@@ -6,4 +6,5 @@ export const ScriptControl = {
   ForceCheckUserScriptsFolder: `${env.EXTENSION_BASE_NAME}.forceCheckUserScriptsFolder`,
   CleanUp: `${env.EXTENSION_BASE_NAME}.cleanUp`,
   CleanUpAllSideEffects: `${env.EXTENSION_BASE_NAME}.cleanUpAllSideEffects`,
+  InstallModule: `${env.EXTENSION_BASE_NAME}.installModule`,
 } as const;

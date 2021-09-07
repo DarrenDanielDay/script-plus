@@ -8,7 +8,8 @@ import { createCoreAPI } from "./modules/core-module";
 import { createMessageHandler } from "./messages/message-manager";
 import type { CoreEvents } from "./app/message-protocol";
 import { createModuleManager } from "./modules/module-manager";
-import { cleanUp, execute } from "./actions/script";
+import { cleanUp, execute, installModule } from "./actions/script";
+import { factory } from "./commands/factory";
 
 export function activate(context: vscode.ExtensionContext) {
   const globalEventHubAdapter = createEventHubAdapter<CoreEvents>();
@@ -40,50 +41,59 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand(
       Commands.WebviewControll.Open,
-      open.bind(webviewManager)
+      factory(open.bind(webviewManager))
     )
   );
   context.subscriptions.push(
     vscode.commands.registerCommand(
       Commands.WebviewControll.Close,
-      close.bind(webviewManager)
+      factory(close.bind(webviewManager))
     )
   );
   context.subscriptions.push(
     vscode.commands.registerCommand(
       Commands.WebviewControll.Reload,
-      reload.bind(webviewManager)
+      factory(reload.bind(webviewManager))
     )
   );
   context.subscriptions.push(
-    vscode.commands.registerCommand(Commands.ScriptControl.Execute, () =>
-      execute({ scriptService: globalModuleManager.api.ScriptService })
+    vscode.commands.registerCommand(
+      Commands.ScriptControl.Execute,
+      factory(() => execute(globalModuleManager.api))
     )
   );
   context.subscriptions.push(
     vscode.commands.registerCommand(
       Commands.ScriptControl.ExecuteCurrentScript,
-      () => globalModuleManager.api.ScriptService.executeCurrent()
+      factory(() => globalModuleManager.api.ScriptService.executeCurrent())
     )
   );
   context.subscriptions.push(
     vscode.commands.registerCommand(
       Commands.ScriptControl.ForceCheckUserScriptsFolder,
-      () => globalModuleManager.api.ScriptService.check(true)
+      factory(() => globalModuleManager.api.ScriptService.check(true))
     )
   );
   context.subscriptions.push(
-    vscode.commands.registerCommand(Commands.ScriptControl.CleanUp, () =>
-      cleanUp({ scriptService: globalModuleManager.api.ScriptService })
+    vscode.commands.registerCommand(
+      Commands.ScriptControl.CleanUp,
+      factory(() => cleanUp(globalModuleManager.api))
     )
   );
   context.subscriptions.push(
     vscode.commands.registerCommand(
       Commands.ScriptControl.CleanUpAllSideEffects,
-      () =>
+      factory(() =>
         globalModuleManager.api.ScriptService.cleanUpAll({
           includeMounted: true,
         })
+      )
+    )
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      Commands.ScriptControl.InstallModule,
+      factory(() => installModule(globalModuleManager.api))
     )
   );
   if (env.ENV === "dev") {

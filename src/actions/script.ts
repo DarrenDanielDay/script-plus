@@ -1,6 +1,6 @@
 import { enumKeys, enumValues } from "taio/build/utils/enum";
 import * as vscode from "vscode";
-import type { ScriptService } from "../app/message-protocol";
+import type { CoreAPI } from "../app/message-protocol";
 import type { ExecutionTask } from "../models/execution-task";
 import type {
   ArgumentConfig,
@@ -9,12 +9,8 @@ import type {
   UserScript,
 } from "../models/script";
 
-export async function askScript({
-  scriptService,
-}: {
-  scriptService: ScriptService;
-}) {
-  const scriptList = await scriptService.getList();
+export async function askScript(api: CoreAPI) {
+  const scriptList = await api.ScriptService.getList();
   const result = await vscode.window.showQuickPick(
     scriptList.map<vscode.QuickPickItem & { script: UserScript }>((script) => ({
       label: script.name,
@@ -110,12 +106,8 @@ function askParameter(field: ArgumentField, fieldKey: string) {
   });
 }
 
-export async function execute({
-  scriptService,
-}: {
-  scriptService: ScriptService;
-}) {
-  const script = await askScript({ scriptService });
+export async function execute(api: CoreAPI) {
+  const script = await askScript(api);
   if (!script) {
     return;
   }
@@ -123,11 +115,11 @@ export async function execute({
   if (!params) {
     return;
   }
-  return scriptService.execute(script, params);
+  return api.ScriptService.execute(script, params);
 }
 
-async function askTasks({ scriptService }: { scriptService: ScriptService }) {
-  const tasks = await scriptService.getTasks();
+async function askTasks(api: CoreAPI) {
+  const tasks = await api.ScriptService.getTasks();
   return vscode.window
     .showQuickPick<vscode.QuickPickItem & { task: ExecutionTask }>(
       tasks.map((task) => ({
@@ -142,13 +134,46 @@ async function askTasks({ scriptService }: { scriptService: ScriptService }) {
     .then((tasks) => tasks?.map((task) => task.task));
 }
 
-export async function cleanUp({
-  scriptService,
-}: {
-  scriptService: ScriptService;
-}) {
-  const tasks = await askTasks({ scriptService });
+export async function cleanUp(api: CoreAPI) {
+  const tasks = await askTasks(api);
   if (tasks) {
-    await Promise.all(tasks.map((task) => scriptService.cleanUp(task.taskId)));
+    await Promise.all(
+      tasks.map((task) => api.ScriptService.cleanUp(task.taskId))
+    );
   }
+}
+
+export async function installModule(api: CoreAPI) {
+  const moduleId = await vscode.window.showInputBox({
+    title: "Input the module ID (npm package name)",
+    placeHolder: "e.g. semver",
+  });
+  if (moduleId === undefined) {
+    return;
+  }
+  const versions = await vscode.window.withProgress(
+    {
+      location: vscode.ProgressLocation.Notification,
+      title: `Searching versions of package "${moduleId}""`,
+      cancellable: true,
+    },
+    (_, token) => {
+      return new Promise<string[]>((resolve, reject) => {
+        api.ScriptService.listVersions(moduleId).then(resolve);
+        const subscription = token.onCancellationRequested(() => {
+          subscription.dispose();
+          reject(`Canceled searching version of "${moduleId}".`);
+        });
+      });
+    }
+  );
+  const version = await vscode.window.showQuickPick(["latest", ...versions], {
+    canPickMany: false,
+    ignoreFocusOut: true,
+    title: `pick a version of package "${moduleId}" to install`,
+  });
+  if (version === undefined) {
+    return;
+  }
+  await api.ScriptService.installPackage(moduleId, version);
 }

@@ -39,7 +39,8 @@
     "onCommand:script-plus.executeCurrentScript",
     "onCommand:script-plus.forceCheckUserScriptsFolder",
     "onCommand:script-plus.cleanUp",
-    "onCommand:script-plus.cleanUpAllSideEffects"
+    "onCommand:script-plus.cleanUpAllSideEffects",
+    "onCommand:script-plus.installModule"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -75,6 +76,10 @@
       {
         "command": "script-plus.cleanUpAllSideEffects",
         "title": "Script Plus: Clean up all side effects"
+      },
+      {
+        "command": "script-plus.installModule",
+        "title": "Script Plus: Install a module"
       }
     ],
     "configuration": {
