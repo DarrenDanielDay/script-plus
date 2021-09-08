@@ -112,6 +112,11 @@
           "description": "Whether to include pre-release version of packages in module search.\nWhen set to true, the version list of large packages may be very long.",
           "type": "boolean",
           "default": false
+        },
+        "script-plus.startUp.autoCheck": {
+          "description": "Whether to check folder on activate.",
+          "type": "boolean",
+          "default": true
         }
       }
     },

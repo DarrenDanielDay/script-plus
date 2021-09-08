@@ -37,6 +37,15 @@ When set to true, the version list of large packages may be very long.`,
         },
       },
     },
+    startUp: {
+      type: "object",
+      fields: {
+        autoCheck: {
+          type: "boolean",
+          description: "Whether to check folder on activate.",
+        },
+      },
+    },
   },
 } as const);
 
@@ -52,6 +61,9 @@ export const defaultConfig: ScriptPlusConfig = {
     installPosition: InstallPosition.Local,
     installTypes: true,
     includePrerelease: false,
+  },
+  startUp: {
+    autoCheck: true,
   },
 };
 

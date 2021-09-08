@@ -564,7 +564,15 @@ Do you want to install them?`
         task.cleanUp?.();
       });
     },
-    async check() {
+    async check(force) {
+      if (!force) {
+        const {
+          startUp: { autoCheck },
+        } = getConfigs();
+        if (!autoCheck) {
+          return;
+        }
+      }
       return vscode.window.withProgress(
         {
           cancellable: false,

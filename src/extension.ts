@@ -25,8 +25,8 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(globalEventHubAdapter);
   context.subscriptions.push(globalModuleManager.api.ScriptService);
   const { open: doOpen, reload, close } = webviewManager;
-  const open = async function () {
-    await globalModuleManager.api.ScriptService.check();
+  const open = async () => {
+    await void 0;
     doOpen();
     webviewManager.messageHandler ??
       webviewManager.attach(globalMessageHandler);
@@ -104,6 +104,7 @@ export function activate(context: vscode.ExtensionContext) {
       };
     });
   }
+  globalModuleManager.api.ScriptService.check();
 }
 
 export function deactivate() {
