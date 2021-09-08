@@ -9,7 +9,7 @@ import { createMessageHandler } from "./messages/message-manager";
 import type { CoreEvents } from "./app/message-protocol";
 import { createModuleManager } from "./modules/module-manager";
 import { cleanUp, execute, installModule } from "./actions/script";
-import { factory } from "./commands/factory";
+import { factory, ready } from "./commands/factory";
 
 export function activate(context: vscode.ExtensionContext) {
   const globalEventHubAdapter = createEventHubAdapter<CoreEvents>();
@@ -26,7 +26,6 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(globalModuleManager.api.ScriptService);
   const { open: doOpen, reload, close } = webviewManager;
   const open = async () => {
-    await void 0;
     doOpen();
     webviewManager.messageHandler ??
       webviewManager.attach(globalMessageHandler);
@@ -104,7 +103,7 @@ export function activate(context: vscode.ExtensionContext) {
       };
     });
   }
-  globalModuleManager.api.ScriptService.check();
+  globalModuleManager.api.ScriptService.check().finally(ready);
 }
 
 export function deactivate() {

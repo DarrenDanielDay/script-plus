@@ -575,17 +575,23 @@ Do you want to install them?`
       }
       return vscode.window.withProgress(
         {
-          cancellable: false,
+          cancellable: true,
           location: vscode.ProgressLocation.Notification,
           title: "Script Plus Start Up check",
         },
-        async (report) => {
-          report.report({ message: "Checking script plus storage folder..." });
-          await scriptFolderCheck();
-          report.report({
-            message: "Checking vscode version and node version...",
+        (report, token) => {
+          return new Promise(async (resolve, reject) => {
+            token.onCancellationRequested(reject);
+            report.report({
+              message: "Checking script plus storage folder...",
+            });
+            await scriptFolderCheck();
+            report.report({
+              message: "Checking vscode version and node version...",
+            });
+            await vscodeAndNodeVersionCheck();
+            resolve();
           });
-          await vscodeAndNodeVersionCheck();
         }
       );
     },
