@@ -40,19 +40,19 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand(
       Commands.WebviewControll.Open,
-      factory(open.bind(webviewManager))
+      factory(open)
     )
   );
   context.subscriptions.push(
     vscode.commands.registerCommand(
       Commands.WebviewControll.Close,
-      factory(close.bind(webviewManager))
+      factory(close)
     )
   );
   context.subscriptions.push(
     vscode.commands.registerCommand(
       Commands.WebviewControll.Reload,
-      factory(reload.bind(webviewManager))
+      factory(reload)
     )
   );
   context.subscriptions.push(
