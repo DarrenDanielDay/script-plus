@@ -7,4 +7,5 @@ export const ScriptControl = {
   CleanUp: `${env.EXTENSION_BASE_NAME}.cleanUp`,
   CleanUpAllSideEffects: `${env.EXTENSION_BASE_NAME}.cleanUpAllSideEffects`,
   InstallModule: `${env.EXTENSION_BASE_NAME}.installModule`,
+  EditScript: `${env.EXTENSION_BASE_NAME}.editScript`,
 } as const;

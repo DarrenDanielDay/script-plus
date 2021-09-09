@@ -8,7 +8,7 @@ import { createCoreAPI } from "./modules/core-module";
 import { createMessageHandler } from "./messages/message-manager";
 import type { CoreEvents } from "./app/message-protocol";
 import { createModuleManager } from "./modules/module-manager";
-import { cleanUp, execute, installModule } from "./actions/script";
+import { askScript, cleanUp, execute, installModule } from "./actions/script";
 import { factory, ready } from "./commands/factory";
 
 export function activate(context: vscode.ExtensionContext) {
@@ -93,6 +93,17 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(
       Commands.ScriptControl.InstallModule,
       factory(() => installModule(globalModuleManager.api))
+    )
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      Commands.ScriptControl.EditScript,
+      factory(() =>
+        askScript(globalModuleManager.api).then(
+          (script) =>
+            script && globalModuleManager.api.ScriptService.editScript(script)
+        )
+      )
     )
   );
   if (env.ENV === "dev") {
