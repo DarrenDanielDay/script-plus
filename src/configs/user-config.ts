@@ -44,6 +44,10 @@ When set to true, the version list of large packages may be very long.`,
           type: "boolean",
           description: "Whether to check folder on activate.",
         },
+        warnLocale: {
+          type: "boolean",
+          description: "Whether to show locale warning on start up.",
+        },
       },
     },
   },
@@ -64,6 +68,7 @@ export const defaultConfig: ScriptPlusConfig = {
   },
   startUp: {
     autoCheck: true,
+    warnLocale: true,
   },
 };
 

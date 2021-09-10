@@ -68,6 +68,7 @@ import * as semver from "semver";
 import type { CleanUp, ScriptRunResult } from "../../templates/api";
 import env from "@esbuild-env";
 import { PackageManager } from "../../models/configurations";
+import { intl } from "../../i18n/core/locale";
 const f = ts.factory;
 interface ScriptModule {
   main: (
@@ -612,9 +613,9 @@ Do you want to install them?`
     },
     async delete(script, directly?) {
       const scriptHost = basedOnScripts(script.name);
-      if (directly) {
+      if (!directly) {
         const result = await askYesNoQuestion(
-          `Are you sure to delete script "${script.name}" ? It will be permanently lost!`
+          intl("script.delete.confirm", { scriptName: script.name })
         );
         if (!result) {
           return;

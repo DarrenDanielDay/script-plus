@@ -4,7 +4,7 @@ import * as path from "path";
 import * as http from "http";
 import env from "@esbuild-env";
 import { json } from "./app/src/json-serializer";
-import { normalizeLocale } from "./models/locales";
+import { getLocale } from "./i18n/core/locale";
 type OnDidReceiveMessageHandler = Parameters<
   vscode.Webview["onDidReceiveMessage"]
 >[0];
@@ -40,16 +40,7 @@ export function createWebviewManager(
   let devServerConfig: DevServerConfig | undefined = undefined;
   let onCloseHook: (() => void) | undefined = undefined;
   function processLangOfHtml(html: string) {
-    const language = vscode.env.language;
-    try {
-      const locale = normalizeLocale(language);
-      return html.replace("%LANG%", locale);
-    } catch (error) {
-      vscode.window.showWarningMessage(
-        `language "${language}"" is currently not supported.`
-      );
-      return html.replace("%LANG%", "en");
-    }
+    return html.replace("%LANG%", getLocale());
   }
   function processUrlOfHtml(html: string, baseUrl: string): string {
     return html.replace("%BASE_URL%", baseUrl);

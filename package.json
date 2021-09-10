@@ -40,7 +40,8 @@
     "onCommand:script-plus.forceCheckUserScriptsFolder",
     "onCommand:script-plus.cleanUp",
     "onCommand:script-plus.cleanUpAllSideEffects",
-    "onCommand:script-plus.installModule"
+    "onCommand:script-plus.installModule",
+    "onCommand:script-plus.editScript"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -119,6 +120,11 @@
         },
         "script-plus.startUp.autoCheck": {
           "description": "Whether to check folder on activate.",
+          "type": "boolean",
+          "default": true
+        },
+        "script-plus.startUp.warnLocale": {
+          "description": "Whether to show locale warning on start up.",
           "type": "boolean",
           "default": true
         }

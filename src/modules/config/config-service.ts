@@ -8,8 +8,8 @@ import type { IEventHubAdapter } from "../../events/event-manager";
 export function createConfigService(
   eventHub: IEventHubAdapter<CoreEvents>
 ): ConfigService {
-  const disposable = vscode.workspace.onDidChangeConfiguration(async () => {
-    const nowConfig = await getConfigs();
+  const disposable = vscode.workspace.onDidChangeConfiguration(() => {
+    const nowConfig = getConfigs();
     eventHub.dispatcher.emit("config", { fullConfig: nowConfig });
   });
   return {
