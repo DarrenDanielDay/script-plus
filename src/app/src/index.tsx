@@ -11,7 +11,7 @@ const noop = () => {
 function createTrackerProxy(
   path: string[],
   callHandler: (path: string[], argArray: unknown[]) => void
-): any {
+): unknown {
   return new Proxy(noop, {
     get(_, key) {
       if (typeof key !== "string") {
@@ -40,10 +40,10 @@ window.SessionInvoker = new Proxy(
 window.SessionHubs = new Proxy(
   {},
   {
-    get(_target, key: keyof EventHub<any>) {
+    get(_target, key: keyof EventHub<unknown>) {
       return createTrackerProxy([key], (path, argArray) => {
         // @ts-expect-error
-        const method: keyof EventHub<any> = path[path.length - 1];
+        const method: keyof EventHub<unknown> = path[path.length - 1];
         if (method === "on") {
           // @ts-expect-error Skip real arguments check
           return globalMessageManager.onEvent(...argArray);
