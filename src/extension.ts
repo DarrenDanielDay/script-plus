@@ -8,7 +8,8 @@ import { createCoreAPI } from "./modules/core-module";
 import { createMessageHandler } from "./messages/message-manager";
 import type { CoreEvents } from "./app/message-protocol";
 import { createModuleManager } from "./modules/module-manager";
-import { askScript, cleanUp, execute, installModule } from "./actions/script";
+import { askScript, cleanUp, execute } from "./actions/script";
+import { installModule } from "./actions/module";
 import { devConfigReady, factory, startUpReady } from "./commands/factory";
 
 export function activate(context: vscode.ExtensionContext) {
