@@ -4,6 +4,7 @@ import * as path from "path";
 import * as http from "http";
 import env from "@esbuild-env";
 import { json } from "./app/src/json-serializer";
+import { normalizeLocale } from "./models/locales";
 type OnDidReceiveMessageHandler = Parameters<
   vscode.Webview["onDidReceiveMessage"]
 >[0];
@@ -38,6 +39,9 @@ export function createWebviewManager(
   let messageHandler: OnDidReceiveMessageHandler | undefined = undefined;
   let devServerConfig: DevServerConfig | undefined = undefined;
   let onCloseHook: (() => void) | undefined = undefined;
+  function processLangOfHtml(html: string) {
+    return html.replace("%LANG%", normalizeLocale(vscode.env.language));
+  }
   function processUrlOfHtml(html: string, baseUrl: string): string {
     return html.replace("%BASE_URL%", baseUrl);
   }
@@ -142,6 +146,8 @@ export function createWebviewManager(
         });
       });
     }
+    // Inject html property `lang`.
+    html = processLangOfHtml(html);
     // A <base> element with correct base url.
     html = processUrlOfHtml(html, baseUrl);
     // A <meta> element with hash is designed to ensure the webview to reload.

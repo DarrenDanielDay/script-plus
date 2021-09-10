@@ -23,5 +23,5 @@ export const assertNonNullish: <T>(
 export const setStateEffect: <T>(
   fn: React.Dispatch<React.SetStateAction<T>>
 ) => (value: T) => T = R.tap;
-export const cleanUp = (subscription: Subscription) =>
+export const createCleanUp = (subscription: Subscription) => () =>
   subscription.unsubscribe();

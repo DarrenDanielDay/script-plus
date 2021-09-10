@@ -21,7 +21,7 @@
     "importsNotUsedAsValues": "error",
     "skipLibCheck": true,
     "preserveWatchOutput": true,
-    "lib": ["DOM", "ES2019"]
+    "lib": ["DOM", "ES2019", "ESNext.Intl", "ES2017.Intl", "ES2018.Intl"]
   },
-  "include": ["src"]
+  "include": ["src", "../models/locales.ts"]
 }

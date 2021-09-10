@@ -35,11 +35,13 @@ import type {
 } from "../../../../models/execution-task";
 import styles from "../../components/common/common.module.css";
 import { useLoadingPipe } from "../../hooks/use-loading";
+import { useTypedIntl } from "../../i18n/core/locale";
 
 export interface IScriptRunnerProp {}
 
 export const ScriptRunner: React.FC<IScriptRunnerProp> = ({}) => {
   const theme = useTheme();
+  const intl = useTypedIntl();
   const [script, setScript] = useState<UserScript | undefined>();
   const [argument, setArgument] = useState<PassedParameter>({});
   const [running, setRunning] = useState(false);
@@ -135,13 +137,17 @@ export const ScriptRunner: React.FC<IScriptRunnerProp> = ({}) => {
                   setExectionTask(task);
                 }}
               >
-                {cleaning ? "Cleaning" : running ? "Running" : "Run"}
+                {cleaning
+                  ? intl("runner.run.cleaning")
+                  : running
+                  ? intl("runner.run.running")
+                  : intl("runner.run.apply")}
               </Button>
             </AccordionActions>
           </Accordion>
           <Accordion>
             <AccordionSummary expandIcon={<ExpandMore />}>
-              <Typography>Console</Typography>
+              <Typography>{intl("runner.console.title")}</Typography>
             </AccordionSummary>
             <AccordionDetails>
               <div className={styles["max-width"]}>
@@ -169,14 +175,14 @@ export const ScriptRunner: React.FC<IScriptRunnerProp> = ({}) => {
               </div>
             </AccordionDetails>
             <AccordionActions>
-              <Tooltip title="Mount your script to background for event listeners.">
+              <Tooltip title={intl("runner.mount.tooltip")}>
                 <Button
                   style={{ color: colors.yellow[400] }}
                   startIcon={<Queue />}
                   onClick={() => exectionTask && mountTask(exectionTask.taskId)}
                   disabled={cleaning || running}
                 >
-                  Mount
+                  {intl("runner.mount.button")}
                 </Button>
               </Tooltip>
               <Button
@@ -185,7 +191,9 @@ export const ScriptRunner: React.FC<IScriptRunnerProp> = ({}) => {
                 onClick={cleanTask}
                 disabled={cleaning || running}
               >
-                {cleaning ? "Cleaning" : "Clean Up"}
+                {cleaning
+                  ? intl("runner.cleanUp.cleaning")
+                  : intl("runner.cleanUp.apply")}
               </Button>
             </AccordionActions>
           </Accordion>

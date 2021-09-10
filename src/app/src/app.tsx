@@ -5,22 +5,33 @@ import SwipeableViews from "react-swipeable-views";
 import { ScriptRunner } from "./pages/script-runner";
 import { ScriptManager } from "./pages/script-manager";
 import { ModuleManager } from "./pages/module-manager";
-
+import { IntlProvider } from "react-intl";
+import { messages, useLocale, useTypedIntl } from "./i18n/core/locale";
 const theme = darkTheme;
-
 export const App: React.FC = () => {
-  const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const locale = useLocale();
   return (
-    <ThemeProvider theme={theme}>
+    <IntlProvider locale={locale} messages={messages[locale]}>
+      <ThemeProvider theme={theme}>
+        <Layout></Layout>
+      </ThemeProvider>
+    </IntlProvider>
+  );
+};
+const Layout: React.FC = () => {
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const intl = useTypedIntl();
+  return (
+    <>
       <AppBar position="static" color="default">
         <Tabs
           value={activeTabIndex}
           indicatorColor="primary"
           onChange={(_, index: number) => setActiveTabIndex(index)}
         >
-          <Tab label="run script" value={0}></Tab>
-          <Tab label="manage script" value={1}></Tab>
-          <Tab label="manage modules" value={2}></Tab>
+          <Tab label={intl("menu.runScript")} value={0}></Tab>
+          <Tab label={intl("menu.manageScript")} value={1}></Tab>
+          <Tab label={intl("menu.manageModules")} value={2}></Tab>
         </Tabs>
       </AppBar>
       <SwipeableViews index={activeTabIndex} onChangeIndex={setActiveTabIndex}>
@@ -34,6 +45,6 @@ export const App: React.FC = () => {
           <ModuleManager></ModuleManager>
         </Box>
       </SwipeableViews>
-    </ThemeProvider>
+    </>
   );
 };
