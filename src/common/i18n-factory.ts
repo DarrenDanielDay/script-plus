@@ -1,10 +1,10 @@
 import { isObjectLike } from "taio/build/utils/validator/object";
 import { isString } from "taio/build/utils/validator/primitive";
-import type { IntlTextKeys, IntlTextTemplates } from "./types";
+import type { CreateIntlTextKeys } from "../utils/types/intl-types";
 
-export function createMessages(
-  templates: IntlTextTemplates
-): Record<IntlTextKeys, string> {
+export function createMessages<T extends Record<string, unknown>>(
+  templates: T
+): Record<CreateIntlTextKeys<T>, string> {
   const result = {};
   const path: string[] = [];
   const walk = (node: unknown) => {

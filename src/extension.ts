@@ -9,7 +9,7 @@ import { createMessageHandler } from "./messages/message-manager";
 import type { CoreEvents } from "./app/message-protocol";
 import { createModuleManager } from "./modules/module-manager";
 import { askScript, cleanUp, execute, installModule } from "./actions/script";
-import { factory, ready } from "./commands/factory";
+import { devConfigReady, factory, startUpReady } from "./commands/factory";
 
 export function activate(context: vscode.ExtensionContext) {
   const globalEventHubAdapter = createEventHubAdapter<CoreEvents>();
@@ -107,14 +107,18 @@ export function activate(context: vscode.ExtensionContext) {
     )
   );
   if (env.ENV === "dev") {
-    loadSnowpackConfig(context).then((config) => {
-      webviewManager.devServerConfig = {
-        port: config.devOptions.port,
-        hmrSocketPort: config.devOptions.hmrPort ?? config.devOptions.port,
-      };
-    });
+    loadSnowpackConfig(context)
+      .then((config) => {
+        webviewManager.devServerConfig = {
+          port: config.devOptions.port,
+          hmrSocketPort: config.devOptions.hmrPort ?? config.devOptions.port,
+        };
+      })
+      .then(devConfigReady);
+  } else {
+    devConfigReady();
   }
-  globalModuleManager.api.ScriptService.check().finally(ready);
+  globalModuleManager.api.ScriptService.check().finally(startUpReady);
 }
 
 export function deactivate() {

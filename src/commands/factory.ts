@@ -1,19 +1,26 @@
 import type { Func } from "taio/build/types/concepts";
 import { globalErrorHandler } from "../modules/vscode-utils";
 
-let done: Func<[], void>;
-
-const readyState = new Promise<void>((resolve) => {
-  done = resolve;
+let startUpCheckDone: Func<[], void>;
+let devConfigDone: Func<[], void>;
+const startUpReadyState = new Promise<void>((resolve) => {
+  startUpCheckDone = resolve;
+});
+const devConfigReadyState = new Promise<void>((resolve) => {
+  devConfigDone = resolve;
 });
 
-export function ready() {
-  done();
+export function startUpReady() {
+  startUpCheckDone();
+}
+
+export function devConfigReady() {
+  devConfigDone();
 }
 
 export function factory(handler: Func<[], unknown>, silent?: boolean) {
   return async () => {
-    await readyState;
+    await Promise.all([startUpReadyState, devConfigReadyState]);
     try {
       return await handler();
     } catch (error) {

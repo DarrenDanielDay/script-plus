@@ -23,5 +23,5 @@
     "preserveWatchOutput": true,
     "lib": ["DOM", "ES2019", "ESNext.Intl", "ES2017.Intl", "ES2018.Intl"]
   },
-  "include": ["src", "../models/locales.ts", "../utils/types/intl-types.ts"]
+  "include": ["src"]
 }

@@ -7,7 +7,7 @@ import { assertThat, record } from "taio/build/utils/validator/utils";
 import { createCleanUp, setStateEffect } from "../../utils/well-typed";
 import { en } from "../en";
 import { zhCN } from "../zh-CN";
-import { createMessages } from "./factory";
+import { createMessages } from "../../../../common/i18n-factory";
 import type { IntlTextKeys, TemplateValues } from "./types";
 import { isLocales, Locales } from "../../../../models/locales";
 
