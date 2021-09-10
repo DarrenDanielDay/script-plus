@@ -40,7 +40,16 @@ export function createWebviewManager(
   let devServerConfig: DevServerConfig | undefined = undefined;
   let onCloseHook: (() => void) | undefined = undefined;
   function processLangOfHtml(html: string) {
-    return html.replace("%LANG%", normalizeLocale(vscode.env.language));
+    const language = vscode.env.language;
+    try {
+      const locale = normalizeLocale(language);
+      return html.replace("%LANG%", locale);
+    } catch (error) {
+      vscode.window.showWarningMessage(
+        `language "${language}"" is currently not supported.`
+      );
+      return html.replace("%LANG%", "en");
+    }
   }
   function processUrlOfHtml(html: string, baseUrl: string): string {
     return html.replace("%BASE_URL%", baseUrl);
