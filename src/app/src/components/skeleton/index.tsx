@@ -1,5 +1,6 @@
 import classNames from "classnames";
 import React from "react";
+import { useTypedIntl } from "../../i18n/core/locale";
 import styles from "./style.module.css";
 
 export interface ISkeletonProp {
@@ -8,9 +9,10 @@ export interface ISkeletonProp {
 }
 // Snowpack cannot work with @material-ui/lab@5.0.0-alpha correctly.
 export const Skeleton: React.FC<ISkeletonProp> = ({ width, height }) => {
+  const intl = useTypedIntl();
   return (
     <span className={classNames(styles.waving)} style={{ width, height }}>
-      loading
+      {intl("components.skeleton.loading")}
     </span>
   );
 };

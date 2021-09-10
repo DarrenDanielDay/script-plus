@@ -29,6 +29,7 @@ import { EnumPicker } from "../enum-picker";
 import { ListPicker } from "../list-picker";
 import styles from "./style.module.css";
 import { useStyles } from "../common/common-mui-styles";
+import { useTypedIntl } from "../../i18n/core/locale";
 
 const useCustomStyles = makeStyles((theme) => ({
   saveFab: {
@@ -51,6 +52,7 @@ export const ParameterEditor: React.FC<ParameterEditorProp> = ({
 }) => {
   const theme = useTheme();
   const classes = useStyles();
+  const intl = useTypedIntl();
   const customClasses = useCustomStyles();
   const [fields, setFields] = useState<ArgumentConfig>(configObject);
   const fieldKeys = Object.keys(fields);
@@ -67,7 +69,7 @@ export const ParameterEditor: React.FC<ParameterEditorProp> = ({
     editingFieldKey !== null ? fields[editingFieldKey] ?? null : null;
   const isNameOccupied = newFieldName in fields;
   const configNameValidateText = isNameOccupied
-    ? `"${newFieldName}" already exist.`
+    ? intl("components.parameterEditor.validate.exist", { newFieldName })
     : "";
   const handleFieldEdit: OnFieldEditCallback = (fieldKey, editedField) =>
     setFields((fields) => ({ ...fields, [fieldKey]: editedField }));
@@ -101,8 +103,10 @@ export const ParameterEditor: React.FC<ParameterEditorProp> = ({
           rowsMax={3}
           style={{ width: theme.spacing(72) }}
           variant="outlined"
-          label="script description"
-          placeholder="Input some description for this script"
+          label={intl("components.parameterEditor.description.label")}
+          placeholder={intl(
+            "components.parameterEditor.description.placeholder"
+          )}
           value={scriptDescription}
           onChange={(e) => setScriptDescription(e.target.value)}
         ></TextField>
@@ -114,15 +118,19 @@ export const ParameterEditor: React.FC<ParameterEditorProp> = ({
         )}
       >
         <FormControl className={classes.formControl}>
-          <FormLabel>Add new</FormLabel>
+          <FormLabel>
+            {intl("components.parameterEditor.configKey.label")}
+          </FormLabel>
         </FormControl>
         <TextField
           variant="outlined"
           value={newFieldName}
           onChange={(e) => setNewFieldName(e.target.value)}
           error={!!configNameValidateText}
-          label="config key"
-          placeholder="Input new key"
+          label={intl("components.parameterEditor.configKey.new.label")}
+          placeholder={intl(
+            "components.parameterEditor.configKey.new.placeholder"
+          )}
           helperText={configNameValidateText}
         ></TextField>
         <IconButton
@@ -138,7 +146,9 @@ export const ParameterEditor: React.FC<ParameterEditorProp> = ({
           <FormControl
             className={classNames(classes.formControl, classes.selectControl)}
           >
-            <InputLabel>config keys</InputLabel>
+            <InputLabel>
+              {intl("components.parameterEditor.fieldEditor.picker.label")}
+            </InputLabel>
             <ListPicker
               list={Object.keys(fields)}
               displayMapping={R.identity}
@@ -195,6 +205,7 @@ export const FieldEditor: React.FC<IFieldEditorProp> = ({
   field,
   onFieldEdit,
 }) => {
+  const intl = useTypedIntl();
   const classes = useStyles();
   return (
     <Box>
@@ -202,7 +213,9 @@ export const FieldEditor: React.FC<IFieldEditorProp> = ({
         <FormControl
           className={classNames(classes.formControl, classes.selectControl)}
         >
-          <InputLabel>type</InputLabel>
+          <InputLabel>
+            {intl("components.parameterEditor.fieldEditor.type.label")}
+          </InputLabel>
           <EnumPicker
             value={field.type}
             enumObject={ConfigTypeEnum}
@@ -233,7 +246,9 @@ export const FieldEditor: React.FC<IFieldEditorProp> = ({
           ></EnumPicker>
         </FormControl>
         <FormControl className={classNames(classes.tinyFormControl)}>
-          <InputLabel>default value</InputLabel>
+          <InputLabel>
+            {intl("components.parameterEditor.fieldEditor.defaultValue.label")}
+          </InputLabel>
           {field.type === "number" ? (
             <Input
               type="number"
@@ -291,7 +306,11 @@ export const FieldEditor: React.FC<IFieldEditorProp> = ({
         </FormControl>
         {field.type === "enum" && (
           <FormControl className={classes.formControl}>
-            <Tooltip title="Delete selected enum">
+            <Tooltip
+              title={intl(
+                "components.parameterEditor.fieldEditor.enum.delete.tooltip"
+              )}
+            >
               <IconButton
                 style={{ color: colors.red[500] }}
                 onClick={() => {
@@ -361,9 +380,13 @@ export const FieldEditor: React.FC<IFieldEditorProp> = ({
       <FormControl
         className={classNames(classes.formControl, classes.textAreaControl)}
       >
-        <InputLabel>description</InputLabel>
+        <InputLabel>
+          {intl("components.parameterEditor.fieldEditor.description.label")}
+        </InputLabel>
         <Input
-          placeholder="A description for this config field"
+          placeholder={intl(
+            "components.parameterEditor.fieldEditor.description.placeholder"
+          )}
           value={field.description}
           multiline
           rows={2}
@@ -392,19 +415,29 @@ export const EnumValueEditor: React.FC<IEnumValueEditorProp> = ({
   onAdd,
   enumObject,
 }) => {
+  const intl = useTypedIntl();
   const classes = useStyles();
   const [enumKey, setEnumKey] = useState("");
   const [enumValue, setEnumValue] = useState<number | string>("");
   const [enumName, setEnumName] = useState("");
   const enumKeyValidateInfo = enumKeys(enumObject ?? {}).includes(enumKey)
-    ? `name "${enumKey}" already exists`
+    ? intl(
+        "components.parameterEditor.fieldEditor.enum.valueEditor.validate.name.exists",
+        { enumKey }
+      )
     : !/^[a-z]/i.test(enumKey)
-    ? "name should start with words"
+    ? intl(
+        "components.parameterEditor.fieldEditor.enum.valueEditor.validate.name.startWithWords"
+      )
     : "";
   const enumValueValidateInfo = enumValues(enumObject ?? {}).includes(enumValue)
-    ? `value ${enumValue} already exists`
+    ? intl(
+        "components.parameterEditor.fieldEditor.enum.valueEditor.validate.value.exists"
+      )
     : enumValue === ""
-    ? "value should not be empty"
+    ? intl(
+        "components.parameterEditor.fieldEditor.enum.valueEditor.validate.value.notEmpty"
+      )
     : "";
   const isAllValid = !enumValueValidateInfo && !enumKeyValidateInfo;
   const renderDeleteEnumButton = () => (
@@ -426,7 +459,9 @@ export const EnumValueEditor: React.FC<IEnumValueEditorProp> = ({
       <TextField
         variant="outlined"
         className={classes.tinyFormControl}
-        label="enum name"
+        label={intl(
+          "components.parameterEditor.fieldEditor.enum.valueEditor.name.label"
+        )}
         error={!!enumKeyValidateInfo}
         helperText={enumKeyValidateInfo}
         value={enumKey}
@@ -435,7 +470,9 @@ export const EnumValueEditor: React.FC<IEnumValueEditorProp> = ({
       <TextField
         variant="outlined"
         className={classes.tinyFormControl}
-        label="enum value"
+        label={intl(
+          "components.parameterEditor.fieldEditor.enum.valueEditor.value.label"
+        )}
         error={!!enumValueValidateInfo}
         helperText={enumValueValidateInfo}
         value={enumValue}
@@ -448,13 +485,19 @@ export const EnumValueEditor: React.FC<IEnumValueEditorProp> = ({
       <TextField
         variant="outlined"
         className={classes.tinyFormControl}
-        label="enum display"
+        label={intl(
+          "components.parameterEditor.fieldEditor.enum.valueEditor.display.label"
+        )}
         value={enumName}
         onChange={(e) => setEnumName(e.target.value)}
       ></TextField>
       <FormControl>
         {isAllValid ? (
-          <Tooltip title="Add enum value definition">
+          <Tooltip
+            title={intl(
+              "components.parameterEditor.fieldEditor.enum.valueEditor.add.tooltip"
+            )}
+          >
             {renderDeleteEnumButton()}
           </Tooltip>
         ) : (

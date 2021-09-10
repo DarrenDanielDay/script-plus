@@ -23,9 +23,11 @@ import { EnumPicker } from "../../components/enum-picker";
 import { InstallPosition } from "../../../../models/configurations";
 import type { Mapper } from "taio/build/types/concepts";
 import type { ScriptPlusConfig } from "../../../../configs/user-config";
+import { useTypedIntl } from "../../i18n/core/locale";
 export const ModuleManager: React.FC = () => {
   const classes = useStyles();
   const theme = useTheme();
+  const intl = useTypedIntl();
   const moduleIdInput$ = useRef<Subject<string>>();
   const [moduleId, setModuleId] = useState("");
   const [versions, setVersions] = useState<string[]>([]);
@@ -86,7 +88,7 @@ export const ModuleManager: React.FC = () => {
     <Box>
       <Box className={styles["center-row"]}>
         <FormControl className={classes.formControl}>
-          <FormLabel>npm package/module name</FormLabel>
+          <FormLabel>{intl("manager.module.id.label")}</FormLabel>
           <Input
             value={moduleId}
             onChange={(e) => {
@@ -98,7 +100,7 @@ export const ModuleManager: React.FC = () => {
         <FormControl
           className={classNames(classes.formControl, classes.selectControl)}
         >
-          <FormLabel>version</FormLabel>
+          <FormLabel>{intl("manager.module.version.label")}</FormLabel>
           {versionSearching ? (
             <Skeleton width={100} height={theme.spacing(6)}></Skeleton>
           ) : (
@@ -125,7 +127,9 @@ export const ModuleManager: React.FC = () => {
               )
             }
           >
-            {installing ? "Installing" : "Install"}
+            {installing
+              ? intl("manager.module.install.installing")
+              : intl("manager.module.install.apply")}
           </Button>
         </FormControl>
       </Box>
@@ -133,7 +137,7 @@ export const ModuleManager: React.FC = () => {
         <FormControl
           className={classNames(classes.formControl, classes.selectControl)}
         >
-          <FormLabel>Install scope</FormLabel>
+          <FormLabel>{intl("manager.module.scope.label")}</FormLabel>
           <EnumPicker
             value={installPosition}
             onChange={(position) =>
@@ -143,8 +147,12 @@ export const ModuleManager: React.FC = () => {
             }
             enumObject={InstallPosition}
             enumNameMapping={{
-              [InstallPosition.Local]: "extension",
-              [InstallPosition.Global]: "global",
+              [InstallPosition.Local]: intl(
+                "manager.module.scope.mapping.local"
+              ),
+              [InstallPosition.Global]: intl(
+                "manager.module.scope.mapping.global"
+              ),
             }}
           ></EnumPicker>
         </FormControl>
@@ -161,7 +169,9 @@ export const ModuleManager: React.FC = () => {
                   }}
                 ></Checkbox>
               }
-              label={`also install @types/${moduleId} for typings`}
+              label={intl("manager.module.options.installTypes", {
+                moduleId: `@types/${moduleId}`,
+              })}
             ></FormControlLabel>
           </FormControl>
         )}

@@ -28,12 +28,14 @@ import { ListPicker } from "../../components/list-picker";
 import { useStyles } from "../../components/common/common-mui-styles";
 import classNames from "classnames";
 import styles from "../../components/common/common.module.css";
+import { useTypedIntl } from "../../i18n/core/locale";
 
 export interface IScriptManagerProp {}
 
 export const ScriptManager: React.FC<IScriptManagerProp> = ({}) => {
   const classes = useStyles();
   const theme = useTheme();
+  const intl = useTypedIntl();
   const [scripts, setScripts] = useState<UserScript[]>([]);
   const [editingScript, setEditingScript] = useState<UserScript | undefined>();
   const [loading, fetchScripts] = useLoadingPipe(
@@ -49,7 +51,7 @@ export const ScriptManager: React.FC<IScriptManagerProp> = ({}) => {
   return (
     <Box>
       <Box className={styles["center-row"]}>
-        <Tooltip title="import scripts">
+        <Tooltip title={intl("manager.script.import.tooltip")}>
           <IconButton
             style={{ color: theme.palette.primary.main }}
             onClick={() => SessionInvoker.ScriptService.import()}
@@ -57,7 +59,7 @@ export const ScriptManager: React.FC<IScriptManagerProp> = ({}) => {
             <SaveAlt />
           </IconButton>
         </Tooltip>
-        <Tooltip title="refresh list">
+        <Tooltip title={intl("manager.script.refresh.tooltip")}>
           <IconButton
             style={{ color: colors.green[500] }}
             onClick={fetchScripts}
@@ -69,7 +71,7 @@ export const ScriptManager: React.FC<IScriptManagerProp> = ({}) => {
         <FormControl
           className={classNames(classes.selectControl, classes.formControl)}
         >
-          <InputLabel>script name</InputLabel>
+          <InputLabel>{intl("manager.script.picker.label")}</InputLabel>
           <ListPicker
             list={scripts}
             value={editingScript}
@@ -77,7 +79,7 @@ export const ScriptManager: React.FC<IScriptManagerProp> = ({}) => {
             displayMapping={R.prop<"name", UserScript>("name")}
           ></ListPicker>
         </FormControl>
-        <Tooltip title="delete">
+        <Tooltip title={intl("manager.script.delete.tooltip")}>
           <IconButton
             style={{ color: colors.red[500] }}
             onClick={async () => {
@@ -98,7 +100,7 @@ export const ScriptManager: React.FC<IScriptManagerProp> = ({}) => {
             <DeleteOutline></DeleteOutline>
           </IconButton>
         </Tooltip>
-        <Tooltip title="edit">
+        <Tooltip title={intl("manager.script.edit.tooltip")}>
           <IconButton
             style={{ color: colors.amber[500] }}
             onClick={() =>
@@ -109,7 +111,7 @@ export const ScriptManager: React.FC<IScriptManagerProp> = ({}) => {
             <EditOutlined></EditOutlined>
           </IconButton>
         </Tooltip>
-        <Tooltip title="export">
+        <Tooltip title={intl("manager.script.export.tooltip")}>
           <IconButton
             style={{ color: colors.green[500] }}
             onClick={() =>
@@ -125,12 +127,12 @@ export const ScriptManager: React.FC<IScriptManagerProp> = ({}) => {
         <TextField
           value={newScriptName}
           onChange={(e) => setNewScriptName(e.target.value)}
-          label="new script name"
+          label={intl("manager.script.new.name.label")}
         ></TextField>
         <FormControl
           className={classNames(classes.selectControl, classes.formControl)}
         >
-          <InputLabel>language</InputLabel>
+          <InputLabel>{intl("manager.script.new.language.label")}</InputLabel>
           <ListPicker
             list={R.identity<UserScript["lang"][]>(["ts", "js"])}
             value={newScriptLang}
@@ -162,7 +164,9 @@ export const ScriptManager: React.FC<IScriptManagerProp> = ({}) => {
         {!!editingScript && (
           <>
             <Typography variant="h6">
-              Edit config of script "{editingScript.name}"
+              {intl("manager.script.params.title", {
+                scriptName: editingScript.name,
+              })}
             </Typography>
             <Divider style={{ margin: `${theme.spacing(2)}px 0` }}></Divider>
             <ParameterEditor

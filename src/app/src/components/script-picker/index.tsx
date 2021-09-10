@@ -12,6 +12,7 @@ import React, { useEffect, useState } from "react";
 import { noop } from "taio/build/utils/typed-function";
 import type { UserScript } from "../../../../models/script";
 import { useLoadingPipe } from "../../hooks/use-loading";
+import { useTypedIntl } from "../../i18n/core/locale";
 import { isNonNullish, setStateEffect } from "../../utils/well-typed";
 import styles from "../common/common.module.css";
 import type { IPickerProps } from "../common/schema";
@@ -32,6 +33,7 @@ export interface IScriptPickerProp
 
 export const ScriptPicker: React.FC<IScriptPickerProp> = ({ onChange }) => {
   const classes = useStyles();
+  const intl = useTypedIntl();
   const [scriptList, setScriptList] = useState<UserScript[]>([]);
   const [script, setScript] = useState<UserScript | undefined>(undefined);
   const setFilteredScripts = R.when(
@@ -54,10 +56,10 @@ export const ScriptPicker: React.FC<IScriptPickerProp> = ({ onChange }) => {
         <RefreshOutlined></RefreshOutlined>
       </IconButton>
       {script == null ? (
-        "No scripts"
+        intl("components.picker.script.empty")
       ) : (
         <FormControl className={classes.selectControl}>
-          <InputLabel>Script name</InputLabel>
+          <InputLabel>{intl("components.picker.script.label")}</InputLabel>
           <ListPicker
             list={scriptList}
             value={script}
