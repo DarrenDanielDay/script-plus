@@ -164,6 +164,7 @@
     "bundle": "yarn vsce package"
   },
   "devDependencies": {
+    "@formatjs/intl": "^1.14.1",
     "@snowpack/plugin-react-refresh": "^2.5.0",
     "@types/fs-extra": "^9.0.12",
     "@types/glob": "^7.1.3",
