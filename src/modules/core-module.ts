@@ -1,4 +1,4 @@
-import * as vscode from "vscode";
+import type * as vscode from "vscode";
 import type { CoreAPI, CoreEvents } from "../app/message-protocol";
 import type { IEventHubAdapter } from "../events/event-manager";
 import { createConfigService } from "./config/config-service";
@@ -9,7 +9,6 @@ function createCoreAPI(
   eventHub: IEventHubAdapter<CoreEvents>
 ): CoreAPI {
   const coreApi: CoreAPI = {
-    vscode,
     ScriptService: createScriptService(context, eventHub),
     ConfigService: createConfigService(eventHub),
   };

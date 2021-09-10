@@ -84,17 +84,8 @@ export const ScriptManager: React.FC<IScriptManagerProp> = ({}) => {
             style={{ color: colors.red[500] }}
             onClick={async () => {
               if (!editingScript) return;
-              const result =
-                await SessionInvoker.vscode.window.showWarningMessage(
-                  `Are you sure to delete script "${editingScript.name}" ? It will be permanently lost!`,
-                  { modal: true },
-                  { title: "Yes" },
-                  { title: "No" }
-                );
-              if (result?.title === "Yes") {
-                await SessionInvoker.ScriptService.delete(editingScript);
-                await fetchScripts();
-              }
+              await SessionInvoker.ScriptService.delete(editingScript);
+              await fetchScripts();
             }}
           >
             <DeleteOutline></DeleteOutline>

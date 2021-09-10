@@ -8,7 +8,6 @@ import type {
 import type { DeepPartial } from "taio/build/types/object";
 import type { ConfigUpdateSignal } from "../models/configurations";
 export interface CoreAPI {
-  vscode: typeof import("vscode");
   ScriptService: ScriptService;
   ConfigService: ConfigService;
 }
@@ -25,7 +24,7 @@ export interface ScriptService {
   getList(): Promise<UserScript[]>;
   updateScript(script: UserScript): Promise<void>;
   editScript(script: UserScript): Promise<void>;
-  delete(script: UserScript): Promise<void>;
+  delete(script: UserScript, directly?: boolean): Promise<void>;
   export(script: UserScript): Promise<void>;
   import(): Promise<void>;
   execute(script: UserScript, params: PassedParameter): Promise<ExecutionTask>;

@@ -24,6 +24,7 @@ import { InstallPosition } from "../../../../models/configurations";
 import type { Mapper } from "taio/build/types/concepts";
 import type { ScriptPlusConfig } from "../../../../configs/user-config";
 import { useTypedIntl } from "../../i18n/core/locale";
+import { noop } from "taio/build/utils/typed-function";
 export const ModuleManager: React.FC = () => {
   const classes = useStyles();
   const theme = useTheme();
@@ -34,25 +35,17 @@ export const ModuleManager: React.FC = () => {
   const [version, setVersion] = useState("");
   const [includeTypes, setIncludeTypes] = useState(true);
   const [installPosition, setInstallPosition] = useState(InstallPosition.Local);
-  const [installing, install] = useLoadingPipe(
-    () => {
-      const packagePromise = SessionInvoker.ScriptService.installPackage(
-        moduleId,
-        version,
-        { global: installPosition === InstallPosition.Global }
-      );
-      const typesPromise = includeTypes
-        ? SessionInvoker.ScriptService.installPackage(`@types/${moduleId}`, "")
-        : Promise.resolve();
-      return Promise.all([packagePromise, typesPromise]);
-    },
-    () => {
-      SessionInvoker.vscode.window.showInformationMessage(
-        `Module "${moduleId}" installed`,
-        {}
-      );
-    }
-  );
+  const [installing, install] = useLoadingPipe(() => {
+    const packagePromise = SessionInvoker.ScriptService.installPackage(
+      moduleId,
+      version,
+      { global: installPosition === InstallPosition.Global }
+    );
+    const typesPromise = includeTypes
+      ? SessionInvoker.ScriptService.installPackage(`@types/${moduleId}`, "")
+      : Promise.resolve();
+    return Promise.all([packagePromise, typesPromise]);
+  }, noop);
   const [versionSearching, getVersions] = useLoadingPipe(
     async (moduleId: string) =>
       moduleId ? SessionInvoker.ScriptService.listVersions(moduleId) : [],

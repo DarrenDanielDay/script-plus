@@ -610,8 +610,16 @@ Do you want to install them?`
         dependencies: {},
       });
     },
-    async delete(script) {
+    async delete(script, directly?) {
       const scriptHost = basedOnScripts(script.name);
+      if (directly) {
+        const result = await askYesNoQuestion(
+          `Are you sure to delete script "${script.name}" ? It will be permanently lost!`
+        );
+        if (!result) {
+          return;
+        }
+      }
       if (!(await existDir(scriptHost))) {
         return die(`Script "${script.name}" not found!`);
       }
@@ -813,6 +821,7 @@ Do you want to install them?`
         }
       );
       logInstallPackage(packageName, stdout, stderr);
+      vscode.window.showInformationMessage(`"${packageName}" installed.`);
     },
   };
   return scriptService;
