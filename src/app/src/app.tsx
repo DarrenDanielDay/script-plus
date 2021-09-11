@@ -6,17 +6,22 @@ import { ScriptRunner } from "./pages/script-runner";
 import { ScriptManager } from "./pages/script-manager";
 import { ModuleManager } from "./pages/module-manager";
 import { IntlProvider } from "react-intl";
-import { messages, useLocale, useTypedIntl } from "./i18n/core/locale";
+import {
+  useLazyLoadLocaleMessages,
+  useLocale,
+  useTypedIntl,
+} from "./i18n/core/locale";
 const theme = darkTheme;
 export const App: React.FC = () => {
   const locale = useLocale();
-  return (
-    <IntlProvider locale={locale} messages={messages[locale]}>
+  const messages = useLazyLoadLocaleMessages(locale);
+  return !!messages ? (
+    <IntlProvider locale={locale} messages={messages}>
       <ThemeProvider theme={theme}>
         <Layout></Layout>
       </ThemeProvider>
     </IntlProvider>
-  );
+  ) : null;
 };
 const Layout: React.FC = () => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
