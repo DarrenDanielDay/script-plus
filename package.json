@@ -91,7 +91,7 @@
       "title": "Script Plus",
       "properties": {
         "script-plus.node.packageManager": {
-          "description": "Specifies the package manager to install packages.",
+          "description": "%script-plus.node.packageManager%",
           "type": "string",
           "enum": [
             "npm",
@@ -100,7 +100,7 @@
           "default": "yarn"
         },
         "script-plus.packages.installPosition": {
-          "description": "Position to install packages.\nWhen set to `local`, packages will be installed in extension global storage.\nWhen set to `global`, packages will be installed in the pacakge manager's global folder.",
+          "description": "%script-plus.packages.installPosition%",
           "type": "string",
           "enum": [
             "local",
@@ -109,22 +109,22 @@
           "default": "local"
         },
         "script-plus.packages.installTypes": {
-          "description": "Auto install `@types` for packages.",
+          "description": "%script-plus.packages.installTypes%",
           "type": "boolean",
           "default": true
         },
         "script-plus.packages.includePrerelease": {
-          "description": "Whether to include pre-release version of packages in module search.\nWhen set to true, the version list of large packages may be very long.",
+          "description": "%script-plus.packages.includePrerelease%",
           "type": "boolean",
           "default": false
         },
         "script-plus.startUp.autoCheck": {
-          "description": "Whether to check folder on activate.",
+          "description": "%script-plus.startUp.autoCheck%",
           "type": "boolean",
           "default": true
         },
         "script-plus.startUp.warnLocale": {
-          "description": "Whether to show locale warning on start up.",
+          "description": "%script-plus.startUp.warnLocale%",
           "type": "boolean",
           "default": true
         }

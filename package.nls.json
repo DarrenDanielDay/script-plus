@@ -8,5 +8,11 @@
   "script-plus.cleanUp": "Script Plus: Clean up side effects",
   "script-plus.cleanUpAllSideEffects": "Script Plus: Clean up all side effects",
   "script-plus.installModule": "Script Plus: Install a module",
-  "script-plus.editScript": "Script Plus: Edit script"
+  "script-plus.editScript": "Script Plus: Edit script",
+  "script-plus.node.packageManager": "Specifies the package manager to install packages.",
+  "script-plus.packages.installPosition": "Position to install packages.\nWhen set to `local`, packages will be installed in extension global storage.\nWhen set to `global`, packages will be installed in the pacakge manager's global folder.",
+  "script-plus.packages.installTypes": "Auto install `@types` for packages.",
+  "script-plus.packages.includePrerelease": "Whether to include pre-release version of packages in module search.\nWhen set to true, the version list of large packages may be very long.",
+  "script-plus.startUp.autoCheck": "Whether to check folder on activate.",
+  "script-plus.startUp.warnLocale": "Whether to show locale warning on start up."
 }
