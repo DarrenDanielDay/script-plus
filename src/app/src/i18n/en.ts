@@ -2,17 +2,7 @@ import type { IntlTextTemplates } from "./core/types";
 
 export const en: IntlTextTemplates = {
   components: {
-    picker: {
-      script: {
-        empty: "No Script",
-        label: "Script name",
-      },
-    },
     parameterEditor: {
-      description: {
-        label: "script description",
-        placeholder: "Input some description for this script",
-      },
       configKey: {
         label: "Add new",
         new: {
@@ -20,24 +10,32 @@ export const en: IntlTextTemplates = {
           placeholder: "Input new key",
         },
       },
-      validate: {
-        exist: '"{newFieldName}" already exist.',
+      description: {
+        label: "script description",
+        placeholder: "Input some description for this script",
       },
       fieldEditor: {
-        type: {
-          label: "type",
-        },
-        picker: {
-          label: "config keys",
-        },
         defaultValue: {
           label: "default value",
+        },
+        description: {
+          label: "description",
+          placeholder: "A description for this config field",
         },
         enum: {
           delete: {
             tooltip: "Delete selected enum",
           },
           valueEditor: {
+            add: {
+              tooltip: "Add enum value definition",
+            },
+            display: {
+              label: "enum display",
+            },
+            name: {
+              label: "enum name",
+            },
             validate: {
               name: {
                 exists: 'name "{enumKey}" already exists',
@@ -48,58 +46,56 @@ export const en: IntlTextTemplates = {
                 notEmpty: "value should not be empty",
               },
             },
-            name: {
-              label: "enum name",
-            },
             value: {
               label: "enum value",
             },
-            display: {
-              label: "enum display",
-            },
-            add: {
-              tooltip: "Add enum value definition",
-            },
           },
         },
-        description: {
-          label: "description",
-          placeholder: "A description for this config field",
+        picker: {
+          label: "config keys",
         },
+        type: {
+          label: "type",
+        },
+      },
+      validate: {
+        exist: '"{newFieldName}" already exist.',
+      },
+    },
+    picker: {
+      script: {
+        empty: "No Script",
+        label: "Script name",
       },
     },
     skeleton: {
       loading: "loading",
     },
   },
-  menu: {
-    manageModules: "Manage Modules",
-    manageScript: "Manage Script",
-    runScript: "Run Script",
-  },
-  runner: {
-    console: {
-      title: "Console",
-    },
-    mount: {
-      button: "Mount",
-      tooltip: "Mount your script to background for event listeners.",
-    },
-    run: {
-      cleaning: "Cleaning",
-      running: "Running",
-      apply: "Run",
-    },
-    cleanUp: {
-      apply: "Clean Up",
-      cleaning: "Cleaning",
-    },
-  },
   manager: {
-    script: {
-      import: {
-        tooltip: "import scripts",
+    module: {
+      id: {
+        label: "npm package/module name",
       },
+      install: {
+        apply: "Install",
+        installing: "Installing",
+      },
+      options: {
+        installTypes: "also install `{moduleId}` for typings",
+      },
+      scope: {
+        label: "install scope",
+        mapping: {
+          global: "global",
+          local: "extension",
+        },
+      },
+      version: {
+        label: "version",
+      },
+    },
+    script: {
       delete: {
         tooltip: "delete",
       },
@@ -108,6 +104,9 @@ export const en: IntlTextTemplates = {
       },
       export: {
         tooltip: "export",
+      },
+      import: {
+        tooltip: "import scripts",
       },
       new: {
         language: {
@@ -127,27 +126,28 @@ export const en: IntlTextTemplates = {
         tooltip: "refresh list",
       },
     },
-    module: {
-      id: {
-        label: "npm package/module name",
-      },
-      version: {
-        label: "version",
-      },
-      install: {
-        installing: "Installing",
-        apply: "Install",
-      },
-      scope: {
-        label: "install scope",
-        mapping: {
-          global: "global",
-          local: "extension",
-        },
-      },
-      options: {
-        installTypes: "also install `{moduleId}` for typings",
-      },
+  },
+  menu: {
+    manageModules: "Manage Modules",
+    manageScript: "Manage Script",
+    runScript: "Run Script",
+  },
+  runner: {
+    cleanUp: {
+      apply: "Clean Up",
+      cleaning: "Cleaning",
+    },
+    console: {
+      title: "Console",
+    },
+    mount: {
+      button: "Mount",
+      tooltip: "Mount your script to background for event listeners.",
+    },
+    run: {
+      apply: "Run",
+      cleaning: "Cleaning",
+      running: "Running",
     },
   },
 };

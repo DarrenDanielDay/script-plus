@@ -13,20 +13,7 @@ export type TemplateValues<K extends IntlTextKeys> = GetTemplateValue<
 
 export interface IntlTextFields {
   components: {
-    picker: {
-      script: {
-        empty: [];
-        label: [];
-      };
-    };
     parameterEditor: {
-      validate: {
-        exist: [{ newFieldName: string }];
-      };
-      description: {
-        label: [];
-        placeholder: [];
-      };
       configKey: {
         label: [];
         new: {
@@ -34,21 +21,32 @@ export interface IntlTextFields {
           placeholder: [];
         };
       };
+      description: {
+        label: [];
+        placeholder: [];
+      };
       fieldEditor: {
-        type: {
-          label: [];
-        };
-        picker: {
-          label: [];
-        };
         defaultValue: {
           label: [];
+        };
+        description: {
+          label: [];
+          placeholder: [];
         };
         enum: {
           delete: {
             tooltip: [];
           };
           valueEditor: {
+            add: {
+              tooltip: [];
+            };
+            display: {
+              label: [];
+            };
+            name: {
+              label: [];
+            };
             validate: {
               name: {
                 exists: [{ enumKey: string }];
@@ -59,64 +57,56 @@ export interface IntlTextFields {
                 notEmpty: [];
               };
             };
-            name: {
-              label: [];
-            };
             value: {
               label: [];
             };
-            display: {
-              label: [];
-            };
-            add: {
-              tooltip: [];
-            };
           };
         };
-        description: {
+        picker: {
           label: [];
-          placeholder: [];
         };
+        type: {
+          label: [];
+        };
+      };
+      validate: {
+        exist: [{ newFieldName: string }];
+      };
+    };
+    picker: {
+      script: {
+        empty: [];
+        label: [];
       };
     };
     skeleton: {
       loading: [];
     };
   };
-  menu: {
-    runScript: [];
-    manageScript: [];
-    manageModules: [];
-  };
-  runner: {
-    run: {
-      apply: [];
-      running: [];
-      cleaning: [];
-    };
-    console: {
-      title: [];
-    };
-    mount: {
-      button: [];
-      tooltip: [];
-    };
-    cleanUp: {
-      cleaning: [];
-      apply: [];
-    };
-  };
   manager: {
-    script: {
-      import: {
-        tooltip: [];
-      };
-      refresh: {
-        tooltip: [];
-      };
-      picker: {
+    module: {
+      id: {
         label: [];
       };
+      install: {
+        apply: [];
+        installing: [];
+      };
+      options: {
+        installTypes: [{ moduleId: string }];
+      };
+      scope: {
+        label: [];
+        mapping: {
+          global: [];
+          local: [];
+        };
+      };
+      version: {
+        label: [];
+      };
+    };
+    script: {
       delete: {
         tooltip: [];
       };
@@ -126,39 +116,49 @@ export interface IntlTextFields {
       export: {
         tooltip: [];
       };
+      import: {
+        tooltip: [];
+      };
       new: {
-        name: {
+        language: {
           label: [];
         };
-        language: {
+        name: {
           label: [];
         };
       };
       params: {
         title: [{ scriptName: string }];
       };
+      picker: {
+        label: [];
+      };
+      refresh: {
+        tooltip: [];
+      };
     };
-    module: {
-      id: {
-        label: [];
-      };
-      version: {
-        label: [];
-      };
-      install: {
-        installing: [];
-        apply: [];
-      };
-      scope: {
-        label: [];
-        mapping: {
-          local: [];
-          global: [];
-        };
-      };
-      options: {
-        installTypes: [{ moduleId: string }];
-      };
+  };
+  menu: {
+    manageModules: [];
+    manageScript: [];
+    runScript: [];
+  };
+  runner: {
+    cleanUp: {
+      apply: [];
+      cleaning: [];
+    };
+    console: {
+      title: [];
+    };
+    mount: {
+      button: [];
+      tooltip: [];
+    };
+    run: {
+      apply: [];
+      cleaning: [];
+      running: [];
     };
   };
 }

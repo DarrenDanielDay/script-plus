@@ -1,10 +1,6 @@
 import type { IntlTextTemplates } from "./core/types";
 
 export const en: IntlTextTemplates = {
-  api: {
-    invalidParam:
-      'API "{api}" invoked with invalid parameter at position {index}.',
-  },
   actions: {
     module: {
       install: {
@@ -13,30 +9,30 @@ export const en: IntlTextTemplates = {
           promote: "Input the module ID (npm package name)",
         },
         version: {
-          search: {
-            searching: 'Searching versions of package "{moduleId}"...',
-            canceled: 'Canceled searching version of "{moduleId}".',
-          },
           pick: {
             title: 'pick a version of package "{moduleId}" to install',
+          },
+          search: {
+            canceled: 'Canceled searching version of "{moduleId}".',
+            searching: 'Searching versions of package "{moduleId}"...',
           },
         },
       },
     },
     script: {
       ask: {
-        script: {
-          placeholder: "Input to search",
-          title: "Select a script",
-        },
         parameter: {
-          title: 'Give the value of "{fieldKey}"',
           enum: {
-            description: `{display}(value = {value})`,
+            description: "{display}(value = {value})",
           },
+          title: 'Give the value of "{fieldKey}"',
           validate: {
             shouldBeNumber: "Must be a valid number",
           },
+        },
+        script: {
+          placeholder: "Input to search",
+          title: "Select a script",
         },
         task: {
           label: "{taskName} (taskId={taskId}, startTime={startTime})",
@@ -45,13 +41,17 @@ export const en: IntlTextTemplates = {
       },
     },
   },
+  api: {
+    invalidParam:
+      'API "{api}" invoked with invalid parameter at position {index}.',
+  },
   common: {
+    ask: {
+      no: "No",
+      yes: "Yes",
+    },
     promote: {
       reportIssue: "Please report an issue.",
-    },
-    ask: {
-      yes: "Yes",
-      no: "No",
     },
   },
   config: {
@@ -59,56 +59,47 @@ export const en: IntlTextTemplates = {
       maybeCrashed: "Configuration may be crashed. Please report an issue.",
     },
   },
+  module: {
+    install: {
+      done: {
+        message: "Module {moduleName} installed.",
+      },
+    },
+    notFound:
+      'Cannot find module "{moduleId}", have you installed it in extension or globally?',
+  },
+  node: {
+    packageManager: {
+      noManager:
+        "No package manager can be found. You need to install npm or yarn for this extension.\n  If you have installed one of them, please ensure its location can be found in your environment variables.",
+      useNpmInstead:
+        "Package manager `yarn` cannot be found, use `npm` instead?",
+    },
+  },
   script: {
     check: {
       progress: {
-        title: "Script Plus Start Up check",
         checkingStorageFolder: "Checking script plus storage folder...",
         checkingVersions: "Checking vscode version and node version...",
+        title: "Script Plus Start Up check",
       },
-    },
-    import: {
-      title: "Import script",
-      invalid: {
-        bundle: 'File "{fileName}" is not a valid script plus bundle.',
-      },
-    },
-    export: {
-      title: 'Export script "{scriptName}"',
-      dependencies: {
-        unresolved: `Versions for the following import path can not be resolved, marked as \"latest\":
-{dependencies}`,
-      },
-    },
-    logging: {
-      createPackageJson: "Creating package.json",
-      installModule: "install {moduleName}",
-      installDependencies: 'dependencies of script "{scriptName}"',
-      invalidPackageJson: "Invalid package.json found: {fileName}",
-    },
-    invalid: {
-      scriptObject: "Invalid script object",
     },
     create: {
       code: {
         generate: {
-          unexpectedEnumType: "Unexpected enum type",
           unexpectedArgumentType: "Unexpected string type",
+          unexpectedEnumType: "Unexpected enum type",
         },
       },
       validate: {
-        name: `Script name should not include the following symbols and white spaces (kebab-case is recommended):
-{special}`,
+        name: "Script name should not include the following symbols and white spaces (kebab-case is recommended):\n  {special}",
       },
     },
     delete: {
       confirm:
         'Are you sure to delete script "{scriptname}" ? It will be permanently lost!',
-      notFound: 'Script "{script.name}" not found!',
       done: 'Script "{scriptName}" Removed.',
-    },
-    meta: {
-      invalidFile: "Invalid meta file",
+      notFound: 'Script "{script.name}" not found!',
     },
     execute: {
       consoleMethodHasToBeFunction:
@@ -133,11 +124,31 @@ export const en: IntlTextTemplates = {
           'Do you want to clean up side effect of task "{taskName}" (taskId={taskId}) now?',
       },
     },
+    export: {
+      dependencies: {
+        unresolved:
+          'Versions for the following import path can not be resolved, marked as "latest":\n          {dependencies}',
+      },
+      title: 'Export script "{scriptName}"',
+    },
+    import: {
+      invalid: {
+        bundle: 'File "{fileName}" is not a valid script plus bundle.',
+      },
+      title: "Import script",
+    },
     install: {
+      abort: {
+        message: 'Install script "{scriptName}" aborted.',
+      },
+      dependencies: {
+        promote:
+          'Script "{scriptName}" has the following dependencies:\n  {dependencies}\n  Do you want to install them?',
+      },
       exists: {
+        overwrite: "overwrite",
         promote:
           'Script "{scriptName}" already exists, overwrite or use another name?',
-        overwrite: "overwrite",
         rename: "rename",
       },
       rename: {
@@ -146,29 +157,18 @@ export const en: IntlTextTemplates = {
           exists: 'Script "{value}" already exists',
         },
       },
-      abort: {
-        message: 'Install script "{scriptName}" aborted.',
-      },
-      dependencies: {
-        promote: `Script "{scriptName}" has the following dependencies:
-{dependencies}
-Do you want to install them?`,
-      },
     },
-  },
-  module: {
-    notFound:
-      'Cannot find module "{moduleId}", have you installed it in extension or globally?',
-    install: {
-      done: { message: "Module {moduleName} installed." },
+    invalid: {
+      scriptObject: "Invalid script object",
     },
-  },
-  node: {
-    packageManager: {
-      noManager: `No package manager can be found. You need to install npm or yarn for this extension.
-If you have installed one of them, please ensure its location can be found in your environment variables.`,
-      useNpmInstead:
-        "Package manager `yarn` cannot be found, use `npm` instead?",
+    logging: {
+      createPackageJson: "Creating package.json",
+      installDependencies: 'dependencies of script "{scriptName}"',
+      installModule: "install {moduleName}",
+      invalidPackageJson: "Invalid package.json found: {fileName}",
+    },
+    meta: {
+      invalidFile: "Invalid meta file",
     },
   },
   webview: {

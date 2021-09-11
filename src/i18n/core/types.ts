@@ -12,33 +12,38 @@ export type TemplateValues<K extends IntlTextKeys> = GetTemplateValue<
   K
 >;
 export interface IntlTextFields {
-  api: {
-    invalidParam: [{ index: number; api: string }];
-  };
-  common: {
-    promote: {
-      reportIssue: [];
-    };
-    ask: {
-      yes: [];
-      no: [];
-    };
-  };
   actions: {
+    module: {
+      install: {
+        moduleId: {
+          placeholder: [];
+          promote: [];
+        };
+        version: {
+          pick: {
+            title: [{ moduleId: string }];
+          };
+          search: {
+            canceled: [{ moduleId: string }];
+            searching: [{ moduleId: string }];
+          };
+        };
+      };
+    };
     script: {
       ask: {
-        script: {
-          placeholder: [];
-          title: [];
-        };
         parameter: {
-          title: [{ fieldKey: string }];
           enum: {
             description: [{ displayName: string; value: string }];
           };
+          title: [{ fieldKey: string }];
           validate: {
             shouldBeNumber: [];
           };
+        };
+        script: {
+          placeholder: [];
+          title: [];
         };
         task: {
           label: [ExecutionTask];
@@ -46,22 +51,17 @@ export interface IntlTextFields {
         };
       };
     };
-    module: {
-      install: {
-        moduleId: {
-          promote: [];
-          placeholder: [];
-        };
-        version: {
-          search: {
-            searching: [{ moduleId: string }];
-            canceled: [{ moduleId: string }];
-          };
-          pick: {
-            title: [{ moduleId: string }];
-          };
-        };
-      };
+  };
+  api: {
+    invalidParam: [{ index: number; api: string }];
+  };
+  common: {
+    ask: {
+      no: [];
+      yes: [];
+    };
+    promote: {
+      reportIssue: [];
     };
   };
   config: {
@@ -69,28 +69,33 @@ export interface IntlTextFields {
       maybeCrashed: [];
     };
   };
+  module: {
+    install: {
+      done: {
+        message: [{ moduleName: string }];
+      };
+    };
+    notFound: [{ moduleId: string }];
+  };
+  node: {
+    packageManager: {
+      noManager: [];
+      useNpmInstead: [];
+    };
+  };
   script: {
-    logging: {
-      createPackageJson: [];
-      installModule: [{ moduleName: string }];
-      invalidPackageJson: [{ fileName: string }];
-      installDependencies: [{ scriptName: string }];
-    };
-    invalid: {
-      scriptObject: [];
-    };
     check: {
       progress: {
-        title: [];
         checkingStorageFolder: [];
         checkingVersions: [];
+        title: [];
       };
     };
     create: {
       code: {
         generate: {
-          unexpectedEnumType: [];
           unexpectedArgumentType: [];
+          unexpectedEnumType: [];
         };
       };
       validate: {
@@ -99,11 +104,8 @@ export interface IntlTextFields {
     };
     delete: {
       confirm: [{ scriptName: string }];
-      notFound: [{ scriptName: string }];
       done: [{ scriptName: string }];
-    };
-    meta: {
-      invalidFile: [];
+      notFound: [{ scriptName: string }];
     };
     execute: {
       consoleMethodHasToBeFunction: [{ methodName: string }];
@@ -125,22 +127,28 @@ export interface IntlTextFields {
         promote: [ExecutionTask];
       };
     };
-    import: {
-      title: [];
-      invalid: {
-        bundle: [{ fileName: string }];
-      };
-    };
     export: {
-      title: [{ scriptName: string }];
       dependencies: {
         unresolved: [{ dependencies: string }];
       };
+      title: [{ scriptName: string }];
+    };
+    import: {
+      invalid: {
+        bundle: [{ fileName: string }];
+      };
+      title: [];
     };
     install: {
+      abort: {
+        message: [{ scriptName: string }];
+      };
+      dependencies: {
+        promote: [{ scriptName: string; dependencies: string }];
+      };
       exists: {
-        promote: [{ scriptName: string }];
         overwrite: [];
+        promote: [{ scriptName: string }];
         rename: [];
       };
       rename: {
@@ -149,38 +157,30 @@ export interface IntlTextFields {
           exists: [{ value: string }];
         };
       };
-      abort: {
-        message: [{ scriptName: string }];
-      };
-      dependencies: {
-        promote: [{ scriptName: string; dependencies: string }];
-      };
     };
-  };
-  module: {
-    notFound: [{ moduleId: string }];
-    install: {
-      done: {
-        message: [{ moduleName: string }];
-      };
+    invalid: {
+      scriptObject: [];
     };
-  };
-  node: {
-    packageManager: {
-      noManager: [];
-      useNpmInstead: [];
+    logging: {
+      createPackageJson: [];
+      installDependencies: [{ scriptName: string }];
+      installModule: [{ moduleName: string }];
+      invalidPackageJson: [{ fileName: string }];
+    };
+    meta: {
+      invalidFile: [];
     };
   };
   webview: {
+    attach: {
+      moreThanOnce: [];
+      noPanel: [];
+    };
     reload: {
       beforeOpen: [];
       dev: {
         serverNotReady: [];
       };
-    };
-    attach: {
-      moreThanOnce: [];
-      noPanel: [];
     };
   };
 }
