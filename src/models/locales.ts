@@ -9,6 +9,7 @@ export enum Locales {
 export const isLocales = isEnumOf(Locales);
 
 export const normalizeLocale = (vscodeEnvLocale: string): Locales => {
+  vscodeEnvLocale = vscodeEnvLocale.toLowerCase();
   if (vscodeEnvLocale === "zh-cn") {
     return Locales.SimplifiedChinese;
   }
