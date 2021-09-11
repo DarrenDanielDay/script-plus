@@ -432,7 +432,8 @@ export const EnumValueEditor: React.FC<IEnumValueEditorProp> = ({
     : "";
   const enumValueValidateInfo = enumValues(enumObject ?? {}).includes(enumValue)
     ? intl(
-        "components.parameterEditor.fieldEditor.enum.valueEditor.validate.value.exists"
+        "components.parameterEditor.fieldEditor.enum.valueEditor.validate.value.exists",
+        { enumValue: enumValue.toString() }
       )
     : enumValue === ""
     ? intl(

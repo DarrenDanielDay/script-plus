@@ -30,7 +30,6 @@ import vm from "vm";
 import { tmpdir, homedir } from "os";
 import { builtinModules } from "module";
 import packageJson from "package-json";
-import { die } from "taio/build/utils/internal/exceptions";
 import { enumValues } from "taio/build/utils/enum";
 import {
   isNullish,
@@ -55,6 +54,7 @@ import {
   existDir,
   existFile,
   getConfigs,
+  getErrorMessage,
   globalErrorHandler,
   loadObjectFromFile,
   openEdit,
@@ -69,6 +69,8 @@ import type { CleanUp, ScriptRunResult } from "../../templates/api";
 import env from "@esbuild-env";
 import { PackageManager } from "../../models/configurations";
 import { intl } from "../../i18n/core/locale";
+import { invalidUsage } from "../../errors/invalid-usage";
+import { impossible } from "../../errors/internal-error";
 const f = ts.factory;
 interface ScriptModule {
   main: (
@@ -114,7 +116,7 @@ export function createScriptService(
       }
       if (hasNpm) {
         const userSayUseNpm = await askYesNoQuestion(
-          "Package manager `yarn` cannot be found, use `npm` instead?"
+          intl("node.packageManager.useNpmInstead")
         );
         if (userSayUseNpm) {
           await updateConfig({ node: { packageManager: PackageManager.npm } });
@@ -125,14 +127,13 @@ export function createScriptService(
     if (hasNpm) {
       return npmInstallPackages;
     }
-    return die(`No package manager can be found. You need to install npm or yarn for this extension.
-If you have installed one of them, please ensure its location can be found in your environment variables.`);
+    return invalidUsage(intl("node.packageManager.noManager"));
   }
   async function scriptFolderCheck() {
     await vscode.workspace.fs.createDirectory(basedOnScripts());
     const packageJsonFile = basedOnScripts(paths.packageJson);
     if (!(await existFile(packageJsonFile))) {
-      output.appendLine("Creating package.json");
+      output.appendLine(intl("script.logging.createPackageJson"));
       await writeFile(
         packageJsonFile,
         JSON.stringify(
@@ -167,8 +168,7 @@ If you have installed one of them, please ensure its location can be found in yo
     const specialChars = "~`!@#$%^&*()_+={}|[]\\:;\"'<>?,./ ";
     const special = new Set([...specialChars]);
     return [...name].some((char) => special.has(char))
-      ? `Script name should not include the following symbols and white spaces (kebab-case is recommended):
-    ${specialChars}`
+      ? intl("script.create.validate.name", { special: specialChars })
       : "";
   }
   function getScriptFileName(script: UserScript): string {
@@ -183,7 +183,7 @@ If you have installed one of them, please ensure its location can be found in yo
       await readFile(vscode.Uri.joinPath(folder, paths.meta))
     );
     if (!isUserScript(content)) {
-      return die("Invalid meta file");
+      return invalidUsage(intl("script.meta.invalidFile"));
     }
     return content;
   }
@@ -226,20 +226,26 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
       return scripts.some((script) => script.name === value);
     };
     if (await existDir(scriptHome)) {
-      const message = `Script "${meta.name}" already exists, overwrite or use another name?`;
-      const action = await askForOptions(message, true, "Overwrite", "Rename");
+      const message = intl("script.install.exists.promote", {
+        scriptName: meta.name,
+      });
+      const overwrite = intl("script.install.exists.overwrite");
+      const rename = intl("script.install.exists.rename");
+      const action = await askForOptions(message, true, overwrite, rename);
       if (action === undefined) {
         return;
       }
-      if (action === "Rename") {
+      if (action === rename) {
         const newName = await vscode.window.showInputBox({
-          prompt: `Input a new script name instead of "${meta.name}"`,
+          prompt: intl("script.install.rename.promote", {
+            scriptName: meta.name,
+          }),
           value: meta.name,
           async validateInput(value) {
             return (
               isValidScriptName(value) ||
               (scriptNameExists(value)
-                ? `Script "${value}" already exists`
+                ? intl("script.install.rename.validate.exists", { value })
                 : "")
             );
           },
@@ -248,7 +254,7 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
           meta.name = newName;
         } else {
           vscode.window.showInformationMessage(
-            `Install script "${meta.name}" aborted.`
+            intl("script.install.abort.message", { scriptName: meta.name })
           );
           return;
         }
@@ -265,16 +271,19 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
         );
         if (packages.length) {
           const userSayYes = await askYesNoQuestion(
-            `Script "${meta.name}" has the following dependencies:
-${packages.join("\n")}
-Do you want to install them?`
+            intl("script.install.dependencies.promote", {
+              scriptName: meta.name,
+              dependencies: packages.join("\n"),
+            })
           );
           if (userSayYes) {
             const { stderr, stdout } = await yarnAddPackages(packages, {
               cwd: basedOnScripts().fsPath,
             });
             logInstallPackage(
-              `dependencies of script "${meta.name}"`,
+              intl("script.logging.installDependencies", {
+                scriptName: meta.name,
+              }),
               stdout,
               stderr
             );
@@ -429,9 +438,7 @@ Do you want to install them?`
           return require.call(undefined, resolved);
         }
       }
-      return die(
-        `Cannot find module "${moduleId}", have you installed it in extension or globally?`
-      );
+      return invalidUsage(intl("module.notFound", { moduleId }));
     };
     const context = vm.createContext({
       ...Object.getOwnPropertyNames(globalThis).reduce((globalMixin, key) => {
@@ -449,7 +456,11 @@ Do you want to install them?`
           if (isLogLevel(methodName)) {
             return (...args: unknown[]) => {
               if (typeof originalMethod !== "function") {
-                return die("Impossible case.");
+                return impossible(
+                  intl("script.execute.consoleMethodHasToBeFunction", {
+                    methodName,
+                  })
+                );
               }
               eventHub.dispatcher.emit("task", {
                 type: "output",
@@ -496,7 +507,11 @@ Do you want to install them?`
     if (isScriptModule(exports)) {
       return exports;
     } else {
-      return die(`Script "${script.name}" is not written in expected format`);
+      return invalidUsage(
+        intl("script.execute.invalid.script.format", {
+          scriptName: script.name,
+        })
+      );
     }
   }
 
@@ -525,7 +540,7 @@ Do you want to install them?`
         task.cleanUp = result.cleanUp;
         trueResult = result.custom;
       } else if (!isNullish(result) && !hasError) {
-        return die("Invalid script return value!");
+        return invalidUsage(intl("script.execute.invalid.script.returnValue"));
       }
       if (!task.cleanUp) {
         activeTasks.delete(taskId);
@@ -541,10 +556,14 @@ Do you want to install them?`
   async function cleanUpTaskResource(taskId: string) {
     const task = activeTasks.get(taskId);
     if (!task) {
-      return die(`Task id ${taskId} does not exist!`);
+      return invalidUsage(
+        intl("script.execute.task.invalid.notFound", { taskId })
+      );
     }
     if (task.running) {
-      return die(`Task id ${taskId} is still running!`);
+      return invalidUsage(
+        intl("script.execute.task.invalid.running", { taskId })
+      );
     }
     await task.cleanUp?.();
     for (const requiredPath of task.reqiredPaths) {
@@ -599,11 +618,10 @@ Do you want to install them?`
     async create(script) {
       const validateMessage = isValidScriptName(script.name);
       if (validateMessage) {
-        return die(validateMessage);
+        return invalidUsage(validateMessage);
       }
       if (!isUserScript(script)) {
-        vscode.window.showInformationMessage(`Invalid script object!`);
-        return;
+        return impossible(intl("script.invalid.scriptObject"));
       }
       await installScript({
         meta: script,
@@ -622,7 +640,9 @@ Do you want to install them?`
         }
       }
       if (!(await existDir(scriptHost))) {
-        return die(`Script "${script.name}" not found!`);
+        return invalidUsage(
+          intl("script.delete.notFound", { scriptName: script.name })
+        );
       }
       await vscode.workspace.fs.delete(scriptHost, {
         useTrash: false,
@@ -644,7 +664,7 @@ Do you want to install them?`
     },
     async updateScript(script) {
       if (!isUserScript(script)) {
-        return die(`Invalid script object!`);
+        return impossible(intl("script.invalid.scriptObject"));
       }
       await Promise.all([writeDeclaration(script), writeMeta(script)]);
     },
@@ -664,13 +684,14 @@ Do you want to install them?`
             try {
               const bundle = await loadObjectFromFile(spp);
               if (!isScriptPlusBundle(bundle)) {
-                return die();
+                return invalidUsage(
+                  intl("script.import.invalid.bundle", { fileName: spp.fsPath })
+                );
               }
               await installScript(bundle);
             } catch (error) {
-              vscode.window.showWarningMessage(
-                `File "${spp.fsPath}" is not a valid script plus bundle`
-              );
+              const message = getErrorMessage(error);
+              vscode.window.showWarningMessage(message);
               return;
             }
           })
@@ -865,11 +886,15 @@ function getConfigTsDeclCodeOfUserScript(script: UserScript): string {
                       ? f.createStringLiteral(value)
                       : isNumber(value)
                       ? f.createNumericLiteral(value)
-                      : die()
+                      : impossible(
+                          intl("script.create.code.generate.unexpectedEnumType")
+                        )
                   )
                 )
               )
-            : die()
+            : impossible(
+                intl("script.create.code.generate.unexpectedArgumentType")
+              )
         )
       )
     )

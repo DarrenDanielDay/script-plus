@@ -28,6 +28,4 @@ export type CreateIntlTextKeys<Template extends Record<string, unknown>> = Join<
 export type GetTemplateValue<Fields, K extends string> = WeakAccessByPath<
   Fields,
   Split<K, ".">
-> extends readonly [infer T]
-  ? T
-  : never;
+>;

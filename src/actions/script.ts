@@ -1,6 +1,7 @@
 import { enumKeys, enumValues } from "taio/build/utils/enum";
 import * as vscode from "vscode";
 import type { CoreAPI } from "../app/message-protocol";
+import { intl } from "../i18n/core/locale";
 import type { ExecutionTask } from "../models/execution-task";
 import type {
   ArgumentConfig,
@@ -18,9 +19,9 @@ export async function askScript(api: CoreAPI) {
       script,
     })),
     {
-      placeHolder: "Input to search",
+      placeHolder: intl("actions.script.ask.script.placeholder"),
       canPickMany: false,
-      title: "Select a script",
+      title: intl("actions.script.ask.script.title"),
       matchOnDescription: true,
     }
   );
@@ -46,8 +47,11 @@ export async function askParameters({
 }
 
 function askParameter(field: ArgumentField, fieldKey: string) {
+  const parameterPromote =
+    (field.description ?? "") ||
+    intl("actions.script.ask.parameter.title", { fieldKey });
   const pickOptions: vscode.QuickPickOptions = {
-    title: field.description ?? `Give the value of "${fieldKey}"`,
+    title: parameterPromote,
     matchOnDetail: true,
     canPickMany: false,
   };
@@ -77,16 +81,17 @@ function askParameter(field: ArgumentField, fieldKey: string) {
               (key) => field.enumOptions.enumObject[key] === value
             ) ?? `${value}`,
           value,
-          description: `${
-            field.enumOptions.enumNameMapping?.[value] ?? ""
-          }(value = ${value})`,
+          description: intl("actions.script.ask.parameter.enum.description", {
+            value: value.toString(),
+            displayName: field.enumOptions.enumNameMapping?.[value] ?? "",
+          }),
         })),
         pickOptions
       )
       .then((result) => result?.value);
   }
   const inputOptions: vscode.InputBoxOptions = {
-    title: field.description,
+    title: parameterPromote,
     value: `${field.defaultValue}`,
   };
   if (field.type === "number") {
@@ -94,7 +99,9 @@ function askParameter(field: ArgumentField, fieldKey: string) {
       .showInputBox({
         ...inputOptions,
         validateInput(value) {
-          return isNaN(+value) ? "Must be a valid number" : "";
+          return isNaN(+value)
+            ? intl("actions.script.ask.parameter.validate.shouldBeNumber")
+            : "";
         },
       })
       .then((value) => {
@@ -123,12 +130,12 @@ async function askTasks(api: CoreAPI) {
   return vscode.window
     .showQuickPick<vscode.QuickPickItem & { task: ExecutionTask }>(
       tasks.map((task) => ({
-        label: `${task.taskName} (taskId=${task.taskId}, startTime=${task.startTime})`,
+        label: intl("actions.script.ask.task.label", task),
         task,
       })),
       {
         canPickMany: true,
-        title: "Select tasks",
+        title: intl("actions.script.ask.task.title"),
       }
     )
     .then((tasks) => tasks?.map((task) => task.task));

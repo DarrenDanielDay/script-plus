@@ -1,10 +1,11 @@
 import * as vscode from "vscode";
 import type { CoreAPI } from "../app/message-protocol";
+import { intl } from "../i18n/core/locale";
 
 export async function installModule(api: CoreAPI) {
   const moduleId = await vscode.window.showInputBox({
-    title: "Input the module ID (npm package name)",
-    placeHolder: "e.g. semver",
+    title: intl("actions.module.install.moduleId.promote"),
+    placeHolder: intl("actions.module.install.moduleId.placeholder"),
   });
   if (moduleId === undefined) {
     return;
@@ -12,7 +13,9 @@ export async function installModule(api: CoreAPI) {
   const versions = await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
-      title: `Searching versions of package "${moduleId}""`,
+      title: intl("actions.module.install.version.search.searching", {
+        moduleId,
+      }),
       cancellable: true,
     },
     (_, token) => {
@@ -20,7 +23,9 @@ export async function installModule(api: CoreAPI) {
         api.ScriptService.listVersions(moduleId).then(resolve);
         const subscription = token.onCancellationRequested(() => {
           subscription.dispose();
-          reject(`Canceled searching version of "${moduleId}".`);
+          reject(
+            intl("actions.module.install.version.search.canceled", { moduleId })
+          );
         });
       });
     }
@@ -28,7 +33,7 @@ export async function installModule(api: CoreAPI) {
   const version = await vscode.window.showQuickPick(["latest", ...versions], {
     canPickMany: false,
     ignoreFocusOut: true,
-    title: `pick a version of package "${moduleId}" to install`,
+    title: intl("actions.module.install.version.pick.title", { moduleId }),
   });
   if (version === undefined) {
     return;

@@ -53,9 +53,9 @@ export const intl = (() => {
   );
   function typedIntl<K extends IntlTextKeys>(
     id: K,
-    values?: TemplateValues<K>
+    ...values: TemplateValues<K>
   ) {
-    const fillValues = values ?? {};
+    const fillValues = values[0] ?? {};
     assertIsStringRecord(fillValues);
     return intl.formatMessage({ id }, fillValues);
   }
