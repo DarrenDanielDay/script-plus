@@ -6,14 +6,14 @@ import { Commands } from "./commands";
 import { loadSnowpackConfig } from "./debug/snowpack-dev";
 import { createCoreAPI } from "./modules/core-module";
 import { createMessageHandler } from "./messages/message-manager";
-import type { CoreEvents } from "./app/message-protocol";
+import type { CoreAPI, CoreEvents } from "./app/message-protocol";
 import { createModuleManager } from "./modules/module-manager";
 import { askScript, cleanUp, execute } from "./actions/script";
 import { installModule } from "./actions/module";
 import { devConfigReady, factory, startUpReady } from "./commands/factory";
 import { createPublicAPI } from "./api/public-api";
 
-export function activate(context: vscode.ExtensionContext) {
+export function activate(context: vscode.ExtensionContext): CoreAPI {
   const globalEventHubAdapter = createEventHubAdapter<CoreEvents>();
   const globalModuleManager = createModuleManager(
     createCoreAPI(context, globalEventHubAdapter)
