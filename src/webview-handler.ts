@@ -4,7 +4,9 @@ import * as path from "path";
 import * as http from "http";
 import env from "@esbuild-env";
 import { json } from "./app/src/json-serializer";
-import { getLocale } from "./i18n/core/locale";
+import { getLocale, intl } from "./i18n/core/locale";
+import { impossible } from "./errors/internal-error";
+import { invalidUsage } from "./errors/invalid-usage";
 type OnDidReceiveMessageHandler = Parameters<
   vscode.Webview["onDidReceiveMessage"]
 >[0];
@@ -97,8 +99,7 @@ export function createWebviewManager(
   }
   async function reload() {
     if (!panel) {
-      console.warn("Please open panel first!");
-      return;
+      return invalidUsage(intl("webview.reload.beforeOpen"));
     }
     let html: string;
     let baseUrl: string;
@@ -115,7 +116,7 @@ export function createWebviewManager(
     } else {
       if (!devServerConfig) {
         vscode.window.showWarningMessage(
-          "Development Server is not ready currently"
+          intl("webview.reload.dev.serverNotReady")
         );
         return;
       }
@@ -163,10 +164,10 @@ export function createWebviewManager(
   }
   function attach(handler: OnDidReceiveMessageHandler) {
     if (messageHandler) {
-      throw new Error("Cannot attach handler more than once!");
+      return impossible(intl("webview.attach.moreThanOnce"));
     }
     if (!panel) {
-      throw new Error("Please open webview first!");
+      return impossible(intl("webview.attach.noPanel"));
     }
     messageHandler = async (e) => {
       if (!panel) {

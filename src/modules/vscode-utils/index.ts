@@ -7,13 +7,15 @@ import {
   isScriptPlusConfig,
   ScriptPlusConfig,
 } from "../../configs/user-config";
-import { die } from "taio/build/utils/internal/exceptions";
 import type { DeepPartial } from "taio/build/types/object";
 import { isObject, isObjectLike } from "taio/build/utils/validator/object";
 import { isPrimitive, isString } from "taio/build/utils/validator/primitive";
 import { dfs } from "taio/build/libs/custom/algorithms/search";
 import * as R from "ramda";
 import type { ArrayItem } from "taio/build/types/array";
+import { impossible, isInternalError } from "../../errors/internal-error";
+import { isInvalidUsage } from "../../errors/invalid-usage";
+import { intl } from "../../i18n/core/locale";
 export const output = vscode.window.createOutputChannel(
   `${env.EXTENSION_BASE_NAME} Logger`
 );
@@ -100,7 +102,16 @@ export function getErrorMessage(error: unknown): string {
 }
 
 export function globalErrorHandler(error: unknown): void {
-  let displayMessage: string = getErrorMessage(error);
+  let displayMessage = "";
+  if (isInternalError(error)) {
+    displayMessage = `${error.message}
+${intl("common.promote.reportIssue")}
+${getErrorMessage(error)}`;
+  } else if (isInvalidUsage(error)) {
+    displayMessage = error.message;
+  } else {
+    displayMessage = getErrorMessage(error);
+  }
   vscode.window.showErrorMessage(displayMessage);
 }
 
@@ -108,10 +119,14 @@ export async function askYesNoQuestion(
   question: string,
   modal = true
 ): Promise<boolean | undefined> {
-  const result = await vscode.window.showInformationMessage<{
-    title: "No" | "Yes";
-  }>(question, { modal }, { title: "Yes" }, { title: "No" });
-  return result && result.title === "Yes";
+  const [yes, no] = [intl("common.ask.yes"), intl("common.ask.no")];
+  const result = await vscode.window.showInformationMessage(
+    question,
+    { modal },
+    { title: yes },
+    { title: no }
+  );
+  return result && result.title === yes;
 }
 
 export async function askForOptions<Options extends readonly string[]>(
@@ -132,7 +147,9 @@ function getExtensionConfiguration() {
 
 export function getConfigs(): ScriptPlusConfig & vscode.WorkspaceConfiguration {
   const config = getExtensionConfiguration();
-  return isScriptPlusConfig(config) ? config : die("Impossible");
+  return isScriptPlusConfig(config)
+    ? config
+    : impossible(intl("config.check.maybeCrashed"));
 }
 
 export async function updateConfig(patch: DeepPartial<ScriptPlusConfig>) {

@@ -12,9 +12,16 @@ export type TemplateValues<K extends IntlTextKeys> = GetTemplateValue<
   K
 >;
 export interface IntlTextFields {
+  api: {
+    invalidParam: [{ index: number; api: string }];
+  };
   common: {
     promote: {
       reportIssue: [];
+    };
+    ask: {
+      yes: [];
+      no: [];
     };
   };
   actions: {
@@ -65,10 +72,19 @@ export interface IntlTextFields {
   script: {
     logging: {
       createPackageJson: [];
+      installModule: [{ moduleName: string }];
+      invalidPackageJson: [{ fileName: string }];
       installDependencies: [{ scriptName: string }];
     };
     invalid: {
       scriptObject: [];
+    };
+    check: {
+      progress: {
+        title: [];
+        checkingStorageFolder: [];
+        checkingVersions: [];
+      };
     };
     create: {
       code: {
@@ -84,6 +100,7 @@ export interface IntlTextFields {
     delete: {
       confirm: [{ scriptName: string }];
       notFound: [{ scriptName: string }];
+      done: [{ scriptName: string }];
     };
     meta: {
       invalidFile: [];
@@ -103,9 +120,21 @@ export interface IntlTextFields {
         };
       };
     };
+    executeCurrent: {
+      cleanUpNow: {
+        promote: [ExecutionTask];
+      };
+    };
     import: {
+      title: [];
       invalid: {
         bundle: [{ fileName: string }];
+      };
+    };
+    export: {
+      title: [{ scriptName: string }];
+      dependencies: {
+        unresolved: [{ dependencies: string }];
       };
     };
     install: {
@@ -130,11 +159,28 @@ export interface IntlTextFields {
   };
   module: {
     notFound: [{ moduleId: string }];
+    install: {
+      done: {
+        message: [{ moduleName: string }];
+      };
+    };
   };
   node: {
     packageManager: {
       noManager: [];
       useNpmInstead: [];
+    };
+  };
+  webview: {
+    reload: {
+      beforeOpen: [];
+      dev: {
+        serverNotReady: [];
+      };
+    };
+    attach: {
+      moreThanOnce: [];
+      noPanel: [];
     };
   };
 }

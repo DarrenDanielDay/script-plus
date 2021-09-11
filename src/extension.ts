@@ -11,6 +11,7 @@ import { createModuleManager } from "./modules/module-manager";
 import { askScript, cleanUp, execute } from "./actions/script";
 import { installModule } from "./actions/module";
 import { devConfigReady, factory, startUpReady } from "./commands/factory";
+import { createPublicAPI } from "./api/public-api";
 
 export function activate(context: vscode.ExtensionContext) {
   const globalEventHubAdapter = createEventHubAdapter<CoreEvents>();
@@ -121,6 +122,7 @@ export function activate(context: vscode.ExtensionContext) {
     devConfigReady();
   }
   globalModuleManager.api.ScriptService.check().finally(startUpReady);
+  return createPublicAPI(globalModuleManager.api);
 }
 
 export function deactivate() {

@@ -210,7 +210,7 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
     stdout: string,
     stderr: string
   ) {
-    divider(`install ${packageName}`);
+    divider(intl("script.logging.installModule", { moduleName: packageName }));
     divider("stdout");
     output.appendLine(stdout);
     divider("stderr");
@@ -313,7 +313,9 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
             };
           }
         }
-        output.appendLine(`Invalid package.json found: ${uri.fsPath}`);
+        output.appendLine(
+          intl("script.logging.invalidPackageJson", { fileName: uri.fsPath })
+        );
       } catch (error) {}
       return null;
     };
@@ -381,10 +383,11 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
       )
     ).filter(isString);
     if (notResolvedPackages.length) {
+      const dependencies = notResolvedPackages
+        .map((pkg) => `"${pkg}"`)
+        .join(",");
       vscode.window.showWarningMessage(
-        `Versions for the following import path can not be resolved, marked as "latest": ${notResolvedPackages
-          .map((pkg) => `"${pkg}"`)
-          .join(",")}`
+        intl("script.export.dependencies.unresolved", { dependencies })
       );
     }
     return dependencies;
@@ -597,17 +600,17 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
         {
           cancellable: true,
           location: vscode.ProgressLocation.Notification,
-          title: "Script Plus Start Up check",
+          title: intl("script.check.progress.title"),
         },
         (report, token) => {
           return new Promise(async (resolve, reject) => {
             token.onCancellationRequested(reject);
             report.report({
-              message: "Checking script plus storage folder...",
+              message: intl("script.check.progress.checkingStorageFolder"),
             });
             await scriptFolderCheck();
             report.report({
-              message: "Checking vscode version and node version...",
+              message: intl("script.check.progress.checkingVersions"),
             });
             await vscodeAndNodeVersionCheck();
             resolve();
@@ -648,7 +651,9 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
         useTrash: false,
         recursive: true,
       });
-      vscode.window.showInformationMessage(`Script "${script.name}" Removed.`);
+      vscode.window.showInformationMessage(
+        intl("script.delete.done", { scriptName: script.name })
+      );
     },
     async getList() {
       const base = basedOnScripts();
@@ -673,7 +678,7 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
     },
     async import() {
       const spps = await vscode.window.showOpenDialog({
-        title: "Import script",
+        title: intl("script.import.title"),
         filters: scriptBundleFilter,
         canSelectFiles: true,
         canSelectFolders: false,
@@ -700,7 +705,7 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
     },
     async export(script) {
       const askLocation = await vscode.window.showSaveDialog({
-        title: `Export script "${script.name}"`,
+        title: intl("script.export.title", { scriptName: script.name }),
         filters: scriptBundleFilter,
         defaultUri: vscode.Uri.joinPath(
           vscode.Uri.file(homedir()),
@@ -757,15 +762,13 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
           defaultArgs[key] = value.defaultValue;
           return defaultArgs;
         }, {});
-        const { taskId, taskName } = await scriptService.execute(
-          meta,
-          defaults
-        );
+        const task = await scriptService.execute(meta, defaults);
+        const { taskId } = task;
         const { promise } = activeTasks.get(taskId)!;
         promise.then(async (result) => {
           if (isCleanUp(result) || isScriptRunResultObject(result)) {
             const userSayYes = await askYesNoQuestion(
-              `Do you want to clean up side effect of task "${taskName}" (taskId=${taskId}) now?`,
+              intl("script.executeCurrent.cleanUpNow.promote", task),
               false
             );
             if (userSayYes) {
@@ -843,7 +846,9 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
         }
       );
       logInstallPackage(packageName, stdout, stderr);
-      vscode.window.showInformationMessage(`"${packageName}" installed.`);
+      vscode.window.showInformationMessage(
+        intl("module.install.done.message", { moduleName: packageName })
+      );
     },
   };
   return scriptService;
