@@ -1,0 +1,12 @@
+{
+  "script-plus.open": "Script Plus: Open Webview Panel",
+  "script-plus.close": "Script Plus: Close Webview",
+  "script-plus.reload": "Script Plus: Reload Webview",
+  "script-plus.execute": "Script Plus: Execute Script",
+  "script-plus.executeCurrentScript": "Script Plus: Execute Current Script (Using default configs)",
+  "script-plus.forceCheckUserScriptsFolder": "Script Plus: Check user-scripts folder",
+  "script-plus.cleanUp": "Script Plus: Clean up side effects",
+  "script-plus.cleanUpAllSideEffects": "Script Plus: Clean up all side effects",
+  "script-plus.installModule": "Script Plus: Install a module",
+  "script-plus.editScript": "Script Plus: Edit script"
+}

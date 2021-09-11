@@ -48,43 +48,43 @@
     "commands": [
       {
         "command": "script-plus.open",
-        "title": "Script Plus: Open Webview"
+        "title": "%script-plus.open%"
       },
       {
         "command": "script-plus.close",
-        "title": "Script Plus: Close Webview"
+        "title": "%script-plus.close%"
       },
       {
         "command": "script-plus.reload",
-        "title": "Script Plus: Reload Webview"
+        "title": "%script-plus.reload%"
       },
       {
         "command": "script-plus.execute",
-        "title": "Script Plus: Execute Script"
+        "title": "%script-plus.execute%"
       },
       {
         "command": "script-plus.executeCurrentScript",
-        "title": "Script Plus: Execute Current Script (Using default configs)"
+        "title": "%script-plus.executeCurrentScript%"
       },
       {
         "command": "script-plus.forceCheckUserScriptsFolder",
-        "title": "Script Plus: Check user-scripts folder"
+        "title": "%script-plus.forceCheckUserScriptsFolder%"
       },
       {
         "command": "script-plus.cleanUp",
-        "title": "Script Plus: Clean up side effects"
+        "title": "%script-plus.cleanUp%"
       },
       {
         "command": "script-plus.cleanUpAllSideEffects",
-        "title": "Script Plus: Clean up all side effects"
+        "title": "%script-plus.cleanUpAllSideEffects%"
       },
       {
         "command": "script-plus.installModule",
-        "title": "Script Plus: Install a module"
+        "title": "%script-plus.installModule%"
       },
       {
         "command": "script-plus.editScript",
-        "title": "Script Plus: Edit script"
+        "title": "%script-plus.editScript%"
       }
     ],
     "configuration": {
