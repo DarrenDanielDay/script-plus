@@ -1,29 +1,16 @@
 import { promisify } from "util";
 import G from "glob";
-import * as fsextra from "fs-extra";
 import * as path from "path";
 import * as fs from "fs";
-import type { PathLike } from "fs";
 import * as R from "ramda";
 import * as child_process from "child_process";
 import { platform } from "os";
 import { isBoolean, isString } from "taio/build/utils/validator/primitive";
 import { defineValidator, optional } from "taio/build/utils/validator/utils";
 import { isObject } from "taio/build/utils/validator/object";
-export const existFile = (pathLike: PathLike) =>
-  fsextra.promises
-    .stat(pathLike)
-    .then((stat) => stat.isFile())
-    .catch(R.F);
-
-export const existDir = (pathLike: PathLike) =>
-  fsextra.promises
-    .stat(pathLike)
-    .then((stat) => stat.isDirectory())
-    .catch(R.F);
 
 export const glob = promisify(G);
-export { fs, path, fsextra };
+export { fs, path };
 const uppers = R.map(
   R.pipe(R.add("A".charCodeAt(0)), String.fromCharCode),
   R.range(0, 26)
