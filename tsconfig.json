@@ -13,6 +13,6 @@
     "noUnusedParameters": true,
     "preserveWatchOutput": true
   },
-  "include": ["src", "esbuild-env.d.ts", "esbuild-for-extension.ts"],
+  "include": ["src", "esbuild-for-extension.ts"],
   "exclude": ["node_modules", "src/app/src", "src/templates"]
 }

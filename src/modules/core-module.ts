@@ -1,5 +1,5 @@
 import type * as vscode from "vscode";
-import type { CoreAPI, CoreEvents } from "../app/message-protocol";
+import type { CoreAPI, CoreEvents } from "../types/public-api";
 import type { IEventHubAdapter } from "../events/event-manager";
 import { createConfigService } from "./config/config-service";
 import { createPackageService } from "./package/package-service";

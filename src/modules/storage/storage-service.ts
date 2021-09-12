@@ -1,4 +1,4 @@
-import type { StorageService } from "../../app/message-protocol";
+import type { StorageService } from "../../types/public-api";
 import * as vscode from "vscode";
 import { paths } from "../constant";
 

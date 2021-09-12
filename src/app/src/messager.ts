@@ -1,7 +1,7 @@
 import type { Func } from "taio/build/types/concepts";
 import type { StringKey } from "taio/build/types/converts";
 import type { AnyMessage, Event, Request, Response } from "../communication";
-import type { CoreEvents } from "../message-protocol";
+import type { CoreEvents } from "../../types/public-api";
 import { json } from "./json-serializer";
 if (typeof acquireVsCodeApi !== "function") {
   alert(

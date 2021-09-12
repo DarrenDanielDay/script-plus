@@ -10,7 +10,7 @@ import {
   primitiveOf,
 } from "taio/build/utils/validator/primitive";
 import { optional, record } from "taio/build/utils/validator/utils";
-import type { CoreAPI } from "../app/message-protocol";
+import type { CoreAPI } from "../types/public-api";
 import { invalidUsage } from "../errors/invalid-usage";
 import { intl } from "../i18n/core/locale";
 import { isUserScript } from "../models/script";

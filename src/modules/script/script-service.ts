@@ -3,7 +3,7 @@ import type {
   PackageService,
   ScriptService,
   StorageService,
-} from "../../app/message-protocol";
+} from "../../types/public-api";
 import {
   Dependencies,
   isBooleanArgumentField,

@@ -1,6 +1,6 @@
 import { enumKeys, enumValues } from "taio/build/utils/enum";
 import * as vscode from "vscode";
-import type { CoreAPI } from "../app/message-protocol";
+import type { CoreAPI } from "../types/public-api";
 import { intl } from "../i18n/core/locale";
 import type { ExecutionTask } from "../models/execution-task";
 import type {

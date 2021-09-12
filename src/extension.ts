@@ -6,7 +6,7 @@ import { Commands } from "./commands";
 import { loadSnowpackConfig } from "./debug/snowpack-dev";
 import { createCoreAPI } from "./modules/core-module";
 import { createMessageHandler } from "./messages/message-manager";
-import type { CoreAPI, CoreEvents } from "./app/message-protocol";
+import type { CoreAPI, CoreEvents } from "./types/public-api";
 import { createModuleManager } from "./modules/module-manager";
 import { askScript, cleanUp, execute } from "./actions/script";
 import { installModule } from "./actions/module";

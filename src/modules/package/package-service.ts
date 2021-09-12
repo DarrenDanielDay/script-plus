@@ -5,7 +5,7 @@ import type {
   ConfigService,
   PackageService,
   StorageService,
-} from "../../app/message-protocol";
+} from "../../types/public-api";
 import { intl } from "../../i18n/core/locale";
 import { askYesNoQuestion, divider, output } from "../vscode-utils";
 import {

@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import type { ConfigService, CoreEvents } from "../../app/message-protocol";
+import type { ConfigService, CoreEvents } from "../../types/public-api";
 import { isScriptPlusConfig } from "../../configs/user-config";
 import { getConfigs, updateConfig } from "../vscode-utils";
 import type { IEventHubAdapter } from "../../events/event-manager";
