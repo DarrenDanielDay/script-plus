@@ -18,7 +18,7 @@ export function devConfigReady() {
   devConfigDone();
 }
 
-export function factory(handler: Func<[], unknown>, silent?: boolean) {
+export function handlerFactory(handler: Func<[], unknown>, silent?: boolean) {
   return async () => {
     await Promise.all([startUpReadyState, devConfigReadyState]);
     try {

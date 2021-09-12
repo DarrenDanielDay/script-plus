@@ -10,8 +10,13 @@ import type { CoreAPI, CoreEvents } from "./types/public-api";
 import { createModuleManager } from "./modules/module-manager";
 import { askScript, cleanUp, execute } from "./actions/script";
 import { installModule } from "./actions/module";
-import { devConfigReady, factory, startUpReady } from "./commands/factory";
+import {
+  devConfigReady,
+  handlerFactory,
+  startUpReady,
+} from "./commands/factory";
 import { createPublicAPI } from "./api/public-api";
+import { generate } from "./debug/generator";
 
 export function activate(context: vscode.ExtensionContext): CoreAPI {
   const globalEventHubAdapter = createEventHubAdapter<CoreEvents>();
@@ -43,49 +48,51 @@ export function activate(context: vscode.ExtensionContext): CoreAPI {
   context.subscriptions.push(
     vscode.commands.registerCommand(
       Commands.WebviewControll.Open,
-      factory(open)
+      handlerFactory(open)
     )
   );
   context.subscriptions.push(
     vscode.commands.registerCommand(
       Commands.WebviewControll.Close,
-      factory(close)
+      handlerFactory(close)
     )
   );
   context.subscriptions.push(
     vscode.commands.registerCommand(
       Commands.WebviewControll.Reload,
-      factory(reload)
+      handlerFactory(reload)
     )
   );
   context.subscriptions.push(
     vscode.commands.registerCommand(
       Commands.ScriptControl.Execute,
-      factory(() => execute(globalModuleManager.api))
+      handlerFactory(() => execute(globalModuleManager.api))
     )
   );
   context.subscriptions.push(
     vscode.commands.registerCommand(
       Commands.ScriptControl.ExecuteCurrentScript,
-      factory(() => globalModuleManager.api.ScriptService.executeCurrent())
+      handlerFactory(() =>
+        globalModuleManager.api.ScriptService.executeCurrent()
+      )
     )
   );
   context.subscriptions.push(
     vscode.commands.registerCommand(
       Commands.ScriptControl.ForceCheckUserScriptsFolder,
-      factory(() => globalModuleManager.api.ScriptService.check(true))
+      handlerFactory(() => globalModuleManager.api.ScriptService.check(true))
     )
   );
   context.subscriptions.push(
     vscode.commands.registerCommand(
       Commands.ScriptControl.CleanUp,
-      factory(() => cleanUp(globalModuleManager.api))
+      handlerFactory(() => cleanUp(globalModuleManager.api))
     )
   );
   context.subscriptions.push(
     vscode.commands.registerCommand(
       Commands.ScriptControl.CleanUpAllSideEffects,
-      factory(() =>
+      handlerFactory(() =>
         globalModuleManager.api.ScriptService.cleanUpAll({
           includeMounted: true,
         })
@@ -95,13 +102,13 @@ export function activate(context: vscode.ExtensionContext): CoreAPI {
   context.subscriptions.push(
     vscode.commands.registerCommand(
       Commands.ScriptControl.InstallModule,
-      factory(() => installModule(globalModuleManager.api))
+      handlerFactory(() => installModule(globalModuleManager.api))
     )
   );
   context.subscriptions.push(
     vscode.commands.registerCommand(
       Commands.ScriptControl.EditScript,
-      factory(() =>
+      handlerFactory(() =>
         askScript(globalModuleManager.api).then(
           (script) =>
             script && globalModuleManager.api.ScriptService.editScript(script)
@@ -118,6 +125,7 @@ export function activate(context: vscode.ExtensionContext): CoreAPI {
         };
       })
       .then(devConfigReady);
+    generate(context);
   } else {
     devConfigReady();
   }
