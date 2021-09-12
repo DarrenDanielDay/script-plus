@@ -4,6 +4,7 @@ import * as commandGenerator from "../commands/generator";
 import * as configGenerator from "../configs/generator";
 import { readFile, writeFile } from "../modules/vscode-utils";
 import type { ExtensionPackageJSON } from "../types/vscode-package-json";
+import { sort } from "../utils";
 
 export async function generate(context: vscode.ExtensionContext) {
   const extensionUri = context.extensionUri;
@@ -20,7 +21,8 @@ export async function generate(context: vscode.ExtensionContext) {
   await normalize<Record<string, string>>(
     packageNlsJsonUri,
     commandGenerator.normalizeNlsJson,
-    configGenerator.normalizeNlsJson
+    configGenerator.normalizeNlsJson,
+    sort
   );
 }
 

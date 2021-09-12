@@ -16,12 +16,12 @@ export function normalizePackageJson(
   packageJson: ExtensionPackageJSON
 ): ExtensionPackageJSON {
   const cloned = clone(packageJson);
-  packageJson.contributes.configuration ??= {
+  cloned.contributes.configuration ??= {
     title: env.EXTENSION_NAME,
     properties: {},
   };
   const paths = getFullPaths(defaultConfig);
-  packageJson.contributes.configuration.properties = TypedObject.fromEntries(
+  cloned.contributes.configuration.properties = TypedObject.fromEntries(
     paths.map<readonly [string, ConfigItem]>((path) => {
       // @ts-expect-error Dynamic impl
       const value: never = access(defaultConfig, path);

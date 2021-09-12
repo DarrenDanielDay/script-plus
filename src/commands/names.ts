@@ -56,7 +56,7 @@ const [commandObject, commandList] = (() => {
     const lastObject: unknown = access(
       commandObject,
       // @ts-expect-error Dynamic impl
-      path.slice(1, path.length - 1)
+      path.slice(0, path.length - 1)
     );
     if (!isObjectLike(lastObject)) {
       return impossible();
@@ -64,7 +64,10 @@ const [commandObject, commandList] = (() => {
     Reflect.set(lastObject, path[path.length - 1]!, commandName);
     commandList.push(commandName);
   }
-  return [commandObject as CommandObject, commandList as Command[]] as const;
+  return [
+    commandObject as CommandObject,
+    commandList.sort() as Command[],
+  ] as const;
 })();
 
 export { commandObject as Commands, commandList as CommandList };

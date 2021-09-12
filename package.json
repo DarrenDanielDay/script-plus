@@ -32,31 +32,23 @@
   ],
   "icon": "logo.png",
   "activationEvents": [
-    "onCommand:script-plus.commands.webviewControl.close",
-    "onCommand:script-plus.commands.webviewControl.open",
-    "onCommand:script-plus.commands.webviewControl.reload",
+    "onCommand:script-plus.commands.packageManage.installModule",
     "onCommand:script-plus.commands.scriptControl.cleanUp",
     "onCommand:script-plus.commands.scriptControl.cleanUpAllSideEffects",
     "onCommand:script-plus.commands.scriptControl.editScript",
     "onCommand:script-plus.commands.scriptControl.execute",
     "onCommand:script-plus.commands.scriptControl.executeCurrentScript",
     "onCommand:script-plus.commands.scriptControl.forceCheckUserScriptsFolder",
-    "onCommand:script-plus.commands.packageManage.installModule"
+    "onCommand:script-plus.commands.webviewControl.close",
+    "onCommand:script-plus.commands.webviewControl.open",
+    "onCommand:script-plus.commands.webviewControl.reload"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "script-plus.commands.webviewControl.close",
-        "title": "%script-plus.commands.webviewControl.close%"
-      },
-      {
-        "command": "script-plus.commands.webviewControl.open",
-        "title": "%script-plus.commands.webviewControl.open%"
-      },
-      {
-        "command": "script-plus.commands.webviewControl.reload",
-        "title": "%script-plus.commands.webviewControl.reload%"
+        "command": "script-plus.commands.packageManage.installModule",
+        "title": "%script-plus.commands.packageManage.installModule%"
       },
       {
         "command": "script-plus.commands.scriptControl.cleanUp",
@@ -83,15 +75,23 @@
         "title": "%script-plus.commands.scriptControl.forceCheckUserScriptsFolder%"
       },
       {
-        "command": "script-plus.commands.packageManage.installModule",
-        "title": "%script-plus.commands.packageManage.installModule%"
+        "command": "script-plus.commands.webviewControl.close",
+        "title": "%script-plus.commands.webviewControl.close%"
+      },
+      {
+        "command": "script-plus.commands.webviewControl.open",
+        "title": "%script-plus.commands.webviewControl.open%"
+      },
+      {
+        "command": "script-plus.commands.webviewControl.reload",
+        "title": "%script-plus.commands.webviewControl.reload%"
       }
     ],
     "configuration": {
       "title": "Script Plus",
       "properties": {
-        "script-plus.node.packageManager": {
-          "description": "%script-plus.node.packageManager%",
+        "script-plus.configs.node.packageManager": {
+          "description": "%script-plus.configs.node.packageManager%",
           "type": "string",
           "enum": [
             "npm",
@@ -99,8 +99,8 @@
           ],
           "default": "yarn"
         },
-        "script-plus.packages.installPosition": {
-          "description": "%script-plus.packages.installPosition%",
+        "script-plus.configs.packages.installPosition": {
+          "description": "%script-plus.configs.packages.installPosition%",
           "type": "string",
           "enum": [
             "local",
@@ -108,23 +108,23 @@
           ],
           "default": "local"
         },
-        "script-plus.packages.installTypes": {
-          "description": "%script-plus.packages.installTypes%",
+        "script-plus.configs.packages.installTypes": {
+          "description": "%script-plus.configs.packages.installTypes%",
           "type": "boolean",
           "default": true
         },
-        "script-plus.packages.includePrerelease": {
-          "description": "%script-plus.packages.includePrerelease%",
+        "script-plus.configs.packages.includePrerelease": {
+          "description": "%script-plus.configs.packages.includePrerelease%",
           "type": "boolean",
           "default": false
         },
-        "script-plus.startUp.autoCheck": {
-          "description": "%script-plus.startUp.autoCheck%",
+        "script-plus.configs.startUp.autoCheck": {
+          "description": "%script-plus.configs.startUp.autoCheck%",
           "type": "boolean",
           "default": true
         },
-        "script-plus.startUp.warnLocale": {
-          "description": "%script-plus.startUp.warnLocale%",
+        "script-plus.configs.startUp.warnLocale": {
+          "description": "%script-plus.configs.startUp.warnLocale%",
           "type": "boolean",
           "default": true
         }
@@ -141,7 +141,7 @@
     },
     "viewsWelcome": [
       {
-        "contents": "Welcome to script-plus!\n[Open Script Plus UI](command:script-plus.open)",
+        "contents": "Welcome to script-plus!\n[Open Script Plus UI](command:script-plus.commands.webviewControl.open)",
         "view": "script-plus.view.startup",
         "when": "config.git.enabled"
       }
