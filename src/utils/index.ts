@@ -1,3 +1,4 @@
+import type { Func } from "taio/build/types/concepts";
 import type { AccessByPath, AccessPaths } from "taio/build/types/object";
 import { isObjectLike } from "taio/build/utils/validator/object";
 
@@ -43,4 +44,16 @@ export function sort<T>(json: T): T {
     );
   }
   return json;
+}
+export function createPending() {
+  let resolve: Func<[], void>;
+  let reject: Func<[unknown], void>;
+  let promise = new Promise<void>((...args) => {
+    [resolve, reject] = args;
+  });
+  return {
+    done: () => resolve(),
+    abort: (reason?: unknown) => reject(reason),
+    ready: promise,
+  };
 }

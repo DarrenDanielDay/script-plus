@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import env from "@esbuild-env";
 import { createWebviewManager } from "./webview-handler";
 import { createEventHubAdapter } from "./events/event-manager";
-import { Commands } from "./commands/names";
+import { Command, Commands } from "./commands/names";
 import { loadSnowpackConfig } from "./debug/snowpack-dev";
 import { createCoreAPI } from "./modules/core-module";
 import { createMessageHandler } from "./messages/message-manager";
@@ -10,13 +10,11 @@ import type { CoreAPI, CoreEvents } from "./types/public-api";
 import { createModuleManager } from "./modules/module-manager";
 import { askScript, cleanUp, execute } from "./actions/script";
 import { installModule } from "./actions/module";
-import {
-  devConfigReady,
-  handlerFactory,
-  startUpReady,
-} from "./commands/factory";
+import { handlerFactory } from "./commands/factory";
 import { createPublicAPI } from "./api/public-api";
 import { generate } from "./debug/generator";
+import type { Func } from "taio/build/types/concepts";
+import { startUp } from "./start/start-up";
 
 export function activate(context: vscode.ExtensionContext): CoreAPI {
   const globalEventHubAdapter = createEventHubAdapter<CoreEvents>();
@@ -49,77 +47,33 @@ export function activate(context: vscode.ExtensionContext): CoreAPI {
       globalEventHubAdapter.detach(webviewManager.panel!);
     });
   };
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      Commands.WebviewControl.Open,
-      handlerFactory(open)
-    )
-  );
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      Commands.WebviewControl.Close,
-      handlerFactory(close)
-    )
-  );
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      Commands.WebviewControl.Reload,
-      handlerFactory(reload)
-    )
-  );
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      Commands.ScriptControl.Execute,
-      handlerFactory(() => execute(globalModuleManager.api))
-    )
-  );
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      Commands.ScriptControl.ExecuteCurrentScript,
-      handlerFactory(() =>
-        globalModuleManager.api.ScriptService.executeCurrent()
-      )
-    )
-  );
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      Commands.ScriptControl.ForceCheckUserScriptsFolder,
-      handlerFactory(() => globalModuleManager.api.ScriptService.check(true))
-    )
-  );
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      Commands.ScriptControl.CleanUp,
-      handlerFactory(() => cleanUp(globalModuleManager.api))
-    )
-  );
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      Commands.ScriptControl.CleanUpAllSideEffects,
-      handlerFactory(() =>
-        globalModuleManager.api.ScriptService.cleanUpAll({
-          includeMounted: true,
-        })
-      )
-    )
-  );
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      Commands.PackageManage.InstallModule,
-      handlerFactory(() => installModule(globalModuleManager.api))
-    )
-  );
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      Commands.ScriptControl.EditScript,
-      handlerFactory(() =>
-        askScript(globalModuleManager.api).then(
-          (script) =>
-            script && globalModuleManager.api.ScriptService.editScript(script)
-        )
-      )
-    )
-  );
+  const commandsMapping: Record<Command, Func<[], void>> = {
+    [Commands.WebviewControl.Open]: open,
+    [Commands.WebviewControl.Close]: close,
+    [Commands.WebviewControl.Reload]: reload,
+    [Commands.ScriptControl.Execute]: () => execute(globalModuleManager.api),
+    [Commands.ScriptControl.ExecuteCurrentScript]: () =>
+      globalModuleManager.api.ScriptService.executeCurrent(),
+    [Commands.ScriptControl.ForceCheckUserScriptsFolder]: () =>
+      globalModuleManager.api.ScriptService.check(true),
+    [Commands.ScriptControl.CleanUp]: () => cleanUp(globalModuleManager.api),
+    [Commands.ScriptControl.CleanUpAllSideEffects]: () =>
+      globalModuleManager.api.ScriptService.cleanUpAll({
+        includeMounted: true,
+      }),
+    [Commands.PackageManage.InstallModule]: () =>
+      installModule(globalModuleManager.api),
+    [Commands.ScriptControl.EditScript]: () =>
+      askScript(globalModuleManager.api).then(
+        (script) =>
+          script && globalModuleManager.api.ScriptService.editScript(script)
+      ),
+  };
+  Object.entries(commandsMapping).forEach(([command, handler]) => {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(command, handlerFactory(handler))
+    );
+  });
   if (env.ENV === "dev") {
     loadSnowpackConfig(context)
       .then((config) => {
@@ -128,12 +82,10 @@ export function activate(context: vscode.ExtensionContext): CoreAPI {
           hmrSocketPort: config.devOptions.hmrPort ?? config.devOptions.port,
         };
       })
-      .then(devConfigReady);
+      .then(() => import("./start/dev").then((mod) => mod.devServer.done()));
     generate(context);
-  } else {
-    devConfigReady();
   }
-  globalModuleManager.api.ScriptService.check().finally(startUpReady);
+  globalModuleManager.api.ScriptService.check().finally(startUp.done);
   return createPublicAPI(globalModuleManager.api);
 }
 
