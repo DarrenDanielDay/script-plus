@@ -18,12 +18,14 @@ const devEnv: ESBuildEnv = {
   ENV: "dev",
   STATIC_FILE_BASE_DIR_NAMES: ["src", "app", "src"],
   EXTENSION_BASE_NAME: "script-plus",
+  EXTENSION_NAME: "Script Plus",
   TEMPLATES: templates,
 };
 const prodEnv: ESBuildEnv = {
   ENV: "prod",
   STATIC_FILE_BASE_DIR_NAMES: ["out", "ui"],
   EXTENSION_BASE_NAME: "script-plus",
+  EXTENSION_NAME: "Script Plus",
   TEMPLATES: templates,
 };
 //#endregion

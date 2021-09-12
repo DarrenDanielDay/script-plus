@@ -27,7 +27,11 @@ export function activate(context: vscode.ExtensionContext): CoreAPI {
     moduleManager: globalModuleManager,
     eventAdapter: globalEventHubAdapter,
   });
-  const webviewManager = createWebviewManager("ui", "Script Plus", context);
+  const webviewManager = createWebviewManager(
+    "ui",
+    env.EXTENSION_NAME,
+    context
+  );
   context.subscriptions.push(webviewManager);
   context.subscriptions.push(globalEventHubAdapter);
   context.subscriptions.push(globalModuleManager.api.ScriptService);

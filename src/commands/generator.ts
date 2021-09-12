@@ -1,3 +1,4 @@
+import env from "@esbuild-env";
 import type { ExtensionPackageJSON } from "../types/vscode-package-json";
 import { clone } from "../utils";
 import { CommandList } from "./names";
@@ -25,7 +26,7 @@ export function normalizeNlsJson(
     if (command in result) {
       continue;
     }
-    result[command] = `Script Plus:`;
+    result[command] = `${env.EXTENSION_NAME}:`;
   }
   return result;
 }

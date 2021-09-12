@@ -7,6 +7,7 @@ import { impossible } from "../errors/internal-error";
 import type { ESBuildEnv } from "@esbuild-env";
 import env from "@esbuild-env";
 import type { FullAccessPaths } from "../utils/types/full-access-paths";
+import { namespaces } from "../modules/constant";
 const commands = {
   WebviewControl: {
     Close: "",
@@ -34,26 +35,24 @@ type CreateAccessPathObjectType<Path extends readonly string[], T> =
     : {
         [K in StringKey<T>]: CreateAccessPathObjectType<[...Path, K], T[K]>;
       };
-type CommandObject = CreateAccessPathObjectType<
-  [ESBuildEnv["EXTENSION_BASE_NAME"], "commands"],
-  typeof commands
->;
-const commandRoot = { commands };
+type PrefixPath = [
+  ESBuildEnv["EXTENSION_BASE_NAME"],
+  typeof namespaces["commands"]
+];
+
+type CommandObject = CreateAccessPathObjectType<PrefixPath, typeof commands>;
 export type Command = Join<
-  [
-    ESBuildEnv["EXTENSION_BASE_NAME"],
-    ...MapUncapitalize<FullAccessPaths<typeof commandRoot, string>>
-  ],
+  [...PrefixPath, ...MapUncapitalize<FullAccessPaths<typeof commands, string>>],
   "."
 >;
 const [commandObject, commandList] = (() => {
-  const paths = getFullPaths(commandRoot);
+  const paths = getFullPaths(commands);
   const commandObject = JSON.parse(JSON.stringify(commands)) as typeof commands;
-  const commandList: Command[] = [];
+  const commandList: string[] = [];
   for (const path of paths) {
-    const commandName = `${env.EXTENSION_BASE_NAME}.${path
+    const commandName = [env.EXTENSION_BASE_NAME, namespaces.commands, ...path]
       .map(uncapitalize)
-      .join(".")}`;
+      .join(".");
     const lastObject: unknown = access(
       commandObject,
       // @ts-expect-error Dynamic impl
@@ -63,8 +62,9 @@ const [commandObject, commandList] = (() => {
       return impossible();
     }
     Reflect.set(lastObject, path[path.length - 1]!, commandName);
+    commandList.push(commandName);
   }
-  return [commandObject as CommandObject, commandList] as const;
+  return [commandObject as CommandObject, commandList as Command[]] as const;
 })();
 
 export { commandObject as Commands, commandList as CommandList };

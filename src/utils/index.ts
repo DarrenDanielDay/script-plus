@@ -1,4 +1,5 @@
 import type { AccessByPath, AccessPaths } from "taio/build/types/object";
+import { isObjectLike } from "taio/build/utils/validator/object";
 
 export function clone<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
@@ -26,4 +27,20 @@ export function getFullPaths(obj: unknown): string[][] {
     if (!subPaths.length) return [[key]];
     return subPaths.map((path) => [key, ...path]);
   });
+}
+
+export function sort<T>(json: T): T {
+  if (Array.isArray(json)) {
+    // @ts-expect-error Dynamic impl
+    return json.map((item) => sort(item));
+  }
+  if (isObjectLike(json)) {
+    // @ts-expect-error Dynamic impl
+    return Object.fromEntries(
+      Object.keys(json)
+        .sort()
+        .map<[string, unknown]>((key) => [key, sort(Reflect.get(json, key))])
+    );
+  }
+  return json;
 }

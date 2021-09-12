@@ -12,6 +12,11 @@ export const names = {
   extension: "spp",
 } as const;
 
+export const namespaces = {
+  commands: "commands",
+  configs: "configs",
+} as const;
+
 export const scriptBundleFilter = {
   "Script Plus Bundle": [names.extension],
 };

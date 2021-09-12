@@ -140,9 +140,10 @@ export async function askForOptions<Options extends readonly string[]>(
   return result?.title;
 }
 
-const configRootSection = "script-plus";
 function getExtensionConfiguration() {
-  return vscode.workspace.getConfiguration(configRootSection);
+  return vscode.workspace.getConfiguration(
+    `${env.EXTENSION_BASE_NAME}.configs`
+  );
 }
 
 export function getConfigs(): ScriptPlusConfig & vscode.WorkspaceConfiguration {

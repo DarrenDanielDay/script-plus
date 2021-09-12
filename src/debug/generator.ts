@@ -1,6 +1,7 @@
 import type { Func } from "taio/build/types/concepts";
 import * as vscode from "vscode";
-import { normalizeNlsJson, normalizePackageJson } from "../commands/generator";
+import * as commandGenerator from "../commands/generator";
+import * as configGenerator from "../configs/generator";
 import { readFile, writeFile } from "../modules/vscode-utils";
 import type { ExtensionPackageJSON } from "../types/vscode-package-json";
 
@@ -11,11 +12,26 @@ export async function generate(context: vscode.ExtensionContext) {
     extensionUri,
     "package.nls.json"
   );
-  await normalize<ExtensionPackageJSON>(packageJsonUri, normalizePackageJson);
-  await normalize<Record<string, string>>(packageNlsJsonUri, normalizeNlsJson);
+  await normalize<ExtensionPackageJSON>(
+    packageJsonUri,
+    commandGenerator.normalizePackageJson,
+    configGenerator.normalizePackageJson
+  );
+  await normalize<Record<string, string>>(
+    packageNlsJsonUri,
+    commandGenerator.normalizeNlsJson,
+    configGenerator.normalizeNlsJson
+  );
 }
 
-async function normalize<T>(uri: vscode.Uri, normalizer: Func<[T], T>) {
+async function normalize<T>(uri: vscode.Uri, ...normalizers: Func<[T], T>[]) {
   const original = JSON.parse(await readFile(uri)) as T;
-  await writeFile(uri, JSON.stringify(normalizer(original)));
+  await writeFile(
+    uri,
+    JSON.stringify(
+      normalizers.reduce((prev, normalizer) => normalizer(prev), original),
+      undefined,
+      2
+    )
+  );
 }
