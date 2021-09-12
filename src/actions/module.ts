@@ -20,7 +20,7 @@ export async function installModule(api: CoreAPI) {
     },
     (_, token) => {
       return new Promise<string[]>((resolve, reject) => {
-        api.ScriptService.listVersions(moduleId).then(resolve);
+        api.PackageService.listVersions(moduleId).then(resolve);
         const subscription = token.onCancellationRequested(() => {
           subscription.dispose();
           reject(
@@ -38,5 +38,5 @@ export async function installModule(api: CoreAPI) {
   if (version === undefined) {
     return;
   }
-  await api.ScriptService.installPackage(moduleId, version);
+  await api.PackageService.installPackage(moduleId, version);
 }

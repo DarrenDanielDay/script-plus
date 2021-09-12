@@ -36,19 +36,19 @@ export const ModuleManager: React.FC = () => {
   const [includeTypes, setIncludeTypes] = useState(true);
   const [installPosition, setInstallPosition] = useState(InstallPosition.Local);
   const [installing, install] = useLoadingPipe(() => {
-    const packagePromise = SessionInvoker.ScriptService.installPackage(
+    const packagePromise = SessionInvoker.PackageService.installPackage(
       moduleId,
       version,
       { global: installPosition === InstallPosition.Global }
     );
     const typesPromise = includeTypes
-      ? SessionInvoker.ScriptService.installPackage(`@types/${moduleId}`, "")
+      ? SessionInvoker.PackageService.installPackage(`@types/${moduleId}`, "")
       : Promise.resolve();
     return Promise.all([packagePromise, typesPromise]);
   }, noop);
   const [versionSearching, getVersions] = useLoadingPipe(
     async (moduleId: string) =>
-      moduleId ? SessionInvoker.ScriptService.listVersions(moduleId) : [],
+      moduleId ? SessionInvoker.PackageService.listVersions(moduleId) : [],
     setVersions
   );
   const [configLoading, getConfig] = useLoadingPipe(

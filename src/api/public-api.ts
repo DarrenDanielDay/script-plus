@@ -1,14 +1,20 @@
 import type { AnyArray } from "taio/build/types/array";
 import type { AnyFunc } from "taio/build/types/concepts";
 import type { Join } from "taio/build/types/string";
+import { isArrayOf } from "taio/build/utils/validator/array";
 import type { Validator } from "taio/build/utils/validator/common";
 import { isObject } from "taio/build/utils/validator/object";
-import { isBoolean, isString } from "taio/build/utils/validator/primitive";
+import {
+  isBoolean,
+  isString,
+  primitiveOf,
+} from "taio/build/utils/validator/primitive";
 import { optional, record } from "taio/build/utils/validator/utils";
 import type { CoreAPI } from "../app/message-protocol";
 import { invalidUsage } from "../errors/invalid-usage";
 import { intl } from "../i18n/core/locale";
 import { isUserScript } from "../models/script";
+import { isInstallConfig } from "../modules/node-utils";
 import { globalErrorHandler } from "../modules/vscode-utils";
 import type { FullAccessPaths } from "../utils/types/full-access-paths";
 
@@ -110,18 +116,6 @@ export function createPublicAPI(api: CoreAPI): CoreAPI {
       getList: factory(api.ScriptService.getList, "ScriptService.getList"),
       getTasks: factory(api.ScriptService.getTasks, "ScriptService.getTasks"),
       import: factory(api.ScriptService.import, "ScriptService.import"),
-      installPackage: factory(
-        api.ScriptService.installPackage,
-        "ScriptService.installPackage",
-        isString,
-        isString,
-        optional(isObject({ global: optional(isBoolean) }))
-      ),
-      listVersions: factory(
-        api.ScriptService.listVersions,
-        "ScriptService.listVersions",
-        isString
-      ),
       mountTask: factory(
         api.ScriptService.mountTask,
         "ScriptService.mountTask",
@@ -131,6 +125,27 @@ export function createPublicAPI(api: CoreAPI): CoreAPI {
         api.ScriptService.updateScript,
         "ScriptService.updateScript",
         isUserScript
+      ),
+    },
+    PackageService: {
+      installModules: factory(
+        api.PackageService.installModules,
+        "PackageService.installModules",
+        isArrayOf(primitiveOf("string")),
+        isInstallConfig,
+        optional(isString)
+      ),
+      installPackage: factory(
+        api.PackageService.installPackage,
+        "PackageService.installPackage",
+        isString,
+        isString,
+        optional(isObject({ global: optional(isBoolean) }))
+      ),
+      listVersions: factory(
+        api.PackageService.listVersions,
+        "PackageService.listVersions",
+        isString
       ),
     },
   };

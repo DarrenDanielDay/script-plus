@@ -7,7 +7,9 @@ import type { PathLike } from "fs";
 import * as R from "ramda";
 import * as child_process from "child_process";
 import { platform } from "os";
-import { isString } from "taio/build/utils/validator/primitive";
+import { isBoolean, isString } from "taio/build/utils/validator/primitive";
+import { defineValidator, optional } from "taio/build/utils/validator/utils";
+import { isObject } from "taio/build/utils/validator/object";
 export const existFile = (pathLike: PathLike) =>
   fsextra.promises
     .stat(pathLike)
@@ -49,6 +51,12 @@ export interface InstallConfig {
   cwd: string;
   global?: boolean;
 }
+export const isInstallConfig = defineValidator<InstallConfig>(
+  isObject({
+    cwd: isString,
+    global: optional(isBoolean),
+  })
+);
 
 export type Installer = (
   moduleIds: string[],

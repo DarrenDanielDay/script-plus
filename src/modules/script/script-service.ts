@@ -1,4 +1,9 @@
-import type { CoreEvents, ScriptService } from "../../app/message-protocol";
+import type {
+  CoreEvents,
+  PackageService,
+  ScriptService,
+  StorageService,
+} from "../../app/message-protocol";
 import {
   Dependencies,
   isBooleanArgumentField,
@@ -13,23 +18,12 @@ import {
 } from "../../models/script";
 import * as vscode from "vscode";
 import { names, paths, scriptBundleFilter } from "../constant";
-import {
-  glob,
-  yarnAddPackages,
-  path,
-  randomString,
-  detectYarn,
-  detectNpm,
-  npmInstallPackages,
-  InstallConfig,
-  Installer,
-} from "../node-utils";
+import { glob, path, randomString } from "../node-utils";
 import esbuild from "esbuild";
 import ts from "typescript";
 import vm from "vm";
 import { tmpdir, homedir } from "os";
 import { builtinModules } from "module";
-import packageJson from "package-json";
 import { enumValues } from "taio/build/utils/enum";
 import {
   isNullish,
@@ -49,7 +43,6 @@ import type { IEventHubAdapter } from "../../events/event-manager";
 import {
   askForOptions,
   askYesNoQuestion,
-  divider,
   dumpObjectToFile,
   existDir,
   existFile,
@@ -60,14 +53,12 @@ import {
   openEdit,
   output,
   readFile,
-  updateConfig,
   writeFile,
 } from "../vscode-utils";
 import globalDirectories from "global-dirs";
 import * as semver from "semver";
 import type { CleanUp, ScriptRunResult } from "../../templates/api";
 import env from "@esbuild-env";
-import { PackageManager } from "../../models/configurations";
 import { intl } from "../../i18n/core/locale";
 import { invalidUsage } from "../../errors/invalid-usage";
 import { impossible } from "../../errors/internal-error";
@@ -95,40 +86,13 @@ const isScriptModule = defineValidator<ScriptModule>(
 
 export function createScriptService(
   context: vscode.ExtensionContext,
-  eventHub: IEventHubAdapter<CoreEvents>
+  eventHub: IEventHubAdapter<CoreEvents>,
+  storage: StorageService,
+  pkg: PackageService
 ): ScriptService {
   const activeTasks = new Map<string, LocalExecutionTask>();
-  function basedOnScripts(...fragments: string[]) {
-    return vscode.Uri.joinPath(
-      context.globalStorageUri,
-      paths.userScripts,
-      ...fragments
-    );
-  }
-  async function determinePackageInstaller(): Promise<Installer> {
-    const {
-      node: { packageManager },
-    } = getConfigs();
-    const [hasNpm, hasYarn] = await Promise.all([detectNpm(), detectYarn()]);
-    if (packageManager === PackageManager.yarn) {
-      if (hasYarn) {
-        return yarnAddPackages;
-      }
-      if (hasNpm) {
-        const userSayUseNpm = await askYesNoQuestion(
-          intl("node.packageManager.useNpmInstead")
-        );
-        if (userSayUseNpm) {
-          await updateConfig({ node: { packageManager: PackageManager.npm } });
-          return npmInstallPackages;
-        }
-      }
-    }
-    if (hasNpm) {
-      return npmInstallPackages;
-    }
-    return invalidUsage(intl("node.packageManager.noManager"));
-  }
+  const { basedOnScripts } = storage;
+  const { installModules } = pkg;
   async function scriptFolderCheck() {
     await vscode.workspace.fs.createDirectory(basedOnScripts());
     const packageJsonFile = basedOnScripts(paths.packageJson);
@@ -155,14 +119,14 @@ export function createScriptService(
   }
   async function vscodeAndNodeVersionCheck() {
     const version = new semver.SemVer(vscode.version);
-    const { stdout, stderr } = await installModules(
+    await installModules(
       [`@types/vscode@${version.major}.${version.minor}`, `@types/node@latest`],
       {
         cwd: basedOnScripts().fsPath,
         global: false,
-      }
+      },
+      "@types/vscode @types/node"
     );
-    logInstallPackage("@types/vscode @types/node", stdout, stderr);
   }
   function isValidScriptName(name: string) {
     const specialChars = "~`!@#$%^&*()_+={}|[]\\:;\"'<>?,./ ";
@@ -203,19 +167,6 @@ export function createScriptService(
 
 ${getConfigTsDeclCodeOfUserScript(script)}`
     );
-  }
-
-  function logInstallPackage(
-    packageName: string,
-    stdout: string,
-    stderr: string
-  ) {
-    divider(intl("script.logging.installModule", { moduleName: packageName }));
-    divider("stdout");
-    output.appendLine(stdout);
-    divider("stderr");
-    output.appendLine(stderr);
-    output.show();
   }
 
   async function installScript(bundle: ScriptPlusBundle) {
@@ -277,15 +228,14 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
             })
           );
           if (userSayYes) {
-            const { stderr, stdout } = await installModules(packages, {
-              cwd: basedOnScripts().fsPath,
-            });
-            logInstallPackage(
+            await installModules(
+              packages,
+              {
+                cwd: basedOnScripts().fsPath,
+              },
               intl("script.logging.installDependencies", {
                 scriptName: meta.name,
-              }),
-              stdout,
-              stderr
+              })
             );
           }
         }
@@ -577,10 +527,6 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
     activeTasks.delete(taskId);
   }
 
-  async function installModules(moduleIds: string[], configs: InstallConfig) {
-    return (await determinePackageInstaller())(moduleIds, configs);
-  }
-
   const scriptService: ScriptService = {
     dispose() {
       activeTasks.forEach((task) => {
@@ -808,47 +754,6 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
       } catch (error) {
         // do nothing
       }
-    },
-    async listVersions(moduleId) {
-      try {
-        const {
-          packages: { includePrerelease },
-        } = getConfigs();
-        const packageMeta: Partial<packageJson.AbbreviatedMetadata> =
-          await packageJson(moduleId, { allVersions: true });
-        return [
-          ...Object.keys(packageMeta.versions ?? {})
-            .map((version) => new semver.SemVer(version, { includePrerelease }))
-            .filter(
-              (version) => includePrerelease || !version.prerelease.length
-            )
-            .reduce((set, semver) => {
-              set.add(semver.format());
-              return set;
-            }, new Set<string>())
-            .keys(),
-        ].sort((a, b) => (semver.lt(a, b) ? 1 : semver.gt(a, b) ? -1 : 0));
-      } catch (error) {
-        if (error instanceof packageJson.PackageNotFoundError) {
-          vscode.window.showErrorMessage(error.message);
-          return [];
-        } else {
-          throw error;
-        }
-      }
-    },
-    async installPackage(packageName, version, options) {
-      const { stdout, stderr } = await installModules(
-        [`${packageName}${version ? `@${version}` : "@latest"}`],
-        {
-          cwd: basedOnScripts().fsPath,
-          global: options?.global,
-        }
-      );
-      logInstallPackage(packageName, stdout, stderr);
-      vscode.window.showInformationMessage(
-        intl("module.install.done.message", { moduleName: packageName })
-      );
     },
   };
   return scriptService;
