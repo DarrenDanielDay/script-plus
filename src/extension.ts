@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import env from "@esbuild-env";
 import { createWebviewManager } from "./webview-handler";
 import { createEventHubAdapter } from "./events/event-manager";
-import { Commands } from "./commands";
+import { Commands } from "./commands/names";
 import { loadSnowpackConfig } from "./debug/snowpack-dev";
 import { createCoreAPI } from "./modules/core-module";
 import { createMessageHandler } from "./messages/message-manager";
@@ -51,19 +51,19 @@ export function activate(context: vscode.ExtensionContext): CoreAPI {
   };
   context.subscriptions.push(
     vscode.commands.registerCommand(
-      Commands.WebviewControll.Open,
+      Commands.WebviewControl.Open,
       handlerFactory(open)
     )
   );
   context.subscriptions.push(
     vscode.commands.registerCommand(
-      Commands.WebviewControll.Close,
+      Commands.WebviewControl.Close,
       handlerFactory(close)
     )
   );
   context.subscriptions.push(
     vscode.commands.registerCommand(
-      Commands.WebviewControll.Reload,
+      Commands.WebviewControl.Reload,
       handlerFactory(reload)
     )
   );
@@ -105,7 +105,7 @@ export function activate(context: vscode.ExtensionContext): CoreAPI {
   );
   context.subscriptions.push(
     vscode.commands.registerCommand(
-      Commands.ScriptControl.InstallModule,
+      Commands.PackageManage.InstallModule,
       handlerFactory(() => installModule(globalModuleManager.api))
     )
   );

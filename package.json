@@ -32,59 +32,59 @@
   ],
   "icon": "logo.png",
   "activationEvents": [
-    "onCommand:script-plus.open",
-    "onCommand:script-plus.close",
-    "onCommand:script-plus.reload",
-    "onCommand:script-plus.execute",
-    "onCommand:script-plus.executeCurrentScript",
-    "onCommand:script-plus.forceCheckUserScriptsFolder",
-    "onCommand:script-plus.cleanUp",
-    "onCommand:script-plus.cleanUpAllSideEffects",
-    "onCommand:script-plus.installModule",
-    "onCommand:script-plus.editScript"
+    "onCommand:script-plus.commands.webviewControl.close",
+    "onCommand:script-plus.commands.webviewControl.open",
+    "onCommand:script-plus.commands.webviewControl.reload",
+    "onCommand:script-plus.commands.scriptControl.cleanUp",
+    "onCommand:script-plus.commands.scriptControl.cleanUpAllSideEffects",
+    "onCommand:script-plus.commands.scriptControl.editScript",
+    "onCommand:script-plus.commands.scriptControl.execute",
+    "onCommand:script-plus.commands.scriptControl.executeCurrentScript",
+    "onCommand:script-plus.commands.scriptControl.forceCheckUserScriptsFolder",
+    "onCommand:script-plus.commands.packageManage.installModule"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "script-plus.open",
-        "title": "%script-plus.open%"
+        "command": "script-plus.commands.webviewControl.close",
+        "title": "%script-plus.commands.webviewControl.close%"
       },
       {
-        "command": "script-plus.close",
-        "title": "%script-plus.close%"
+        "command": "script-plus.commands.webviewControl.open",
+        "title": "%script-plus.commands.webviewControl.open%"
       },
       {
-        "command": "script-plus.reload",
-        "title": "%script-plus.reload%"
+        "command": "script-plus.commands.webviewControl.reload",
+        "title": "%script-plus.commands.webviewControl.reload%"
       },
       {
-        "command": "script-plus.execute",
-        "title": "%script-plus.execute%"
+        "command": "script-plus.commands.scriptControl.cleanUp",
+        "title": "%script-plus.commands.scriptControl.cleanUp%"
       },
       {
-        "command": "script-plus.executeCurrentScript",
-        "title": "%script-plus.executeCurrentScript%"
+        "command": "script-plus.commands.scriptControl.cleanUpAllSideEffects",
+        "title": "%script-plus.commands.scriptControl.cleanUpAllSideEffects%"
       },
       {
-        "command": "script-plus.forceCheckUserScriptsFolder",
-        "title": "%script-plus.forceCheckUserScriptsFolder%"
+        "command": "script-plus.commands.scriptControl.editScript",
+        "title": "%script-plus.commands.scriptControl.editScript%"
       },
       {
-        "command": "script-plus.cleanUp",
-        "title": "%script-plus.cleanUp%"
+        "command": "script-plus.commands.scriptControl.execute",
+        "title": "%script-plus.commands.scriptControl.execute%"
       },
       {
-        "command": "script-plus.cleanUpAllSideEffects",
-        "title": "%script-plus.cleanUpAllSideEffects%"
+        "command": "script-plus.commands.scriptControl.executeCurrentScript",
+        "title": "%script-plus.commands.scriptControl.executeCurrentScript%"
       },
       {
-        "command": "script-plus.installModule",
-        "title": "%script-plus.installModule%"
+        "command": "script-plus.commands.scriptControl.forceCheckUserScriptsFolder",
+        "title": "%script-plus.commands.scriptControl.forceCheckUserScriptsFolder%"
       },
       {
-        "command": "script-plus.editScript",
-        "title": "%script-plus.editScript%"
+        "command": "script-plus.commands.packageManage.installModule",
+        "title": "%script-plus.commands.packageManage.installModule%"
       }
     ],
     "configuration": {
