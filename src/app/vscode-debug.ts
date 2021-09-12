@@ -1,4 +1,3 @@
-// @ts-check
 import { spawn } from "child_process";
 import { platform } from "os";
 import { resolve } from "path";

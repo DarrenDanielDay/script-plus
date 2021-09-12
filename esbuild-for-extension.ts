@@ -1,14 +1,10 @@
-// @ts-check
-/// <reference path="esbuild-env.d.ts" />
+import type { ESBuildEnv } from "@esbuild-env";
 import esbuild from "esbuild";
 import path from "path";
 import fs from "fs";
-/** @param file {string} */
-const readFile = (file) => fs.readFileSync(file).toString("utf-8");
-/** @param paths {string[]} */
-const resolve = (...paths) => path.resolve(process.cwd(), ...paths);
-/** @type {import('@esbuild-env').ESBuildEnv['TEMPLATES']} */
-const templates = {
+const readFile = (file: string) => fs.readFileSync(file).toString("utf-8");
+const resolve = (...paths: string[]) => path.resolve(process.cwd(), ...paths);
+const templates: ESBuildEnv["TEMPLATES"] = {
   API_D_TS: readFile(resolve("src", "templates", "api.d.ts")),
   JS_TEMPLATE: readFile(
     resolve("src", "templates", "script-name", "js-template.mjs")
@@ -18,15 +14,13 @@ const templates = {
   ),
 };
 //#region Environment variables
-/** @type {import('@esbuild-env').ESBuildEnv} */
-const devEnv = {
+const devEnv: ESBuildEnv = {
   ENV: "dev",
   STATIC_FILE_BASE_DIR_NAMES: ["src", "app", "src"],
   EXTENSION_BASE_NAME: "script-plus",
   TEMPLATES: templates,
 };
-/** @type {import("@esbuild-env").ESBuildEnv} */
-const prodEnv = {
+const prodEnv: ESBuildEnv = {
   ENV: "prod",
   STATIC_FILE_BASE_DIR_NAMES: ["out", "ui"],
   EXTENSION_BASE_NAME: "script-plus",
@@ -37,8 +31,7 @@ const prodEnv = {
 const isDev = process.argv.includes("--dev");
 
 //#region Extension build options
-/** @type {esbuild.BuildOptions} */
-const extensionCommonBuildOptions = {
+const extensionCommonBuildOptions: esbuild.BuildOptions = {
   platform: "node",
   entryPoints: [path.resolve("src", "extension.ts")],
   external: ["vscode", "snowpack", "esbuild"],
@@ -67,33 +60,29 @@ const extensionCommonBuildOptions = {
 //#endregion
 /**
  * Trace build message.
- * @param message {Pick<import("esbuild").BuildFailure, "errors" | "warnings">}
- * @param method {(...args: any[]) => void}
  */
-function trackMessage(message, method) {
+function trackMessage(
+  message: Pick<esbuild.BuildFailure, "errors" | "warnings">,
+  method: (...args: unknown[]) => void
+) {
   const date = new Date();
   const timeData = [date.getHours(), date.getMinutes(), date.getSeconds()];
   const prefix = `[${timeData
-    .map((time) => (time + "").padEnd(2, "0"))
+    .map((time) => `${time}`.padEnd(2, "0"))
     .join(":")}] [esbuild]`;
   method(`${prefix} Extension code rebuild!`);
+  const logESBuildErrors = (message: esbuild.Message) => {
+    const { location, text } = message;
+    const { file, line, column, suggestion } = location!;
+    method(`${prefix} ${file}(${line}:${column})`);
+    text && method(`${prefix} ${text}`);
+    suggestion && method(`${prefix} ${suggestion}`);
+  };
   for (const warning of message.warnings) {
-    const {
-      location: { file, line, column, suggestion },
-      text,
-    } = warning;
-    method(`${prefix} ${file}(${line}:${column})`);
-    text && method(`${prefix} ${text}`);
-    suggestion && method(`${prefix} ${suggestion}`);
+    logESBuildErrors(warning);
   }
-  for (const warning of message.errors) {
-    const {
-      location: { file, line, column, suggestion },
-      text,
-    } = warning;
-    method(`${prefix} ${file}(${line}:${column})`);
-    text && method(`${prefix} ${text}`);
-    suggestion && method(`${prefix} ${suggestion}`);
+  for (const error of message.errors) {
+    logESBuildErrors(error);
   }
 }
 if (isDev) {
@@ -103,7 +92,7 @@ if (isDev) {
     watch: {
       onRebuild(error, result) {
         if (error) trackMessage(error, console.error);
-        else trackMessage(result, console.log);
+        else trackMessage(result!, console.log);
       },
     },
   });
