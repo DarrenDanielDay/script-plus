@@ -277,7 +277,7 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
             })
           );
           if (userSayYes) {
-            const { stderr, stdout } = await yarnAddPackages(packages, {
+            const { stderr, stdout } = await installModules(packages, {
               cwd: basedOnScripts().fsPath,
             });
             logInstallPackage(
