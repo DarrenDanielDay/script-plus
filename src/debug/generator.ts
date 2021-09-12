@@ -34,6 +34,6 @@ async function normalize<T>(uri: vscode.Uri, ...normalizers: Func<[T], T>[]) {
       normalizers.reduce((prev, normalizer) => normalizer(prev), original),
       undefined,
       2
-    )
+    ) + "\n"
   );
 }
