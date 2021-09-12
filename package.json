@@ -159,7 +159,7 @@
     "prepare": "yarn husky install",
     "vscode:prepublish": "yarn build",
     "watch:types": "tsc -watch --noEmit -p ./",
-    "watch:esbuild": "node ./esbuild-for-extension.mjs --dev",
+    "watch:esbuild": "esbuild ./esbuild-for-extension.ts --format=cjs --platform=node | node - --dev",
     "format": "prettier --write .",
     "lint:fix": " yarn eslint src/**/*.ts --fix && pretty-quick --staged",
     "lint:style": "eslint ./src/**/*.ts",
