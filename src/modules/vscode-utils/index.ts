@@ -16,6 +16,7 @@ import type { ArrayItem } from "taio/build/types/array";
 import { impossible, isInternalError } from "../../errors/internal-error";
 import { isInvalidUsage } from "../../errors/invalid-usage";
 import { intl } from "../../i18n/core/locale";
+import { namespaces } from "../constant";
 export const output = vscode.window.createOutputChannel(
   `${env.EXTENSION_BASE_NAME} Logger`
 );
@@ -142,7 +143,7 @@ export async function askForOptions<Options extends readonly string[]>(
 
 function getExtensionConfiguration() {
   return vscode.workspace.getConfiguration(
-    `${env.EXTENSION_BASE_NAME}.configs`
+    `${env.EXTENSION_BASE_NAME}.${namespaces.configs}`
   );
 }
 
