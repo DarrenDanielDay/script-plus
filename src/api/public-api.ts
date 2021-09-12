@@ -32,7 +32,7 @@ function factory<Fn extends AnyFunc>(
   ...validators: MapToValidators<Parameters<Fn>>
 ): Fn {
   // @ts-expect-error Dynamic impl
-  const wrapped: Fn = (...args: unknown[]): ReturnType<Fn> => {
+  const wrapped: Fn = async (...args: unknown[]): ReturnType<Fn> => {
     try {
       for (let i = 0; i < validators.length; i++) {
         const validator: Validator<unknown> = validators[i];
@@ -43,7 +43,7 @@ function factory<Fn extends AnyFunc>(
           );
         }
       }
-      return fn(...args);
+      return await fn(...args);
     } catch (error) {
       globalErrorHandler(error);
     }
