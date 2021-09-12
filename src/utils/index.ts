@@ -1,18 +1,4 @@
-type AccessByPath<T, Path extends AccessPaths<T>> = Path extends readonly []
-  ? T
-  : Path extends [infer Current, ...infer Rest]
-  ? Current extends keyof T
-    ? Rest extends AccessPaths<T[Current]>
-      ? AccessByPath<T[Current], Rest>
-      : never
-    : never
-  : never;
-
-type AccessPaths<T> = T extends object
-  ? {
-      [K in keyof T]: [K, ...AccessPaths<T[K]>] | [K];
-    }[keyof T]
-  : [];
+import type { AccessByPath, AccessPaths } from "taio/build/types/object";
 
 export function access<T, Path extends AccessPaths<T>>(
   source: T,
