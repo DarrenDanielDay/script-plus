@@ -1,7 +1,6 @@
 import { promisify } from "util";
 import G from "glob";
 import * as path from "path";
-import * as fs from "fs";
 import * as R from "ramda";
 import * as child_process from "child_process";
 import { platform } from "os";
@@ -10,7 +9,7 @@ import { defineValidator, optional } from "taio/build/utils/validator/utils";
 import { isObject } from "taio/build/utils/validator/object";
 
 export const glob = promisify(G);
-export { fs, path };
+export { path };
 const uppers = R.map(
   R.pipe(R.add("A".charCodeAt(0)), String.fromCharCode),
   R.range(0, 26)
