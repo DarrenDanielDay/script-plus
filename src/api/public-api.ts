@@ -131,6 +131,10 @@ export function createPublicAPI(api: CoreAPI): CoreAPI {
         "ScriptService.export",
         isUserScript
       ),
+      getLastExecutedScriptName: factory(
+        api.ScriptService.getLastExecutedScriptName,
+        "ScriptService.getLastExecutedScriptName"
+      ),
       getList: factory(api.ScriptService.getList, "ScriptService.getList"),
       getTasks: factory(api.ScriptService.getTasks, "ScriptService.getTasks"),
       import: factory(api.ScriptService.import, "ScriptService.import"),

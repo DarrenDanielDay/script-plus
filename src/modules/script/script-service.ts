@@ -2,7 +2,6 @@ import type {
   CoreEvents,
   PackageService,
   ScriptService,
-  StorageService,
 } from "../../types/public-api";
 import {
   Dependencies,
@@ -61,6 +60,7 @@ import { intl } from "../../i18n/core/locale";
 import { invalidUsage } from "../../errors/invalid-usage";
 import { impossible } from "../../errors/internal-error";
 import { getDisplay } from "../../common/object-display";
+import type { StorageService } from "../storage/storage-service";
 const f = ts.factory;
 interface ScriptModule {
   main: (
@@ -90,7 +90,7 @@ export function createScriptService(
   pkg: PackageService
 ): ScriptService {
   const activeTasks = new Map<string, LocalExecutionTask>();
-  const { basedOnScripts } = storage;
+  const { basedOnScripts, getGlobalStates, updateGlobalState } = storage;
   const { installModules } = pkg;
   const userConsole = vscode.window.createOutputChannel(
     intl("script.execute.console.name")
@@ -613,6 +613,7 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
       }
     },
     async execute(script, params) {
+      await updateGlobalState({ lastExecutedScript: script.name });
       let taskId = randomString(8);
       while (activeTasks.has(taskId)) {
         taskId = randomString(8);
@@ -676,6 +677,9 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
         taskName: localTask.taskName,
         startTime: localTask.startTime,
       }));
+    },
+    async getLastExecutedScriptName() {
+      return getGlobalStates().lastExecutedScript;
     },
     async mountTask(taskId) {
       const task = activeTasks.get(taskId);

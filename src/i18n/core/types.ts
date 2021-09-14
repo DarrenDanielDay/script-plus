@@ -43,8 +43,12 @@ export interface IntlTextFields {
         };
         script: {
           placeholder: [];
+          suggestion: {
+            lastExecuted: [];
+          };
           title: [];
         };
+
         task: {
           label: [ExecutionTask];
           title: [];

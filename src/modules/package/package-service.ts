@@ -1,11 +1,7 @@
 import * as vscode from "vscode";
 import packageJson from "package-json";
 import semver from "semver";
-import type {
-  ConfigService,
-  PackageService,
-  StorageService,
-} from "../../types/public-api";
+import type { ConfigService, PackageService } from "../../types/public-api";
 import { intl } from "../../i18n/core/locale";
 import {
   askYesNoQuestion,
@@ -26,6 +22,7 @@ import { invalidUsage } from "../../errors/invalid-usage";
 import { createTaskService, TaskService } from "../tasks/task-service";
 import type child_process from "child_process";
 import { noop } from "taio/build/utils/typed-function";
+import type { StorageService } from "../storage/storage-service";
 
 export type PackageInstallTaskService = TaskService<
   Parameters<Installer>,

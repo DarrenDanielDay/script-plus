@@ -7,11 +7,11 @@ import type {
   ConfigService,
   PackageService,
   StartUpService,
-  StorageService,
 } from "../../types/public-api";
 import { paths } from "../constant";
 import { parsePackageJson } from "../node-utils";
 import type { PackageInstallTaskService } from "../package/package-service";
+import type { StorageService } from "../storage/storage-service";
 import {
   askYesNoQuestion,
   existFile,

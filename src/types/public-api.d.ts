@@ -5,7 +5,6 @@ import type {
   TaskExecutionSignal,
 } from "../models/execution-task";
 import type { InstallConfig } from "../modules/node-utils";
-import type * as vscode from "vscode";
 import type { DeepPartial } from "taio/build/types/object";
 import type { ConfigUpdateSignal } from "../models/configurations";
 export interface CoreAPI {
@@ -18,10 +17,6 @@ export interface CoreAPI {
 export interface CoreEvents {
   task: TaskExecutionSignal;
   config: ConfigUpdateSignal;
-}
-
-export interface StorageService {
-  basedOnScripts(...fragments: string[]): vscode.Uri;
 }
 
 export interface StartUpService {
@@ -58,6 +53,7 @@ export interface ScriptService {
   execute(script: UserScript, params: PassedParameter): Promise<ExecutionTask>;
   executeCurrent(): Promise<void>;
   getTasks(): Promise<ExecutionTask[]>;
+  getLastExecutedScriptName(): Promise<string | undefined>;
   mountTask(taskId: string): Promise<void>;
   cleanUp(taskId: string): Promise<void>;
   cleanUpAll(config?: { includeMounted?: boolean }): Promise<void>;

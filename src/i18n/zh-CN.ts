@@ -32,8 +32,12 @@ export const zhCN: IntlTextTemplates = {
         },
         script: {
           placeholder: "输入搜索",
+          suggestion: {
+            lastExecuted: "最近一次执行",
+          },
           title: "选择一个脚本",
         },
+
         task: {
           label: "{taskName}(任务ID={taskId}, 开始运行于{startTime})",
           title: "选择任务",

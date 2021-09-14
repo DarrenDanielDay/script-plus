@@ -9,15 +9,37 @@ import type {
   PassedParameter,
   UserScript,
 } from "../models/script";
+import { typed } from "taio/build/utils/typed-function";
 
 export async function askScript(api: CoreAPI) {
   const scriptList = await api.ScriptService.getList();
-  const result = await vscode.window.showQuickPick(
-    scriptList.map<vscode.QuickPickItem & { script: UserScript }>((script) => ({
-      label: script.name,
-      description: script.description || undefined,
-      script,
-    })),
+  const lastExecutedScriptName =
+    await api.ScriptService.getLastExecutedScriptName();
+  let lastExecutedScript = scriptList.find(
+    (script) => script.name === lastExecutedScriptName
+  );
+  type ScriptQuickPickItem = vscode.QuickPickItem & {
+    script: UserScript;
+  };
+
+  const result = await vscode.window.showQuickPick<ScriptQuickPickItem>(
+    [
+      ...(lastExecutedScript
+        ? [
+            typed<ScriptQuickPickItem>({
+              label: lastExecutedScript.name,
+              description: lastExecutedScript.description || undefined,
+              script: lastExecutedScript,
+              detail: intl("actions.script.ask.script.suggestion.lastExecuted"),
+            }),
+          ]
+        : []),
+      ...scriptList.map((script) => ({
+        label: script.name,
+        description: script.description || undefined,
+        script,
+      })),
+    ],
     {
       placeHolder: intl("actions.script.ask.script.placeholder"),
       canPickMany: false,

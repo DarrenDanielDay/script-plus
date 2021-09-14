@@ -32,6 +32,9 @@ export const en: IntlTextTemplates = {
         },
         script: {
           placeholder: "Input to search",
+          suggestion: {
+            lastExecuted: "last executed script",
+          },
           title: "Select a script",
         },
         task: {
