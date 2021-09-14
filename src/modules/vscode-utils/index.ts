@@ -17,6 +17,7 @@ import { impossible, isInternalError } from "../../errors/internal-error";
 import { isInvalidUsage } from "../../errors/invalid-usage";
 import { intl } from "../../i18n/core/locale";
 import { namespaces } from "../constant";
+import { die } from "taio/build/utils/internal/exceptions";
 export const output = vscode.window.createOutputChannel(
   `${env.EXTENSION_BASE_NAME} Logger`
 );
@@ -139,6 +140,11 @@ export async function askForOptions<Options extends readonly string[]>(
     title: ArrayItem<Options>;
   }>(question, { modal }, ...options.map((option) => ({ title: option })));
   return result?.title;
+}
+
+export function promoteReinstall(): never {
+  vscode.window.showErrorMessage(intl("common.promote.maybeCorrupted"));
+  return die();
 }
 
 function getExtensionConfiguration() {

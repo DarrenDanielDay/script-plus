@@ -14,5 +14,6 @@
   "script-plus.configs.packages.installPosition": "Position to install packages.\nWhen set to `local`, packages will be installed in extension global storage.\nWhen set to `global`, packages will be installed in the pacakge manager's global folder.",
   "script-plus.configs.packages.installTypes": "Auto install `@types` for packages.",
   "script-plus.configs.startUp.autoCheck": "Whether to check folder on activate.",
+  "script-plus.configs.startUp.checkExtensionDependencies": "Whether to check extension dependencies (especially `esbuild`) on start up.",
   "script-plus.configs.startUp.warnLocale": "Whether to show locale warning on start up."
 }

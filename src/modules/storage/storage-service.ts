@@ -5,14 +5,14 @@ import { paths } from "../constant";
 export function createStorageService(
   context: vscode.ExtensionContext
 ): StorageService {
-  function basedOnScripts(...fragments: string[]) {
-    return vscode.Uri.joinPath(
-      context.globalStorageUri,
-      paths.userScripts,
-      ...fragments
-    );
-  }
-  return {
-    basedOnScripts,
+  const storageService: StorageService = {
+    basedOnScripts(...fragments) {
+      return vscode.Uri.joinPath(
+        context.globalStorageUri,
+        paths.userScripts,
+        ...fragments
+      );
+    },
   };
+  return storageService;
 }

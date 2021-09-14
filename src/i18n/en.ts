@@ -51,6 +51,8 @@ export const en: IntlTextTemplates = {
       yes: "Yes",
     },
     promote: {
+      maybeCorrupted:
+        "This extension may be corrupted, please try to reinstall.",
       reportIssue: "Please report an issue.",
     },
   },

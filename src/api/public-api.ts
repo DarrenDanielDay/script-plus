@@ -151,6 +151,11 @@ export function createPublicAPI(api: CoreAPI): CoreAPI {
         "StartUpService.checkAll",
         optional(isBoolean)
       ),
+      checkExtensionDependencies: factory(
+        api.StartUpService.checkExtensionDependencies,
+        "StartUpService.checkExtensionDependencies",
+        optional(isBoolean)
+      ),
       checkFolder: factory(
         api.StartUpService.checkFolder,
         "StartUpService.checkFolder"

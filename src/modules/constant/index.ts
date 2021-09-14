@@ -5,6 +5,7 @@ export const paths = {
   apiDeclaration: "api.d.ts",
   mainScript: "index",
   packageJson: "package.json",
+  nodeModules: "node_modules",
 } as const;
 
 export const names = {
@@ -15,6 +16,7 @@ export const names = {
 export const namespaces = {
   commands: "commands",
   configs: "configs",
+  globalStates: "globalStates",
 } as const;
 
 export const scriptBundleFilter = {

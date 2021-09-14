@@ -497,10 +497,10 @@
   resolved "https://registry.npmjs.org/@types/semver/-/semver-7.3.8.tgz#508a27995498d7586dcecd77c25e289bfaf90c59"
   integrity sha512-D/2EJvAlCEtYFEYmmlGwbGXuK886HzyCc3nZX/tkFTQdEU8jZDAgiv08P162yB17y4ZXZoq7yFAnW4GDBb9Now==
 
-"@types/vscode@^1.59.0":
-  version "1.59.0"
-  resolved "https://registry.npmjs.org/@types/vscode/-/vscode-1.59.0.tgz#11c93f5016926126bf30b47b9ece3bd617eeef31"
-  integrity sha512-Zg38rusx2nU6gy6QdF7v4iqgxNfxzlBlDhrRCjOiPQp+sfaNrp3f9J6OHIhpGNN1oOAca4+9Hq0+8u3jwzPMlQ==
+"@types/vscode@^1.60.0":
+  version "1.60.0"
+  resolved "https://registry.npmjs.org/@types/vscode/-/vscode-1.60.0.tgz#9330c317691b4f53441a18b598768faeeb71618a"
+  integrity sha512-wZt3VTmzYrgZ0l/3QmEbCq4KAJ71K3/hmMQ/nfpv84oH8e81KKwPEoQ5v8dNCxfHFVJ1JabHKmCvqdYOoVm1Ow==
 
 "@typescript-eslint/eslint-plugin@^4.29.0":
   version "4.29.0"
@@ -1212,7 +1212,7 @@ err-code@^2.0.2:
   resolved "https://registry.npmjs.org/err-code/-/err-code-2.0.3.tgz#23c2f3b756ffdfc608d30e27c9a941024807e7f9"
   integrity sha512-2bmlRpNKBxT/CRmPOlyISQpNj+qSeYvcym/uT0Jx2bMOlKLtSy1ZmLuVxSEKKyor/N5yhvp/ZiG1oE3DEYMSFA==
 
-esbuild@^0.12.20:
+esbuild@0.12.20:
   version "0.12.20"
   resolved "https://registry.npmjs.org/esbuild/-/esbuild-0.12.20.tgz#4d3c9d83c99a4031e027b42a4c398c23b6827cb0"
   integrity sha512-u7+0qTo9Z64MD9PhooEngCmzyEYJ6ovFhPp8PLNh3UasR5Ihjv6HWVXqm8uHmasdQlpsAf0IsY4U0YVUfCpt4Q==

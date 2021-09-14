@@ -61,6 +61,7 @@ export interface IntlTextFields {
       yes: [];
     };
     promote: {
+      maybeCorrupted: [];
       reportIssue: [];
     };
   };

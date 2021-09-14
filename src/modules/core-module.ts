@@ -27,6 +27,7 @@ function createCoreAPI(
       packageService
     ),
     StartUpService: createStartUpService(
+      context,
       packageService,
       storageService,
       configService,

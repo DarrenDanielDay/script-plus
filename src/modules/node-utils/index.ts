@@ -5,7 +5,11 @@ import * as R from "ramda";
 import * as child_process from "child_process";
 import { platform } from "os";
 import { isBoolean, isString } from "taio/build/utils/validator/primitive";
-import { defineValidator, optional } from "taio/build/utils/validator/utils";
+import {
+  defineValidator,
+  optional,
+  record,
+} from "taio/build/utils/validator/utils";
 import { isObject } from "taio/build/utils/validator/object";
 
 export const glob = promisify(G);
@@ -81,3 +85,31 @@ export const npmInstallPackages: Installer = (
 export const detectYarn = () => execFile(yarn, ["-v"]).then(R.T).catch(R.F);
 
 export const detectNpm = () => execFile(npm, ["-v"]).then(R.T).catch(R.F);
+
+interface ReferencedPackageJsonPart {
+  version: string;
+  name: string;
+  dependencies?: Record<string, string>;
+}
+
+const isPackageJson = defineValidator<ReferencedPackageJsonPart>(
+  isObject({
+    name: isString,
+    version: isString,
+    dependencies: optional(record(isString)),
+  })
+);
+
+export function parsePackageJson(
+  text: string
+): ReferencedPackageJsonPart | undefined {
+  try {
+    const json: unknown = JSON.parse(text);
+    if (isPackageJson(json)) {
+      return json;
+    }
+    return undefined;
+  } catch (error) {
+    return undefined;
+  }
+}

@@ -26,6 +26,7 @@ export interface StorageService {
 
 export interface StartUpService {
   checkAll(force?: boolean): Promise<void>;
+  checkExtensionDependencies(force?: boolean): Promise<void>;
   checkFolder(): Promise<void>;
   checkVSCodeAndNodeJS(): Promise<string>;
 }

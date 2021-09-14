@@ -50,6 +50,7 @@ export const zhCN: IntlTextTemplates = {
       yes: "是",
     },
     promote: {
+      maybeCorrupted: "插件可能损坏，请尝试重新安装。",
       reportIssue: "请上报错误。",
     },
   },

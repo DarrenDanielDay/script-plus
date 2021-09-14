@@ -127,6 +127,11 @@
           "description": "%script-plus.configs.startUp.warnLocale%",
           "type": "boolean",
           "default": true
+        },
+        "script-plus.configs.startUp.checkExtensionDependencies": {
+          "description": "%script-plus.configs.startUp.checkExtensionDependencies%",
+          "type": "boolean",
+          "default": true
         }
       }
     },
@@ -177,6 +182,7 @@
     "@types/package-json": "^5.0.1",
     "@types/ramda": "^0.27.44",
     "@types/semver": "^7.3.8",
+    "@types/vscode": "^1.60.0",
     "@typescript-eslint/eslint-plugin": "^4.29.0",
     "@typescript-eslint/parser": "^4.29.0",
     "date-fns": "^2.23.0",
@@ -196,7 +202,6 @@
     "vsce": "^1.88.0"
   },
   "dependencies": {
-    "@types/vscode": "^1.59.0",
-    "esbuild": "^0.12.20"
+    "esbuild": "0.12.20"
   }
 }

@@ -18,7 +18,7 @@ import {
 } from "../../models/script";
 import * as vscode from "vscode";
 import { names, paths, scriptBundleFilter } from "../constant";
-import { glob, path, randomString } from "../node-utils";
+import { glob, parsePackageJson, path, randomString } from "../node-utils";
 import esbuild from "esbuild";
 import ts from "typescript";
 import vm from "vm";
@@ -215,11 +215,14 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
       packageJsonFolderUri: vscode.Uri
     ): Promise<{ name: string; version: semver.SemVer } | null> => {
       try {
-        const uri = vscode.Uri.joinPath(packageJsonFolderUri, "package.json");
+        const uri = vscode.Uri.joinPath(
+          packageJsonFolderUri,
+          paths.packageJson
+        );
         const content = await readFile(uri);
-        const packageJSONContent: unknown = JSON.parse(content);
+        const packageJSONContent = parsePackageJson(content);
         if (
-          isObject({ version: isString, name: isString })(packageJSONContent) &&
+          packageJSONContent &&
           importPath.startsWith(packageJSONContent.name)
         ) {
           const version = semver.parse(packageJSONContent.version);
@@ -302,7 +305,7 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
     if (notResolvedPackages.length) {
       const dependencies = notResolvedPackages
         .map((pkg) => `"${pkg}"`)
-        .join(",");
+        .join(" ");
       vscode.window.showWarningMessage(
         intl("script.export.dependencies.unresolved", { dependencies })
       );
@@ -333,7 +336,7 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
 
   function getRequirePaths(): string[] {
     return [
-      basedOnScripts("node_modules").fsPath,
+      basedOnScripts(paths.nodeModules).fsPath,
       globalDirectories.yarn.packages,
       globalDirectories.npm.packages,
     ];

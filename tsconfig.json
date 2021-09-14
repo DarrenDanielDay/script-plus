@@ -11,7 +11,8 @@
     "importsNotUsedAsValues": "error",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "preserveWatchOutput": true
+    "preserveWatchOutput": true,
+    "resolveJsonModule": true
   },
   "include": ["src", "esbuild-for-extension.ts"],
   "exclude": ["node_modules", "src/app/src", "src/templates"]
