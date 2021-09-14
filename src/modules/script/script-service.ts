@@ -60,6 +60,7 @@ import env from "@esbuild-env";
 import { intl } from "../../i18n/core/locale";
 import { invalidUsage } from "../../errors/invalid-usage";
 import { impossible } from "../../errors/internal-error";
+import { getDisplay } from "../../common/object-display";
 const f = ts.factory;
 interface ScriptModule {
   main: (
@@ -91,6 +92,9 @@ export function createScriptService(
   const activeTasks = new Map<string, LocalExecutionTask>();
   const { basedOnScripts } = storage;
   const { installModules } = pkg;
+  const userConsole = vscode.window.createOutputChannel(
+    intl("script.execute.console.name")
+  );
   function isValidScriptName(name: string) {
     const specialChars = "~`!@#$%^&*()_+={}|[]\\:;\"'<>?,./ ";
     const special = new Set([...specialChars]);
@@ -378,14 +382,19 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
                   })
                 );
               }
+              const logs = args.map(getDisplay);
               eventHub.dispatcher.emit("task", {
                 type: "output",
                 output: {
                   level: methodName,
-                  payload: args,
+                  payload: logs,
                 },
                 taskId,
               });
+              for (const logItem of logs) {
+                userConsole.append(logItem + " ");
+              }
+              userConsole.appendLine("");
               return originalMethod.apply(target, args);
             };
           }

@@ -108,6 +108,9 @@ export const zhCN: IntlTextTemplates = {
       notFound: "找不到脚本“{scriptName}”。",
     },
     execute: {
+      console: {
+        name: "Script Plus脚本执行输出控制台",
+      },
       consoleMethodHasToBeFunction: "控制台方法 {methodName} 不是一个函数",
       invalid: {
         script: {

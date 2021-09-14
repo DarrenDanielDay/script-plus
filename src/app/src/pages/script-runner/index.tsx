@@ -36,6 +36,7 @@ import type {
 import styles from "../../components/common/common.module.css";
 import { useLoadingPipe } from "../../hooks/use-loading";
 import { useTypedIntl } from "../../i18n/core/locale";
+import { getDisplay } from "../../../../common/object-display";
 
 export interface IScriptRunnerProp {}
 
@@ -160,14 +161,8 @@ export const ScriptRunner: React.FC<IScriptRunnerProp> = ({}) => {
                       <Typography variant="h6" display="block" gutterBottom>
                         [ {val.level.toUpperCase()} ]{": "}
                         {Array.isArray(val.payload)
-                          ? val.payload
-                              .map((v) =>
-                                typeof v === "string"
-                                  ? v
-                                  : JSON.stringify(v, undefined, 2)
-                              )
-                              .join(", ")
-                          : JSON.stringify(val.payload, undefined, 2)}
+                          ? val.payload.map((v) => getDisplay(v)).join(", ")
+                          : getDisplay(val)}
                       </Typography>
                     </div>
                   );

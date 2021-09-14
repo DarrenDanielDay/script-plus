@@ -115,6 +115,9 @@ export const en: IntlTextTemplates = {
       notFound: 'Script "{script.name}" not found!',
     },
     execute: {
+      console: {
+        name: "Script Plus script execution output console",
+      },
       consoleMethodHasToBeFunction:
         "console method {methodName} is not a function.",
       invalid: {

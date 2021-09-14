@@ -118,6 +118,9 @@ export interface IntlTextFields {
       notFound: [{ scriptName: string }];
     };
     execute: {
+      console: {
+        name: [];
+      };
       consoleMethodHasToBeFunction: [{ methodName: string }];
       invalid: {
         script: {
