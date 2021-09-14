@@ -35,7 +35,7 @@ function factory<Fn extends AnyFunc>(
   const wrapped: Fn = async (...args: unknown[]): ReturnType<Fn> => {
     try {
       for (let i = 0; i < validators.length; i++) {
-        const validator: Validator<unknown> = validators[i];
+        const validator: Validator<unknown> = validators[i]!;
         const arg = args[i];
         if (!validator(arg)) {
           return invalidUsage(
@@ -66,12 +66,28 @@ export function createPublicAPI(api: CoreAPI): CoreAPI {
         nocheck
       ),
     },
-    ScriptService: {
-      check: factory(
-        api.ScriptService.check,
-        "ScriptService.check",
-        optional(isBoolean)
+    PackageService: {
+      installModules: factory(
+        api.PackageService.installModules,
+        "PackageService.installModules",
+        isArrayOf(primitiveOf("string")),
+        isInstallConfig,
+        optional(isString)
       ),
+      installPackage: factory(
+        api.PackageService.installPackage,
+        "PackageService.installPackage",
+        isString,
+        isString,
+        optional(isObject({ global: optional(isBoolean) }))
+      ),
+      listVersions: factory(
+        api.PackageService.listVersions,
+        "PackageService.listVersions",
+        isString
+      ),
+    },
+    ScriptService: {
       cleanUp: factory(
         api.ScriptService.cleanUp,
         "ScriptService.cleanUp",
@@ -127,25 +143,15 @@ export function createPublicAPI(api: CoreAPI): CoreAPI {
         isUserScript
       ),
     },
-    PackageService: {
-      installModules: factory(
-        api.PackageService.installModules,
-        "PackageService.installModules",
-        isArrayOf(primitiveOf("string")),
-        isInstallConfig,
-        optional(isString)
+    StartUpService: {
+      checkAll: factory(api.StartUpService.checkAll, "StartUpService.checkAll"),
+      checkFolder: factory(
+        api.StartUpService.checkFolder,
+        "StartUpService.checkFolder"
       ),
-      installPackage: factory(
-        api.PackageService.installPackage,
-        "PackageService.installPackage",
-        isString,
-        isString,
-        optional(isObject({ global: optional(isBoolean) }))
-      ),
-      listVersions: factory(
-        api.PackageService.listVersions,
-        "PackageService.listVersions",
-        isString
+      checkVSCodeAndNodeJS: factory(
+        api.StartUpService.checkVSCodeAndNodeJS,
+        "StartUpService.checkVSCodeAndNodeJS"
       ),
     },
   };

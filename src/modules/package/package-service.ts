@@ -7,24 +7,48 @@ import type {
   StorageService,
 } from "../../types/public-api";
 import { intl } from "../../i18n/core/locale";
-import { askYesNoQuestion, divider, output } from "../vscode-utils";
+import {
+  askYesNoQuestion,
+  divider,
+  getErrorMessage,
+  output,
+} from "../vscode-utils";
 import {
   detectNpm,
   detectYarn,
-  InstallConfig,
   Installer,
   npmInstallPackages,
+  ProcessOutput,
   yarnAddPackages,
 } from "../node-utils";
 import { PackageManager } from "../../models/configurations";
 import { invalidUsage } from "../../errors/invalid-usage";
+import { createTaskService, TaskService } from "../tasks/task-service";
+import type child_process from "child_process";
+import { noop } from "taio/build/utils/typed-function";
+
+export type PackageInstallTaskService = TaskService<
+  Parameters<Installer>,
+  child_process.ChildProcess,
+  ProcessOutput
+>;
 
 export function createPackageService(
   storage: StorageService,
   config: ConfigService
-): PackageService {
+): [PackageService, PackageInstallTaskService] {
   const { basedOnScripts } = storage;
   const { getConfigs, updateConfigs } = config;
+  const installTaskService: PackageInstallTaskService = createTaskService(
+    async (param, { resolve, reject }) => {
+      const promiseWithChild = (await determinePackageInstaller())(...param);
+      promiseWithChild.then(resolve).catch(reject);
+      return promiseWithChild.child;
+    },
+    (task) => {
+      task.data?.kill();
+    }
+  );
   function logInstallPackage(
     packageName: string,
     stdout: string,
@@ -61,17 +85,7 @@ export function createPackageService(
     }
     return invalidUsage(intl("node.packageManager.noManager"));
   }
-  async function installModules(
-    moduleIds: string[],
-    configs: InstallConfig,
-    message?: string
-  ) {
-    const { stdout, stderr } = await (
-      await determinePackageInstaller()
-    )(moduleIds, configs);
-    logInstallPackage(message ?? moduleIds.join(" "), stdout, stderr);
-  }
-  return {
+  const packageService: PackageService = {
     async listVersions(moduleId) {
       try {
         const {
@@ -101,17 +115,54 @@ export function createPackageService(
       }
     },
     async installPackage(packageName, version, options) {
-      await installModules(
+      const id = await packageService.installModules(
         [`${packageName}${version ? `@${version}` : "@latest"}`],
         {
           cwd: basedOnScripts().fsPath,
           global: options?.global,
-        }
+        },
+        "",
+        true
       );
-      vscode.window.showInformationMessage(
-        intl("module.install.done.message", { moduleName: packageName })
-      );
+      await installTaskService.waitForResult(id).catch(noop);
     },
-    installModules,
+    async installModules(moduleIds, configs, message, showLoading = false) {
+      const id = await installTaskService.create([moduleIds, configs]);
+      const moduleNames = moduleIds.join("\n");
+      const promise = installTaskService
+        .waitForResult(id)
+        .then(({ stdout, stderr }) => {
+          logInstallPackage(message ? message : moduleNames, stdout, stderr);
+          vscode.window.showInformationMessage(
+            intl("module.install.done.message", { moduleNames })
+          );
+        })
+        .catch((reason) =>
+          vscode.window.showErrorMessage(getErrorMessage(reason))
+        );
+      if (showLoading) {
+        vscode.window.withProgress(
+          { location: vscode.ProgressLocation.Notification, cancellable: true },
+          (progress, token) => {
+            progress.report({
+              message: intl("module.install.installing.message", {
+                moduleNames,
+              }),
+            });
+            token.onCancellationRequested(() => {
+              installTaskService.killTask(
+                id,
+                intl("module.install.canceled.message", {
+                  moduleNames,
+                })
+              );
+            });
+            return promise;
+          }
+        );
+      }
+      return id;
+    },
   };
+  return [packageService, installTaskService];
 }

@@ -44,13 +44,15 @@ export const isInstallConfig = defineValidator<InstallConfig>(
   })
 );
 
+export interface ProcessOutput {
+  stdout: string;
+  stderr: string;
+}
+
 export type Installer = (
   moduleIds: string[],
   config: InstallConfig
-) => child_process.PromiseWithChild<{
-  stdout: string;
-  stderr: string;
-}>;
+) => child_process.PromiseWithChild<ProcessOutput>;
 
 export const yarnAddPackages: Installer = (
   moduleIds: string[],

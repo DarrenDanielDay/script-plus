@@ -71,8 +71,14 @@ export interface IntlTextFields {
   };
   module: {
     install: {
+      canceled: {
+        message: [{ moduleNames: string }];
+      };
       done: {
-        message: [{ moduleName: string }];
+        message: [{ moduleNames: string }];
+      };
+      installing: {
+        message: [{ moduleNames: string }];
       };
     };
     notFound: [{ moduleId: string }];
@@ -85,6 +91,10 @@ export interface IntlTextFields {
   };
   script: {
     check: {
+      cancel: {
+        doNotCheckAgain: [];
+        message: [];
+      };
       progress: {
         checkingStorageFolder: [];
         checkingVersions: [];

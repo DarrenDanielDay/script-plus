@@ -1,4 +1,3 @@
-// Define your protocol here, and implement them in `modules` with best practice!
 import type { PassedParameter, UserScript } from "../models/script";
 import type { ScriptPlusConfig } from "../configs/user-config";
 import type {
@@ -10,9 +9,10 @@ import type * as vscode from "vscode";
 import type { DeepPartial } from "taio/build/types/object";
 import type { ConfigUpdateSignal } from "../models/configurations";
 export interface CoreAPI {
-  ScriptService: ScriptService;
   ConfigService: ConfigService;
   PackageService: PackageService;
+  ScriptService: ScriptService;
+  StartUpService: StartUpService;
 }
 
 export interface CoreEvents {
@@ -22,6 +22,12 @@ export interface CoreEvents {
 
 export interface StorageService {
   basedOnScripts(...fragments: string[]): vscode.Uri;
+}
+
+export interface StartUpService {
+  checkAll(force?: boolean): Promise<void>;
+  checkFolder(): Promise<void>;
+  checkVSCodeAndNodeJS(): Promise<string>;
 }
 
 export interface PackageService {
@@ -34,13 +40,13 @@ export interface PackageService {
   installModules(
     moduleIds: string[],
     config: InstallConfig,
-    message?: string
-  ): Promise<void>;
+    message?: string,
+    showLoading?: boolean
+  ): Promise<string>;
 }
 
 export interface ScriptService {
   dispose(): void;
-  check(force?: boolean): Promise<void>;
   create(script: UserScript): Promise<void>;
   getList(): Promise<UserScript[]>;
   updateScript(script: UserScript): Promise<void>;

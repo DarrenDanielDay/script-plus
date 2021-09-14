@@ -60,8 +60,14 @@ export const zhCN: IntlTextTemplates = {
   },
   module: {
     install: {
+      canceled: {
+        message: "已取消安装以下模块：\n{moduleNames}",
+      },
       done: {
-        message: "模块{moduleName}安装完成。",
+        message: "已成功安装以下模块：\n{moduleNames}",
+      },
+      installing: {
+        message: "正在安装以下模块：\n{moduleNames}",
       },
     },
     notFound: "找不到模块“{moduleId}”，是否在插件内或全局安装过？",
@@ -75,6 +81,10 @@ export const zhCN: IntlTextTemplates = {
   },
   script: {
     check: {
+      cancel: {
+        doNotCheckAgain: "是否要禁用启动检查？您可以在设置中重新启用它。",
+        message: "已取消启动检查。",
+      },
       progress: {
         checkingStorageFolder: "正在检查内部存储文件夹……",
         checkingVersions: "正在检查vscode版本与node版本……",

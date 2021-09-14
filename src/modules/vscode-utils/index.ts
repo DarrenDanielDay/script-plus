@@ -24,7 +24,7 @@ export const output = vscode.window.createOutputChannel(
 export const divider = (title: string, char = "=", length = 50) => {
   const left = Math.floor((length - title.length) / 2);
   output.appendLine(
-    `${char[0].repeat(left)}${title.padEnd(length - left, char[0])}`
+    `${char[0]!.repeat(left)}${title.padEnd(length - left, char[0])}`
   );
 };
 

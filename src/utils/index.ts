@@ -1,6 +1,7 @@
 import type { Func } from "taio/build/types/concepts";
 import type { AccessByPath, AccessPaths } from "taio/build/types/object";
 import { isObjectLike } from "taio/build/utils/validator/object";
+import type { PromiseHandler } from "./types/promise";
 
 export function clone<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
@@ -45,6 +46,20 @@ export function sort<T>(json: T): T {
   }
   return json;
 }
+export function createPromiseHandler<T>(): [PromiseHandler<T>, Promise<T>] {
+  let resolve: Func<[T], void>;
+  let reject: Func<[unknown], void>;
+  let promise = new Promise<T>((...args) => {
+    [resolve, reject] = args;
+  });
+  return [
+    {
+      resolve: (result: T) => resolve(result),
+      reject: (reason?: unknown) => reject(reason),
+    },
+    promise,
+  ];
+}
 export function createPending() {
   let resolve: Func<[], void>;
   let reject: Func<[unknown], void>;
@@ -56,4 +71,7 @@ export function createPending() {
     abort: (reason?: unknown) => reject(reason),
     ready: promise,
   };
+}
+export function keyIn<T>() {
+  return <K extends keyof T>(key: K) => key;
 }

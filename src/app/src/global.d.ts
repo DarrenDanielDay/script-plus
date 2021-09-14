@@ -1,4 +1,4 @@
-import type { CoreAPI, CoreEvents } from "../message-protocol";
+import type { CoreAPI, CoreEvents } from "../../types/public-api";
 import type { PromisifyMethods } from "../../utils/types/promise";
 import type { EventHub } from "../communication";
 import type { Subject } from "rxjs";

@@ -4,3 +4,8 @@ export type PromisifyMethods<T> = {
     ? (...args: Params) => Promisify<Result>
     : PromisifyMethods<T[K]>;
 };
+export type AsyncResult<T> = PromiseLike<T> | T;
+export interface PromiseHandler<R> {
+  resolve: (result: R) => void;
+  reject: (error?: unknown) => void;
+}

@@ -55,7 +55,7 @@ export function activate(context: vscode.ExtensionContext): CoreAPI {
     [Commands.ScriptControl.ExecuteCurrentScript]: () =>
       globalModuleManager.api.ScriptService.executeCurrent(),
     [Commands.ScriptControl.ForceCheckUserScriptsFolder]: () =>
-      globalModuleManager.api.ScriptService.check(true),
+      globalModuleManager.api.StartUpService.checkAll(true),
     [Commands.ScriptControl.CleanUp]: () => cleanUp(globalModuleManager.api),
     [Commands.ScriptControl.CleanUpAllSideEffects]: () =>
       globalModuleManager.api.ScriptService.cleanUpAll({
@@ -85,7 +85,7 @@ export function activate(context: vscode.ExtensionContext): CoreAPI {
       .then(() => import("./start/dev").then((mod) => mod.devServer.done()));
     generate(context);
   }
-  globalModuleManager.api.ScriptService.check().finally(startUp.done);
+  globalModuleManager.api.StartUpService.checkAll().finally(startUp.done);
   return createPublicAPI(globalModuleManager.api);
 }
 

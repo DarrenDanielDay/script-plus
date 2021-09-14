@@ -61,8 +61,16 @@ export const en: IntlTextTemplates = {
   },
   module: {
     install: {
+      canceled: {
+        message:
+          "Module installation of the following module(s) has been canceled:\n{moduleNames}",
+      },
       done: {
-        message: "Module {moduleName} installed.",
+        message:
+          "Successfully installed the following module(s):\n{moduleNames}",
+      },
+      installing: {
+        message: "Installing the following module(s):\n{moduleNames}",
       },
     },
     notFound:
@@ -78,6 +86,11 @@ export const en: IntlTextTemplates = {
   },
   script: {
     check: {
+      cancel: {
+        doNotCheckAgain:
+          "Do you want to disable start up check? You can enable it in settings.",
+        message: "Start up check canceled.",
+      },
       progress: {
         checkingStorageFolder: "Checking script plus storage folder...",
         checkingVersions: "Checking vscode version and node version...",

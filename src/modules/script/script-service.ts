@@ -45,8 +45,6 @@ import {
   askYesNoQuestion,
   dumpObjectToFile,
   existDir,
-  existFile,
-  getConfigs,
   getErrorMessage,
   globalErrorHandler,
   loadObjectFromFile,
@@ -93,41 +91,6 @@ export function createScriptService(
   const activeTasks = new Map<string, LocalExecutionTask>();
   const { basedOnScripts } = storage;
   const { installModules } = pkg;
-  async function scriptFolderCheck() {
-    await vscode.workspace.fs.createDirectory(basedOnScripts());
-    const packageJsonFile = basedOnScripts(paths.packageJson);
-    if (!(await existFile(packageJsonFile))) {
-      output.appendLine(intl("script.logging.createPackageJson"));
-      await writeFile(
-        packageJsonFile,
-        JSON.stringify(
-          {
-            name: "user-scripts",
-            version: "0.0.0",
-            description: "Script folder for vscode plugin `Script Plus`.",
-            license: "MIT",
-          },
-          undefined,
-          2
-        )
-      );
-    }
-    await writeFile(
-      basedOnScripts(paths.apiDeclaration),
-      env.TEMPLATES.API_D_TS
-    );
-  }
-  async function vscodeAndNodeVersionCheck() {
-    const version = new semver.SemVer(vscode.version);
-    await installModules(
-      [`@types/vscode@${version.major}.${version.minor}`, `@types/node@latest`],
-      {
-        cwd: basedOnScripts().fsPath,
-        global: false,
-      },
-      "@types/vscode @types/node"
-    );
-  }
   function isValidScriptName(name: string) {
     const specialChars = "~`!@#$%^&*()_+={}|[]\\:;\"'<>?,./ ";
     const special = new Set([...specialChars]);
@@ -532,37 +495,6 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
       activeTasks.forEach((task) => {
         task.cleanUp?.();
       });
-    },
-    async check(force) {
-      if (!force) {
-        const {
-          startUp: { autoCheck },
-        } = getConfigs();
-        if (!autoCheck) {
-          return;
-        }
-      }
-      return vscode.window.withProgress(
-        {
-          cancellable: true,
-          location: vscode.ProgressLocation.Notification,
-          title: intl("script.check.progress.title"),
-        },
-        (report, token) => {
-          return new Promise(async (resolve, reject) => {
-            token.onCancellationRequested(reject);
-            report.report({
-              message: intl("script.check.progress.checkingStorageFolder"),
-            });
-            await scriptFolderCheck();
-            report.report({
-              message: intl("script.check.progress.checkingVersions"),
-            });
-            await vscodeAndNodeVersionCheck();
-            resolve();
-          });
-        }
-      );
     },
     async create(script) {
       const validateMessage = isValidScriptName(script.name);
