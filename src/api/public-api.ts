@@ -72,7 +72,8 @@ export function createPublicAPI(api: CoreAPI): CoreAPI {
         "PackageService.installModules",
         isArrayOf(primitiveOf("string")),
         isInstallConfig,
-        optional(isString)
+        optional(isString),
+        optional(isBoolean)
       ),
       installPackage: factory(
         api.PackageService.installPackage,
@@ -106,7 +107,8 @@ export function createPublicAPI(api: CoreAPI): CoreAPI {
       delete: factory(
         api.ScriptService.delete,
         "ScriptService.delete",
-        isUserScript
+        isUserScript,
+        optional(isBoolean)
       ),
       dispose: factory(api.ScriptService.dispose, "ScriptService.dispose"),
       editScript: factory(
@@ -144,7 +146,11 @@ export function createPublicAPI(api: CoreAPI): CoreAPI {
       ),
     },
     StartUpService: {
-      checkAll: factory(api.StartUpService.checkAll, "StartUpService.checkAll"),
+      checkAll: factory(
+        api.StartUpService.checkAll,
+        "StartUpService.checkAll",
+        optional(isBoolean)
+      ),
       checkFolder: factory(
         api.StartUpService.checkFolder,
         "StartUpService.checkFolder"
