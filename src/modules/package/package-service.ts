@@ -121,7 +121,7 @@ export function createPackageService(
           cwd: basedOnScripts().fsPath,
           global: options?.global,
         },
-        "",
+        undefined,
         true
       );
       await installTaskService.waitForResult(id).catch(noop);
@@ -132,7 +132,7 @@ export function createPackageService(
       const promise = installTaskService
         .waitForResult(id)
         .then(({ stdout, stderr }) => {
-          logInstallPackage(message ? message : moduleNames, stdout, stderr);
+          logInstallPackage(message ?? moduleNames, stdout, stderr);
           vscode.window.showInformationMessage(
             intl("module.install.done.message", { moduleNames })
           );
