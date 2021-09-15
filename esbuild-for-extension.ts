@@ -91,15 +91,12 @@ if (isDev) {
   esbuild.build({
     ...extensionCommonBuildOptions,
     sourcemap: "both",
-    watch:
-      typeof global !== "undefined"
-        ? undefined
-        : {
-            onRebuild(error, result) {
-              if (error) trackMessage(error, console.error);
-              else trackMessage(result!, console.log);
-            },
-          },
+    watch: {
+      onRebuild(error, result) {
+        if (error) trackMessage(error, console.error);
+        else trackMessage(result!, console.log);
+      },
+    },
   });
 } else {
   esbuild

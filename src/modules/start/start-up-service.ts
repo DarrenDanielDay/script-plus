@@ -33,7 +33,7 @@ export function createStartUpService(
   const { getConfigs, updateConfigs } = config;
   const startUpService: StartUpService = {
     async checkAll(force) {
-      startUpService.checkExtensionDependencies(force);
+      await startUpService.checkExtensionDependencies(force);
       if (!force) {
         const {
           startUp: { autoCheck },
