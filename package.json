@@ -30,7 +30,7 @@
   "categories": [
     "Other"
   ],
-  "icon": "logo.png",
+  "icon": "assets/logo.png",
   "activationEvents": [
     "onCommand:script-plus.commands.packageManage.installModule",
     "onCommand:script-plus.commands.scriptControl.cleanUp",
@@ -140,7 +140,7 @@
         {
           "id": "script-plus",
           "title": "Script Plus",
-          "icon": "icon.svg"
+          "icon": "assets/icon.svg"
         }
       ]
     },
@@ -156,6 +156,18 @@
         {
           "id": "script-plus.view.startup",
           "name": "Startup Menu"
+        }
+      ]
+    },
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "script-plus.commands.scriptControl.execute",
+          "group": "inline"
+        },
+        {
+          "command": "script-plus.commands.scriptControl.editScript",
+          "group": "inline"
         }
       ]
     }

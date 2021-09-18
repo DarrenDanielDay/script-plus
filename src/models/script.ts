@@ -16,6 +16,7 @@ import {
 } from "taio/build/utils/validator/primitive";
 import {
   isAnyOf,
+  isUnionOf,
   isUnionThat,
   unionOf,
 } from "taio/build/utils/validator/array";
@@ -125,6 +126,9 @@ export type ArgumentConfig = Record<string, ArgumentField>;
 export const isArgumentConfig = record(isArgumentField);
 
 export type PassedParameter = Record<string, boolean | number | string>;
+export const isPassedParameter = defineValidator<PassedParameter>(
+  record(isUnionOf(isBoolean, isNumber, isString))
+);
 export interface UserScript {
   name: string;
   description: string;

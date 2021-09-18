@@ -9,6 +9,7 @@ import {
   Button,
   CircularProgress,
   colors,
+  Paper,
   Tooltip,
   Typography,
   useTheme,
@@ -111,6 +112,7 @@ export const ScriptRunner: React.FC<IScriptRunnerProp> = ({}) => {
               <Typography>{script.name}</Typography>
             </AccordionSummary>
             <AccordionDetails>
+              <Paper>{script.description}</Paper>
               <ParameterInput
                 arugmentConfig={script.argumentConfig}
                 value={argument}

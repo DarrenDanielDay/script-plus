@@ -15,12 +15,18 @@ import { createPublicAPI } from "./api/public-api";
 import { generate } from "./debug/generator";
 import type { Func } from "taio/build/types/concepts";
 import { startUp } from "./start/start-up";
+import { createTreeViewService } from "./modules/views/tree-view-service";
 
 export function activate(context: vscode.ExtensionContext): CoreAPI {
   const globalEventHubAdapter = createEventHubAdapter<CoreEvents>();
   const globalModuleManager = createModuleManager(
     createCoreAPI(context, globalEventHubAdapter)
   );
+  vscode.window.createTreeView("script-plus.view.startup", {
+    treeDataProvider: createTreeViewService(
+      globalModuleManager.api.ScriptService
+    ).createProvider(),
+  });
   const globalMessageHandler = createMessageHandler({
     moduleManager: globalModuleManager,
     eventAdapter: globalEventHubAdapter,
@@ -51,7 +57,8 @@ export function activate(context: vscode.ExtensionContext): CoreAPI {
     [Commands.WebviewControl.Open]: open,
     [Commands.WebviewControl.Close]: close,
     [Commands.WebviewControl.Reload]: reload,
-    [Commands.ScriptControl.Execute]: () => execute(globalModuleManager.api),
+    [Commands.ScriptControl.Execute]: (...args: unknown[]) =>
+      execute(globalModuleManager.api, ...args),
     [Commands.ScriptControl.ExecuteCurrentScript]: () =>
       globalModuleManager.api.ScriptService.executeCurrent(),
     [Commands.ScriptControl.ForceCheckUserScriptsFolder]: () =>

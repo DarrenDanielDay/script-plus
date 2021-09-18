@@ -3,9 +3,11 @@ import * as vscode from "vscode";
 import type { CoreAPI } from "../types/public-api";
 import { intl } from "../i18n/core/locale";
 import type { ExecutionTask } from "../models/execution-task";
-import type {
+import {
   ArgumentConfig,
   ArgumentField,
+  isPassedParameter,
+  isUserScript,
   PassedParameter,
   UserScript,
 } from "../models/script";
@@ -135,13 +137,17 @@ function askParameter(field: ArgumentField, fieldKey: string) {
   });
 }
 
-export async function execute(api: CoreAPI) {
-  const script = await askScript(api);
-  if (!script) {
+export async function execute(
+  api: CoreAPI,
+  script?: unknown,
+  params?: unknown
+) {
+  script ??= await askScript(api);
+  if (!isUserScript(script)) {
     return;
   }
-  const params = await askParameters({ argConfig: script.argumentConfig });
-  if (!params) {
+  params ??= await askParameters({ argConfig: script.argumentConfig });
+  if (!isPassedParameter(params)) {
     return;
   }
   return api.ScriptService.execute(script, params);
