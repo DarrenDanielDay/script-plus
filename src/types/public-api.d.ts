@@ -15,8 +15,9 @@ export interface CoreAPI {
 }
 
 export interface CoreEvents {
-  task: TaskExecutionSignal;
   config: ConfigUpdateSignal;
+  ["script-list-update"]: void;
+  task: TaskExecutionSignal;
 }
 
 export interface StartUpService {

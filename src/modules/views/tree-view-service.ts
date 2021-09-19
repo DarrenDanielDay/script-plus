@@ -4,7 +4,7 @@ import type { ScriptService } from "../../types/public-api";
 
 export interface TreeViewService {
   createProvider(): vscode.TreeDataProvider<UserScript>;
-  refresh(): Promise<void>;
+  refresh(): void;
 }
 
 export function createTreeViewService(
@@ -27,7 +27,7 @@ export function createTreeViewService(
         onDidChangeTreeData: eventEmitter.event,
       };
     },
-    async refresh() {
+    refresh() {
       eventEmitter.fire();
     },
   };

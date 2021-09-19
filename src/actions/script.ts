@@ -55,11 +55,7 @@ export async function askScript(api: CoreAPI) {
   }
 }
 
-export async function askParameters({
-  argConfig,
-}: {
-  argConfig: ArgumentConfig;
-}) {
+export async function askParameters(argConfig: ArgumentConfig) {
   const passed: PassedParameter = {};
   for (const [key, field] of Object.entries(argConfig)) {
     const result = await askParameter(field, key);
@@ -147,7 +143,7 @@ export async function execute(
   if (!isUserScript(script)) {
     return;
   }
-  params ??= await askParameters({ argConfig: script.argumentConfig });
+  params ??= await askParameters(script.argumentConfig);
   if (!isPassedParameter(params)) {
     return;
   }

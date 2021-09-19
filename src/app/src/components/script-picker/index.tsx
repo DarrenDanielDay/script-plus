@@ -44,7 +44,12 @@ export const ScriptPicker: React.FC<IScriptPickerProp> = ({ onChange }) => {
     () => SessionInvoker.ScriptService.getList(),
     R.compose(setFilteredScripts, R.find(R.T), setStateEffect(setScriptList))
   );
-  useEffect(R.pipe(fetchWithLoading, noop), []);
+  useEffect(
+    R.pipe(fetchWithLoading, () =>
+      window.SessionHubs.on("script-list-update", fetchWithLoading)
+    ),
+    []
+  );
   return (
     <Box className={styles["center-row"]}>
       <IconButton

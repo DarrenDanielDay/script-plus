@@ -45,7 +45,12 @@ export const ScriptManager: React.FC<IScriptManagerProp> = ({}) => {
       R.tap((scripts) => setEditingScript(scripts[0]))
     )
   );
-  useEffect(R.pipe(fetchScripts, R.always(undefined)), []);
+  useEffect(
+    R.pipe(fetchScripts, () =>
+      window.SessionHubs.on("script-list-update", fetchScripts)
+    ),
+    []
+  );
   const [newScriptName, setNewScriptName] = useState("");
   const [newScriptLang, setNewScriptLang] = useState<UserScript["lang"]>("ts");
   return (

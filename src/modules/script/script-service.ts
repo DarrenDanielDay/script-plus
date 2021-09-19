@@ -135,7 +135,9 @@ export function createScriptService(
 ${getConfigTsDeclCodeOfUserScript(script)}`
     );
   }
-
+  function emitScriptListUpdate() {
+    eventHub.dispatcher.emit("script-list-update", undefined);
+  }
   async function installScript(bundle: ScriptPlusBundle) {
     const { content, meta, dependencies } = bundle;
     const scriptHome = basedOnScripts(meta.name);
@@ -208,6 +210,7 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
         }
       })(),
     ]);
+    emitScriptListUpdate();
   }
 
   async function findInstalledVersionFor(importPath: string) {
@@ -521,6 +524,7 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
         content: script.lang === "js" ? getJsTemplate() : getTsTemplate(),
         dependencies: {},
       });
+      emitScriptListUpdate();
     },
     async delete(script, directly?) {
       const scriptHost = basedOnScripts(script.name);
@@ -544,6 +548,7 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
       vscode.window.showInformationMessage(
         intl("script.delete.done", { scriptName: script.name })
       );
+      emitScriptListUpdate();
     },
     async getList() {
       const base = basedOnScripts();

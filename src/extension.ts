@@ -93,6 +93,11 @@ export function activate(context: vscode.ExtensionContext): CoreAPI {
       .then(() => import("./start/dev").then((mod) => mod.devServer.done()));
     generate(context);
   }
+  context.subscriptions.push({
+    dispose: globalEventHubAdapter.dispatcher.on("script-list-update", () => {
+      treeViewService.refresh();
+    }),
+  });
   api.StartUpService.checkAll().finally(startUp.done);
   return createPublicAPI(api);
 }
