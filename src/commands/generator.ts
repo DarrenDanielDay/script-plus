@@ -12,6 +12,7 @@ import editIcon from "../../assets/icons/edit.svg";
 import deleteIcon from "../../assets/icons/delete.svg";
 import addIcon from "../../assets/icons/add.svg";
 import refreshIcon from "../../assets/icons/refresh.svg";
+import launchIcon from "../../assets/icons/launch.svg";
 
 const commandIcons: Partial<Record<Command, CommandConfig["icon"]>> = {
   [Commands.ScriptControl.Create]: {
@@ -33,6 +34,10 @@ const commandIcons: Partial<Record<Command, CommandConfig["icon"]>> = {
   [Commands.TreeViewControl.Refresh]: {
     dark: refreshIcon,
     light: refreshIcon,
+  },
+  [Commands.WebviewControl.Open]: {
+    dark: launchIcon,
+    light: launchIcon,
   },
 };
 

@@ -115,7 +115,11 @@
       },
       {
         "command": "script-plus.commands.webviewControl.open",
-        "title": "%script-plus.commands.webviewControl.open%"
+        "title": "%script-plus.commands.webviewControl.open%",
+        "icon": {
+          "dark": "assets/icons/launch.svg",
+          "light": "assets/icons/launch.svg"
+        }
       },
       {
         "command": "script-plus.commands.webviewControl.reload",
@@ -181,7 +185,7 @@
     },
     "viewsWelcome": [
       {
-        "contents": "Welcome to script-plus!\n[Open Script Plus UI](command:script-plus.commands.webviewControl.open)",
+        "contents": "Welcome to script-plus! For performance reason, this extension is not activated by default. \n[Activate extension and open Script Plus UI](command:script-plus.commands.webviewControl.open)",
         "view": "script-plus.view.startup",
         "when": "config.git.enabled"
       }
@@ -190,7 +194,7 @@
       "script-plus": [
         {
           "id": "script-plus.view.startup",
-          "name": "Startup Menu"
+          "name": "Start Here"
         }
       ]
     },
@@ -216,6 +220,10 @@
         },
         {
           "command": "script-plus.commands.scriptControl.create",
+          "group": "navigation"
+        },
+        {
+          "command": "script-plus.commands.webviewControl.open",
           "group": "navigation"
         }
       ]

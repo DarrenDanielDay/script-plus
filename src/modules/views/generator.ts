@@ -31,6 +31,10 @@ export const normalizePackageJson: Normalizer<ExtensionPackageJSON> = (
       command: Commands.ScriptControl.Create,
       group: "navigation",
     },
+    {
+      command: Commands.WebviewControl.Open,
+      group: "navigation",
+    },
   ];
   return cloned;
 };
