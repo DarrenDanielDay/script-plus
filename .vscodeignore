@@ -6,6 +6,7 @@ src/**
 .yarnrc
 user-scripts
 .husky/**
+.vscode/**
 **/tsconfig.json
 **/*.map
 **/*.ts

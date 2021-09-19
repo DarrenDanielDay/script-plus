@@ -14,6 +14,9 @@ const config = {
   },
   optimize: {
     sourcemap: "both",
+    bundle: true,
+    minify: true,
+    treeshake: true,
   },
   devOptions: {
     open: "none",

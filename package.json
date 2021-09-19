@@ -25,7 +25,7 @@
     "url": "https://github.com/DarrenDanielDay/script-plus"
   },
   "engines": {
-    "vscode": "^1.46.0"
+    "vscode": "^1.60.0"
   },
   "categories": [
     "Other"
