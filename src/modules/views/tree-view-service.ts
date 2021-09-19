@@ -1,30 +1,34 @@
-import type * as vscode from "vscode";
-import { Commands } from "../../commands/names";
+import * as vscode from "vscode";
 import type { UserScript } from "../../models/script";
 import type { ScriptService } from "../../types/public-api";
 
 export interface TreeViewService {
   createProvider(): vscode.TreeDataProvider<UserScript>;
+  refresh(): Promise<void>;
 }
 
-export function createTreeViewService(script: ScriptService): TreeViewService {
+export function createTreeViewService(
+  scriptService: ScriptService
+): TreeViewService {
+  const eventEmitter = new vscode.EventEmitter<UserScript | undefined | void>();
   const treeViewService: TreeViewService = {
     createProvider() {
       return {
         getTreeItem(script) {
           return {
+            id: script.name,
             label: script.name,
             tooltip: script.description,
-            command: {
-              command: Commands.ScriptControl.Execute,
-              title: "Execute Script",
-            },
           };
         },
         getChildren() {
-          return script.getList();
+          return scriptService.getList();
         },
+        onDidChangeTreeData: eventEmitter.event,
       };
+    },
+    async refresh() {
+      eventEmitter.fire();
     },
   };
   return treeViewService;

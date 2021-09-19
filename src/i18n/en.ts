@@ -31,6 +31,15 @@ export const en: IntlTextTemplates = {
           },
         },
         script: {
+          new: {
+            lang: {
+              promote: "Select the programming language for the new script",
+            },
+            name: {
+              duplicate: "Script name {scriptName} already exists.",
+              promote: "Input new script name",
+            },
+          },
           placeholder: "Input to search",
           suggestion: {
             lastExecuted: "last executed script",

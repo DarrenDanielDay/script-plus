@@ -31,6 +31,15 @@ export const zhCN: IntlTextTemplates = {
           },
         },
         script: {
+          new: {
+            lang: {
+              promote: "选择新脚本的编程语言",
+            },
+            name: {
+              duplicate: "脚本名称“{scriptName}”已存在",
+              promote: "输入新脚本的名称",
+            },
+          },
           placeholder: "输入搜索",
           suggestion: {
             lastExecuted: "最近一次执行",

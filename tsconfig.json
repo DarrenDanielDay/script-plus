@@ -14,6 +14,6 @@
     "preserveWatchOutput": true,
     "resolveJsonModule": true
   },
-  "include": ["src", "esbuild-for-extension.ts"],
+  "include": ["src", "assets", "esbuild-for-extension.ts"],
   "exclude": ["node_modules", "src/app/src", "src/templates"]
 }

@@ -1,10 +1,13 @@
-import type { Func } from "taio/build/types/concepts";
+import type { Func, Mapper } from "taio/build/types/concepts";
 import * as vscode from "vscode";
 import * as commandGenerator from "../commands/generator";
 import * as configGenerator from "../configs/generator";
+import * as treeViewGenerator from "../modules/views/generator";
 import { readFile, writeFile } from "../modules/vscode-utils";
 import type { ExtensionPackageJSON } from "../types/vscode-package-json";
 import { sort } from "../utils";
+
+export type Normalizer<T> = Mapper<T, T>;
 
 export async function generate(context: vscode.ExtensionContext) {
   const extensionUri = context.extensionUri;
@@ -16,7 +19,8 @@ export async function generate(context: vscode.ExtensionContext) {
   await normalize<ExtensionPackageJSON>(
     packageJsonUri,
     commandGenerator.normalizePackageJson,
-    configGenerator.normalizePackageJson
+    configGenerator.normalizePackageJson,
+    treeViewGenerator.normalizePackageJson
   );
   await normalize<Record<string, string>>(
     packageNlsJsonUri,

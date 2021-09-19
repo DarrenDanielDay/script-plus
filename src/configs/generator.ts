@@ -3,18 +3,20 @@ import { TypedObject } from "taio/build/libs/typescript/object";
 import { enumValues } from "taio/build/utils/enum";
 import type { JSONSchema } from "taio/build/utils/json/interfaces/json-describer";
 import { isString } from "taio/build/utils/validator/primitive";
+import type { Normalizer } from "../debug/generator";
 import { invalidUsage } from "../errors/invalid-usage";
 import { namespaces } from "../modules/constant";
 import type {
   ConfigItem,
   ExtensionPackageJSON,
 } from "../types/vscode-package-json";
+import type { ExtensionPackageNlsJSON } from "../types/vscode-package-nls-json";
 import { access, clone, getFullPaths } from "../utils";
 import { defaultConfig, scriptPlusConfigSchema } from "./user-config";
 
-export function normalizePackageJson(
-  packageJson: ExtensionPackageJSON
-): ExtensionPackageJSON {
+export const normalizePackageJson: Normalizer<ExtensionPackageJSON> = (
+  packageJson
+) => {
   const cloned = clone(packageJson);
   cloned.contributes.configuration ??= {
     title: env.EXTENSION_NAME,
@@ -49,18 +51,18 @@ export function normalizePackageJson(
     })
   );
   return cloned;
-}
+};
 
-export function normalizeNlsJson(
-  nlsJson: Record<string, string>
-): Record<string, string> {
+export const normalizeNlsJson: Normalizer<ExtensionPackageNlsJSON> = (
+  nlsJson
+) => {
   const result = clone(nlsJson);
   for (const path of getFullPaths(defaultConfig)) {
     const configKey = getConfigKey(path);
     result[configKey] ??= `%${configKey}%`;
   }
   return result;
-}
+};
 
 function getConfigKey(path: string[]) {
   return [env.EXTENSION_BASE_NAME, namespaces.configs, ...path].join(".");

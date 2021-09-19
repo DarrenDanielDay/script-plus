@@ -2,7 +2,7 @@ import { enumKeys, enumValues } from "taio/build/utils/enum";
 import * as vscode from "vscode";
 import type { CoreAPI } from "../types/public-api";
 import { intl } from "../i18n/core/locale";
-import type { ExecutionTask } from "../models/execution-task";
+import { ExecutionTask, isExecutionTask } from "../models/execution-task";
 import {
   ArgumentConfig,
   ArgumentField,
@@ -12,6 +12,7 @@ import {
   UserScript,
 } from "../models/script";
 import { typed } from "taio/build/utils/typed-function";
+import { isArrayOf } from "taio/build/utils/validator/array";
 
 export async function askScript(api: CoreAPI) {
   const scriptList = await api.ScriptService.getList();
@@ -169,11 +170,63 @@ async function askTasks(api: CoreAPI) {
     .then((tasks) => tasks?.map((task) => task.task));
 }
 
-export async function cleanUp(api: CoreAPI) {
-  const tasks = await askTasks(api);
-  if (tasks) {
+export async function cleanUp(api: CoreAPI, tasks?: unknown) {
+  tasks ??= await askTasks(api);
+  if (isArrayOf(isExecutionTask)(tasks)) {
     await Promise.all(
       tasks.map((task) => api.ScriptService.cleanUp(task.taskId))
     );
+  }
+}
+
+export async function create(api: CoreAPI) {
+  const lang = (
+    await vscode.window.showQuickPick<
+      vscode.QuickPickItem & { label: UserScript["lang"] }
+    >([{ label: "js" }, { label: "ts" }], {
+      canPickMany: false,
+      title: intl("actions.script.ask.script.new.lang.promote"),
+    })
+  )?.label;
+  if (!lang) {
+    return;
+  }
+  const list = await api.ScriptService.getList();
+  const names = new Set(list.map((script) => script.name));
+  const name = await vscode.window.showInputBox({
+    title: intl("actions.script.ask.script.new.name.promote"),
+    validateInput(value) {
+      return (
+        api.ScriptService.validateScriptNamePattern(value) ||
+        (names.has(value)
+          ? intl("actions.script.ask.script.new.name.duplicate", {
+              scriptName: value,
+            })
+          : "")
+      );
+    },
+  });
+  if (!name) {
+    return;
+  }
+  return api.ScriptService.create({
+    name,
+    lang,
+    description: "",
+    argumentConfig: {},
+  });
+}
+
+export async function deleteScript(api: CoreAPI, script?: unknown) {
+  script ??= await askScript(api);
+  if (isUserScript(script)) {
+    await api.ScriptService.delete(script);
+  }
+}
+
+export async function edit(api: CoreAPI, script?: unknown) {
+  script ??= await askScript(api);
+  if (isUserScript(script)) {
+    await api.ScriptService.editScript(script);
   }
 }

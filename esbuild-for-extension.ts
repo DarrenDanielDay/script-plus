@@ -54,6 +54,14 @@ const extensionCommonBuildOptions: esbuild.BuildOptions = {
             loader: "json",
           };
         });
+        builder.onLoad({ filter: /.*\.svg/ }, ({ path: filePath }) => {
+          return {
+            contents: path
+              .relative(process.cwd(), filePath)
+              .replace(/\\/g, "/"),
+            loader: "text",
+          };
+        });
       },
     },
   ],

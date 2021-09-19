@@ -9,21 +9,26 @@ import env from "@esbuild-env";
 import type { FullAccessPaths } from "../utils/types/full-access-paths";
 import { namespaces } from "../modules/constant";
 const commands = {
-  WebviewControl: {
-    Close: "",
-    Open: "",
-    Reload: "",
+  PackageManage: {
+    InstallModule: "",
   },
   ScriptControl: {
     CleanUp: "",
     CleanUpAllSideEffects: "",
+    Create: "",
+    Delete: "",
     EditScript: "",
     Execute: "",
     ExecuteCurrentScript: "",
     ForceCheckUserScriptsFolder: "",
   },
-  PackageManage: {
-    InstallModule: "",
+  TreeViewControl: {
+    Refresh: "",
+  },
+  WebviewControl: {
+    Close: "",
+    Open: "",
+    Reload: "",
   },
 };
 type MapUncapitalize<Arr extends readonly string[]> = {

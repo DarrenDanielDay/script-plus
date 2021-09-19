@@ -42,13 +42,21 @@ export interface IntlTextFields {
           };
         };
         script: {
+          new: {
+            lang: {
+              promote: [];
+            };
+            name: {
+              duplicate: [{ scriptName: string }];
+              promote: [];
+            };
+          };
           placeholder: [];
           suggestion: {
             lastExecuted: [];
           };
           title: [];
         };
-
         task: {
           label: [ExecutionTask];
           title: [];

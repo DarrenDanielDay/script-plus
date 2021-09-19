@@ -35,10 +35,13 @@
     "onCommand:script-plus.commands.packageManage.installModule",
     "onCommand:script-plus.commands.scriptControl.cleanUp",
     "onCommand:script-plus.commands.scriptControl.cleanUpAllSideEffects",
+    "onCommand:script-plus.commands.scriptControl.create",
+    "onCommand:script-plus.commands.scriptControl.delete",
     "onCommand:script-plus.commands.scriptControl.editScript",
     "onCommand:script-plus.commands.scriptControl.execute",
     "onCommand:script-plus.commands.scriptControl.executeCurrentScript",
     "onCommand:script-plus.commands.scriptControl.forceCheckUserScriptsFolder",
+    "onCommand:script-plus.commands.treeViewControl.refresh",
     "onCommand:script-plus.commands.webviewControl.close",
     "onCommand:script-plus.commands.webviewControl.open",
     "onCommand:script-plus.commands.webviewControl.reload"
@@ -59,12 +62,36 @@
         "title": "%script-plus.commands.scriptControl.cleanUpAllSideEffects%"
       },
       {
+        "command": "script-plus.commands.scriptControl.create",
+        "title": "%script-plus.commands.scriptControl.create%",
+        "icon": {
+          "dark": "assets/icons/add.svg",
+          "light": "assets/icons/add.svg"
+        }
+      },
+      {
+        "command": "script-plus.commands.scriptControl.delete",
+        "title": "%script-plus.commands.scriptControl.delete%",
+        "icon": {
+          "dark": "assets/icons/delete.svg",
+          "light": "assets/icons/delete.svg"
+        }
+      },
+      {
         "command": "script-plus.commands.scriptControl.editScript",
-        "title": "%script-plus.commands.scriptControl.editScript%"
+        "title": "%script-plus.commands.scriptControl.editScript%",
+        "icon": {
+          "dark": "assets/icons/edit.svg",
+          "light": "assets/icons/edit.svg"
+        }
       },
       {
         "command": "script-plus.commands.scriptControl.execute",
-        "title": "%script-plus.commands.scriptControl.execute%"
+        "title": "%script-plus.commands.scriptControl.execute%",
+        "icon": {
+          "dark": "assets/icons/run.svg",
+          "light": "assets/icons/run.svg"
+        }
       },
       {
         "command": "script-plus.commands.scriptControl.executeCurrentScript",
@@ -73,6 +100,14 @@
       {
         "command": "script-plus.commands.scriptControl.forceCheckUserScriptsFolder",
         "title": "%script-plus.commands.scriptControl.forceCheckUserScriptsFolder%"
+      },
+      {
+        "command": "script-plus.commands.treeViewControl.refresh",
+        "title": "%script-plus.commands.treeViewControl.refresh%",
+        "icon": {
+          "dark": "assets/icons/refresh.svg",
+          "light": "assets/icons/refresh.svg"
+        }
       },
       {
         "command": "script-plus.commands.webviewControl.close",
@@ -162,12 +197,26 @@
     "menus": {
       "view/item/context": [
         {
-          "command": "script-plus.commands.scriptControl.execute",
+          "command": "script-plus.commands.scriptControl.editScript",
           "group": "inline"
         },
         {
-          "command": "script-plus.commands.scriptControl.editScript",
+          "command": "script-plus.commands.scriptControl.delete",
           "group": "inline"
+        },
+        {
+          "command": "script-plus.commands.scriptControl.execute",
+          "group": "inline"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "script-plus.commands.treeViewControl.refresh",
+          "group": "navigation"
+        },
+        {
+          "command": "script-plus.commands.scriptControl.create",
+          "group": "navigation"
         }
       ]
     }
@@ -182,7 +231,7 @@
     "lint:style": "eslint ./src/**/*.ts",
     "lint:types": "tsc --noEmit -p ./ && cd ./src/app && tsc --noEmit -p ./",
     "build": "yarn build:extension && yarn build:ui",
-    "build:extension": "node ./esbuild-for-extension.mjs",
+    "build:extension": "esbuild ./esbuild-for-extension.ts --format=cjs --platform=node | node -",
     "build:ui": "cd src/app && yarn build",
     "bundle": "yarn vsce package"
   },

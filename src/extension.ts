@@ -8,7 +8,7 @@ import { createCoreAPI } from "./modules/core-module";
 import { createMessageHandler } from "./messages/message-manager";
 import type { CoreAPI, CoreEvents } from "./types/public-api";
 import { createModuleManager } from "./modules/module-manager";
-import { askScript, cleanUp, execute } from "./actions/script";
+import { create, cleanUp, deleteScript, edit, execute } from "./actions/script";
 import { installModule } from "./actions/module";
 import { handlerFactory } from "./commands/factory";
 import { createPublicAPI } from "./api/public-api";
@@ -22,10 +22,10 @@ export function activate(context: vscode.ExtensionContext): CoreAPI {
   const globalModuleManager = createModuleManager(
     createCoreAPI(context, globalEventHubAdapter)
   );
+  const { api } = globalModuleManager;
+  const treeViewService = createTreeViewService(api.ScriptService);
   vscode.window.createTreeView("script-plus.view.startup", {
-    treeDataProvider: createTreeViewService(
-      globalModuleManager.api.ScriptService
-    ).createProvider(),
+    treeDataProvider: treeViewService.createProvider(),
   });
   const globalMessageHandler = createMessageHandler({
     moduleManager: globalModuleManager,
@@ -38,8 +38,8 @@ export function activate(context: vscode.ExtensionContext): CoreAPI {
   );
   context.subscriptions.push(webviewManager);
   context.subscriptions.push(globalEventHubAdapter);
-  context.subscriptions.push(globalModuleManager.api.ScriptService);
-  context.subscriptions.push(globalModuleManager.api.ScriptService);
+  context.subscriptions.push(api.ScriptService);
+  context.subscriptions.push(api.ScriptService);
   const { open: doOpen, reload, close } = webviewManager;
   const open = async () => {
     doOpen();
@@ -47,34 +47,35 @@ export function activate(context: vscode.ExtensionContext): CoreAPI {
       webviewManager.attach(globalMessageHandler);
     globalEventHubAdapter.attach(webviewManager.panel!);
     webviewManager.onClose(() => {
-      globalModuleManager.api.ScriptService.cleanUpAll({
+      api.ScriptService.cleanUpAll({
         includeMounted: false,
       });
       globalEventHubAdapter.detach(webviewManager.panel!);
     });
   };
   const commandsMapping: Record<Command, Func<[], void>> = {
+    [Commands.PackageManage.InstallModule]: () => installModule(api),
+    [Commands.ScriptControl.Execute]: (...args: unknown[]) =>
+      execute(api, ...args),
+    [Commands.ScriptControl.ExecuteCurrentScript]: () =>
+      api.ScriptService.executeCurrent(),
+    [Commands.ScriptControl.ForceCheckUserScriptsFolder]: () =>
+      api.StartUpService.checkAll(true),
+    [Commands.ScriptControl.CleanUp]: (...args: unknown[]) =>
+      cleanUp(api, ...args),
+    [Commands.ScriptControl.CleanUpAllSideEffects]: () =>
+      api.ScriptService.cleanUpAll({
+        includeMounted: true,
+      }),
+    [Commands.ScriptControl.Create]: () => create(api),
+    [Commands.ScriptControl.Delete]: (...args: unknown[]) =>
+      deleteScript(api, ...args),
+    [Commands.ScriptControl.EditScript]: (...args: unknown[]) =>
+      edit(api, ...args),
+    [Commands.TreeViewControl.Refresh]: treeViewService.refresh,
     [Commands.WebviewControl.Open]: open,
     [Commands.WebviewControl.Close]: close,
     [Commands.WebviewControl.Reload]: reload,
-    [Commands.ScriptControl.Execute]: (...args: unknown[]) =>
-      execute(globalModuleManager.api, ...args),
-    [Commands.ScriptControl.ExecuteCurrentScript]: () =>
-      globalModuleManager.api.ScriptService.executeCurrent(),
-    [Commands.ScriptControl.ForceCheckUserScriptsFolder]: () =>
-      globalModuleManager.api.StartUpService.checkAll(true),
-    [Commands.ScriptControl.CleanUp]: () => cleanUp(globalModuleManager.api),
-    [Commands.ScriptControl.CleanUpAllSideEffects]: () =>
-      globalModuleManager.api.ScriptService.cleanUpAll({
-        includeMounted: true,
-      }),
-    [Commands.PackageManage.InstallModule]: () =>
-      installModule(globalModuleManager.api),
-    [Commands.ScriptControl.EditScript]: () =>
-      askScript(globalModuleManager.api).then(
-        (script) =>
-          script && globalModuleManager.api.ScriptService.editScript(script)
-      ),
   };
   Object.entries(commandsMapping).forEach(([command, handler]) => {
     context.subscriptions.push(
@@ -92,8 +93,8 @@ export function activate(context: vscode.ExtensionContext): CoreAPI {
       .then(() => import("./start/dev").then((mod) => mod.devServer.done()));
     generate(context);
   }
-  globalModuleManager.api.StartUpService.checkAll().finally(startUp.done);
-  return createPublicAPI(globalModuleManager.api);
+  api.StartUpService.checkAll().finally(startUp.done);
+  return createPublicAPI(api);
 }
 
 export function deactivate() {

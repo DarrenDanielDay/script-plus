@@ -1,11 +1,31 @@
+export interface CommandConfig {
+  command: string;
+  title: string;
+  icon?: {
+    light?: string;
+    dark?: string;
+  };
+}
+
 export interface ExtensionPackageJSON {
-  activationEvents: string[];
+  activationEvents?: string[];
   contributes: {
-    commands?: { command: string; title: string }[];
+    commands?: CommandConfig[];
     configuration?: {
       title: string;
       properties: Record<string, ConfigItem>;
     };
+    menus?: Partial<
+      Record<
+        "view/item/context" | "view/title",
+        {
+          command: string;
+          group?: "inline" | "navigation";
+          when?: string;
+          alt?: string;
+        }[]
+      >
+    >;
   };
 }
 type ConfigItem = NumberConfig | BooleanConfig | StringConfig;

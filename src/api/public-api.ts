@@ -148,6 +148,11 @@ export function createPublicAPI(api: CoreAPI): CoreAPI {
         "ScriptService.updateScript",
         isUserScript
       ),
+      validateScriptNamePattern: factory(
+        api.ScriptService.validateScriptNamePattern,
+        "ScriptService.validateScriptNamePattern",
+        isString
+      ),
     },
     StartUpService: {
       checkAll: factory(

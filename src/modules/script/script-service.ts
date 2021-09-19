@@ -547,7 +547,7 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
     },
     async getList() {
       const base = basedOnScripts();
-      const metas = await glob(`**/${paths.meta}`, {
+      const metas = await glob(`*/${paths.meta}`, {
         cwd: base.fsPath,
       });
       const jsons = await Promise.all(
@@ -702,6 +702,9 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
       } catch (error) {
         // do nothing
       }
+    },
+    validateScriptNamePattern(name) {
+      return isValidScriptName(name);
     },
   };
   return scriptService;

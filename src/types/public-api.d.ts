@@ -28,35 +28,36 @@ export interface StartUpService {
 
 export interface PackageService {
   listVersions(moduleId: string): Promise<string[]>;
-  installPackage(
-    moduleId: string,
-    version: string,
-    options?: { global?: boolean }
-  ): Promise<void>;
   installModules(
     moduleIds: string[],
     config: InstallConfig,
     message?: string,
     showLoading?: boolean
   ): Promise<string>;
+  installPackage(
+    moduleId: string,
+    version: string,
+    options?: { global?: boolean }
+  ): Promise<void>;
 }
 
 export interface ScriptService {
-  dispose(): void;
-  create(script: UserScript): Promise<void>;
-  getList(): Promise<UserScript[]>;
-  updateScript(script: UserScript): Promise<void>;
-  editScript(script: UserScript): Promise<void>;
-  delete(script: UserScript, directly?: boolean): Promise<void>;
-  export(script: UserScript): Promise<void>;
-  import(): Promise<void>;
-  execute(script: UserScript, params: PassedParameter): Promise<ExecutionTask>;
-  executeCurrent(): Promise<void>;
-  getTasks(): Promise<ExecutionTask[]>;
-  getLastExecutedScriptName(): Promise<string | undefined>;
-  mountTask(taskId: string): Promise<void>;
   cleanUp(taskId: string): Promise<void>;
   cleanUpAll(config?: { includeMounted?: boolean }): Promise<void>;
+  create(script: UserScript): Promise<void>;
+  delete(script: UserScript, directly?: boolean): Promise<void>;
+  dispose(): void;
+  editScript(script: UserScript): Promise<void>;
+  execute(script: UserScript, params: PassedParameter): Promise<ExecutionTask>;
+  executeCurrent(): Promise<void>;
+  export(script: UserScript): Promise<void>;
+  getLastExecutedScriptName(): Promise<string | undefined>;
+  getList(): Promise<UserScript[]>;
+  getTasks(): Promise<ExecutionTask[]>;
+  import(): Promise<void>;
+  mountTask(taskId: string): Promise<void>;
+  updateScript(script: UserScript): Promise<void>;
+  validateScriptNamePattern(name: string): string;
 }
 
 export interface ConfigService {
