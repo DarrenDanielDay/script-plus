@@ -32,6 +32,7 @@
   ],
   "icon": "assets/logo.png",
   "activationEvents": [
+    "onCommand:script-plus.commands.configuration.reset",
     "onCommand:script-plus.commands.packageManage.installModule",
     "onCommand:script-plus.commands.scriptControl.cleanUp",
     "onCommand:script-plus.commands.scriptControl.cleanUpAllSideEffects",
@@ -49,6 +50,10 @@
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
+      {
+        "command": "script-plus.commands.configuration.reset",
+        "title": "%script-plus.commands.configuration.reset%"
+      },
       {
         "command": "script-plus.commands.packageManage.installModule",
         "title": "%script-plus.commands.packageManage.installModule%"
@@ -157,6 +162,15 @@
           "type": "boolean",
           "default": false
         },
+        "script-plus.configs.script.transformer": {
+          "description": "%script-plus.configs.script.transformer%",
+          "type": "string",
+          "enum": [
+            "esbuild",
+            "babel"
+          ],
+          "default": "esbuild"
+        },
         "script-plus.configs.startUp.autoCheck": {
           "description": "%script-plus.configs.startUp.autoCheck%",
           "type": "boolean",
@@ -202,29 +216,35 @@
       "view/item/context": [
         {
           "command": "script-plus.commands.scriptControl.editScript",
-          "group": "inline"
+          "group": "inline",
+          "when": "view == script-plus.view.startup"
         },
         {
           "command": "script-plus.commands.scriptControl.delete",
-          "group": "inline"
+          "group": "inline",
+          "when": "view == script-plus.view.startup"
         },
         {
           "command": "script-plus.commands.scriptControl.execute",
-          "group": "inline"
+          "group": "inline",
+          "when": "view == script-plus.view.startup"
         }
       ],
       "view/title": [
         {
           "command": "script-plus.commands.treeViewControl.refresh",
-          "group": "navigation"
+          "group": "navigation",
+          "when": "view == script-plus.view.startup"
         },
         {
           "command": "script-plus.commands.scriptControl.create",
-          "group": "navigation"
+          "group": "navigation",
+          "when": "view == script-plus.view.startup"
         },
         {
           "command": "script-plus.commands.webviewControl.open",
-          "group": "navigation"
+          "group": "navigation",
+          "when": "view == script-plus.view.startup"
         }
       ]
     }
@@ -244,11 +264,13 @@
     "bundle": "yarn vsce package"
   },
   "devDependencies": {
+    "@babel/core": "^7.15.5",
+    "@babel/plugin-transform-modules-commonjs": "^7.15.4",
+    "@babel/plugin-transform-typescript": "^7.15.4",
     "@formatjs/intl": "^1.14.1",
     "@snowpack/plugin-react-refresh": "^2.5.0",
+    "@types/babel__core": "^7.1.16",
     "@types/glob": "^7.1.3",
-    "@types/global-dirs": "^1.0.0",
-    "@types/package-json": "^5.0.1",
     "@types/ramda": "^0.27.44",
     "@types/semver": "^7.3.8",
     "@types/vscode": "^1.60.0",

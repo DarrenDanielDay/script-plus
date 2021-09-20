@@ -4,9 +4,14 @@ export enum InstallPosition {
   Local = "local",
   Global = "global",
 }
-export enum PackageManager {
+export enum PackageManagerKind {
   npm = "npm",
   yarn = "yarn",
+}
+
+export enum TransformerKind {
+  esbuild = "esbuild",
+  babel = "babel",
 }
 
 export interface ConfigUpdateSignal {

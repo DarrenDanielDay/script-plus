@@ -5,15 +5,20 @@ import type { ScriptService } from "../../types/public-api";
 export interface TreeViewService {
   createProvider(): vscode.TreeDataProvider<UserScript>;
   refresh(): void;
+  register(): void;
 }
+
+export const treeViewId = "script-plus.view.startup";
 
 export function createTreeViewService(
   scriptService: ScriptService
 ): TreeViewService {
   const eventEmitter = new vscode.EventEmitter<UserScript | undefined | void>();
+  let registered = false;
+  let provider: vscode.TreeDataProvider<UserScript> | undefined = undefined;
   const treeViewService: TreeViewService = {
     createProvider() {
-      return {
+      provider ??= {
         getTreeItem(script) {
           return {
             id: script.name,
@@ -26,9 +31,20 @@ export function createTreeViewService(
         },
         onDidChangeTreeData: eventEmitter.event,
       };
+      return provider;
     },
     refresh() {
       eventEmitter.fire();
+    },
+    register() {
+      if (registered) {
+        return;
+      }
+      registered = true;
+      vscode.window.registerTreeDataProvider(
+        treeViewId,
+        treeViewService.createProvider()
+      );
     },
   };
   return treeViewService;

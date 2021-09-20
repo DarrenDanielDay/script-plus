@@ -12,3 +12,4 @@ user-scripts
 **/*.ts
 *.mjs
 src/app/node_modules
+*.log

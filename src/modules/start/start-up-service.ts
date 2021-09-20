@@ -1,34 +1,34 @@
 import env from "@esbuild-env";
 import semver from "semver";
-import { isString, isUndefined } from "taio/build/utils/validator/primitive";
 import * as vscode from "vscode";
 import { intl } from "../../i18n/core/locale";
+import { TransformerKind } from "../../models/configurations";
 import type {
   ConfigService,
   PackageService,
   StartUpService,
 } from "../../types/public-api";
 import { paths } from "../constant";
-import { parsePackageJson } from "../node-utils";
-import type { PackageInstallTaskService } from "../package/package-service";
+import type {
+  DependencyInstallTaskService,
+  PackageInstallTaskService,
+} from "../package/package-service";
 import type { StorageService } from "../storage/storage-service";
 import {
   askYesNoQuestion,
   existFile,
   output,
-  promoteReinstall,
-  readFile,
   writeFile,
 } from "../vscode-utils";
 
 export function createStartUpService(
-  context: vscode.ExtensionContext,
   pkg: PackageService,
   storage: StorageService,
   config: ConfigService,
-  installTask: PackageInstallTaskService
+  installTask: PackageInstallTaskService,
+  dependencyTask: DependencyInstallTaskService
 ): StartUpService {
-  const { installModules } = pkg;
+  const { installModules, installExtensionDependencies } = pkg;
   const { basedOnScripts } = storage;
   const { getConfigs, updateConfigs } = config;
   const startUpService: StartUpService = {
@@ -46,7 +46,7 @@ export function createStartUpService(
         {
           cancellable: true,
           location: vscode.ProgressLocation.Notification,
-          title: intl("script.check.progress.title"),
+          title: intl("startUp.check.progress.title"),
         },
         (report, token) => {
           return new Promise<void>(async (resolve, reject) => {
@@ -54,10 +54,10 @@ export function createStartUpService(
               currentId &&
                 installTask.killTask(
                   currentId,
-                  intl("script.check.cancel.message")
+                  intl("startUp.check.cancel.message")
                 );
               askYesNoQuestion(
-                intl("script.check.cancel.doNotCheckAgain"),
+                intl("startUp.check.cancel.doNotCheckAgain"),
                 false
               ).then((yes) => {
                 yes && updateConfigs({ startUp: { autoCheck: false } });
@@ -66,14 +66,14 @@ export function createStartUpService(
             });
             let currentId = "";
             report.report({
-              message: intl("script.check.progress.checkingStorageFolder"),
+              message: intl("startUp.check.progress.checkingStorageFolder"),
             });
             await startUpService.checkFolder();
             if (token.isCancellationRequested) {
               return;
             }
             report.report({
-              message: intl("script.check.progress.checkingVersions"),
+              message: intl("startUp.check.progress.checkingVersions"),
             });
             currentId = await startUpService.checkVSCodeAndNodeJS();
             installTask.waitForResult(currentId).then(() => resolve());
@@ -90,52 +90,37 @@ export function createStartUpService(
           return;
         }
       }
-      await updateConfigs({ startUp: { checkExtensionDependencies: false } });
-      const extensionPackageJson = parsePackageJson(
-        await readFile(
-          vscode.Uri.joinPath(context.extensionUri, paths.packageJson)
-        )
-      );
-      if (!extensionPackageJson) {
-        return promoteReinstall();
-      }
-      try {
-        const moduleIds = await Promise.all(
-          Object.keys(extensionPackageJson.dependencies ?? {}).map(
-            async (moduleId) => {
-              const uri = vscode.Uri.joinPath(
-                context.extensionUri,
-                paths.nodeModules,
-                moduleId,
-                paths.packageJson
-              );
-              const text = await readFile(uri);
-              const dependencyJson = parsePackageJson(text);
-              if (!dependencyJson) {
-                output.appendLine(
-                  intl("script.logging.invalidPackageJson", {
-                    fileName: uri.fsPath,
-                  })
-                );
-                return undefined;
-              }
-              const version = new semver.SemVer(dependencyJson.version);
-              return `${dependencyJson.name}@${version.major}.${version.minor}.${version.patch}`;
+      const taskId = await installExtensionDependencies({
+        useLock: false,
+        production: true,
+      });
+      await vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: intl("startUp.dependency.install.title"),
+          cancellable: true,
+        },
+        (_, token) =>
+          new Promise<void>(async (resolve, reject) => {
+            try {
+              const disposable = token.onCancellationRequested(() => {
+                disposable.dispose();
+                dependencyTask
+                  .killTask(taskId, intl("startUp.dependency.cancel.problem"))
+                  .then(() => {
+                    updateConfigs({
+                      script: { transformer: TransformerKind.babel },
+                    });
+                  });
+              });
+              await dependencyTask.waitForResult(taskId);
+              resolve();
+            } catch (error) {
+              reject(error);
             }
-          )
-        );
-        if (moduleIds.some(isUndefined)) {
-          return promoteReinstall();
-        }
-        const dependenciesInstallTaskId = await installModules(
-          moduleIds.filter(isString),
-          { cwd: context.extensionUri.fsPath },
-          undefined
-        );
-        await installTask.waitForResult(dependenciesInstallTaskId);
-      } catch (error) {
-        return promoteReinstall();
-      }
+          })
+      );
+      await updateConfigs({ startUp: { checkExtensionDependencies: false } });
     },
     async checkFolder() {
       await vscode.workspace.fs.createDirectory(basedOnScripts());

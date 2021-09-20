@@ -31,7 +31,7 @@ const prodEnv: ESBuildEnv = {
 //#endregion
 
 const isDev = process.argv.includes("--dev");
-
+const isDevBuild = process.argv.includes("--dev-build");
 //#region Extension build options
 const extensionCommonBuildOptions: esbuild.BuildOptions = {
   platform: "node",
@@ -50,7 +50,7 @@ const extensionCommonBuildOptions: esbuild.BuildOptions = {
         });
         builder.onLoad({ filter: /@esbuild-env/ }, () => {
           return {
-            contents: JSON.stringify(isDev ? devEnv : prodEnv),
+            contents: JSON.stringify(isDev || isDevBuild ? devEnv : prodEnv),
             loader: "json",
           };
         });
@@ -112,6 +112,7 @@ if (isDev) {
       ...extensionCommonBuildOptions,
       minify: true,
       treeShaking: true,
+      sourcemap: "both",
     })
     .catch(console.error);
 }

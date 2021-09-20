@@ -26,6 +26,13 @@ export interface ExtensionPackageJSON {
         }[]
       >
     >;
+    views?: Record<
+      string,
+      {
+        id: string;
+        name?: string;
+      }[]
+    >;
   };
 }
 type ConfigItem = NumberConfig | BooleanConfig | StringConfig;

@@ -11,6 +11,7 @@ import {
   record,
 } from "taio/build/utils/validator/utils";
 import { isObject } from "taio/build/utils/validator/object";
+import { PackageManagerKind } from "../../models/configurations";
 
 export const glob = promisify(G);
 export { path };
@@ -35,13 +36,12 @@ export const randomString = R.pipe(
   R.join("")
 );
 export const execFile = promisify(child_process.execFile);
-const yarn = platform() === "win32" ? "yarn.cmd" : "yarn";
-const npm = platform() === "win32" ? "npm.cmd" : "npm";
-export interface InstallConfig {
+export interface AddPackageConfig {
   cwd: string;
   global?: boolean;
 }
-export const isInstallConfig = defineValidator<InstallConfig>(
+
+export const isInstallConfig = defineValidator<AddPackageConfig>(
   isObject({
     cwd: isString,
     global: optional(isBoolean),
@@ -53,38 +53,94 @@ export interface ProcessOutput {
   stderr: string;
 }
 
-export type Installer = (
-  moduleIds: string[],
-  config: InstallConfig
-) => child_process.PromiseWithChild<ProcessOutput>;
+export interface DependencyInstallConfig {
+  production?: boolean;
+  useLock?: boolean;
+  cwd: string;
+}
 
-export const yarnAddPackages: Installer = (
-  moduleIds: string[],
-  config: InstallConfig
-) =>
-  execFile(
-    yarn,
-    [config.global && "global", "add", ...moduleIds].filter(isString),
-    {
-      cwd: config.cwd,
-    }
-  );
+export interface PackageManager {
+  readonly type: PackageManagerKind;
+  addPackage(
+    moduleIds: string[],
+    config: AddPackageConfig
+  ): child_process.PromiseWithChild<ProcessOutput>;
+  detect(): Promise<boolean>;
+  install(
+    config: DependencyInstallConfig
+  ): child_process.PromiseWithChild<ProcessOutput>;
+}
 
-export const npmInstallPackages: Installer = (
-  moduleIds: string[],
-  config: InstallConfig
-) =>
-  execFile(
-    npm,
-    ["install", config.global && "-g", ...moduleIds].filter(isString),
-    {
-      cwd: config.cwd,
-    }
-  );
+export const yarn = ((): PackageManager => {
+  const yarnExecutable = platform() === "win32" ? "yarn.cmd" : "yarn";
+  return {
+    get type() {
+      return PackageManagerKind.yarn;
+    },
+    addPackage(moduleIds, config) {
+      return execFile(
+        yarnExecutable,
+        [config.global && "global", "add", ...moduleIds].filter(isString),
+        {
+          cwd: config.cwd,
+        }
+      );
+    },
+    async detect() {
+      try {
+        await execFile(yarnExecutable, ["-v"]);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    install({ production, useLock, cwd }) {
+      return execFile(
+        yarnExecutable,
+        ["install", production && "--prod", !useLock && "--no-lockfile"].filter(
+          isString
+        ),
+        { cwd }
+      );
+    },
+  };
+})();
 
-export const detectYarn = () => execFile(yarn, ["-v"]).then(R.T).catch(R.F);
-
-export const detectNpm = () => execFile(npm, ["-v"]).then(R.T).catch(R.F);
+export const npm = ((): PackageManager => {
+  const npmExecutable = platform() === "win32" ? "npm.cmd" : "npm";
+  return {
+    get type() {
+      return PackageManagerKind.npm;
+    },
+    addPackage(moduleIds, config) {
+      return execFile(
+        npmExecutable,
+        ["install", config.global && "-g", ...moduleIds].filter(isString),
+        {
+          cwd: config.cwd,
+        }
+      );
+    },
+    async detect() {
+      try {
+        await execFile(npmExecutable, ["-v"]);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    install({ production, useLock }) {
+      return execFile(
+        npmExecutable,
+        [
+          "install",
+          production && "--production",
+          !useLock && "--package-lock=false",
+        ].filter(isString)
+      );
+    },
+  };
+})();
 
 interface ReferencedPackageJsonPart {
   version: string;

@@ -67,6 +67,11 @@ export interface IntlTextFields {
   api: {
     invalidParam: [{ index: number; api: string }];
   };
+  code: {
+    transform: {
+      failed: [];
+    };
+  };
   common: {
     ask: {
       no: [];
@@ -102,7 +107,7 @@ export interface IntlTextFields {
       useNpmInstead: [];
     };
   };
-  script: {
+  startUp: {
     check: {
       cancel: {
         doNotCheckAgain: [];
@@ -114,6 +119,16 @@ export interface IntlTextFields {
         title: [];
       };
     };
+    dependency: {
+      install: {
+        title: [];
+      };
+      cancel: {
+        problem: [];
+      };
+    };
+  };
+  script: {
     create: {
       code: {
         generate: {

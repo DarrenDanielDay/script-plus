@@ -57,6 +57,11 @@ export const zhCN: IntlTextTemplates = {
   api: {
     invalidParam: "调用“{api}”的第{index}个参数类型不正确",
   },
+  code: {
+    transform: {
+      failed: "代码转译失败。代码中可能有语法错误或不支持的语法。",
+    },
+  },
   common: {
     ask: {
       no: "否",
@@ -93,7 +98,7 @@ export const zhCN: IntlTextTemplates = {
       useNpmInstead: "找不到包管理工具`yarn`，是否使用`npm`代替？",
     },
   },
-  script: {
+  startUp: {
     check: {
       cancel: {
         doNotCheckAgain: "是否要禁用启动检查？您可以在设置中重新启用它。",
@@ -105,6 +110,17 @@ export const zhCN: IntlTextTemplates = {
         title: "Script Plus启动检查",
       },
     },
+    dependency: {
+      cancel: {
+        problem:
+          "已取消安装Script Plus的依赖项。一些功能（例如JavaScript/TypeScript的esbuild转译）可能不可用。",
+      },
+      install: {
+        title: "正在安装Script Plus的依赖项……",
+      },
+    },
+  },
+  script: {
     create: {
       code: {
         generate: {

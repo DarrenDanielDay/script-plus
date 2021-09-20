@@ -1,7 +1,11 @@
 import type { CreateTypeBySchemaType } from "taio/build/utils/json/interfaces/json-describer";
 import { defineSchema } from "taio/build/utils/json/schema/schema-factory";
 import { createValidatorBySchema } from "taio/build/utils/json/schema/validator-factory";
-import { InstallPosition, PackageManager } from "../models/configurations";
+import {
+  InstallPosition,
+  PackageManagerKind,
+  TransformerKind,
+} from "../models/configurations";
 
 export const scriptPlusConfigSchema = defineSchema({
   type: "object",
@@ -11,7 +15,7 @@ export const scriptPlusConfigSchema = defineSchema({
       fields: {
         packageManager: {
           type: "enum",
-          enumObject: PackageManager,
+          enumObject: PackageManagerKind,
         },
       },
     },
@@ -27,6 +31,15 @@ export const scriptPlusConfigSchema = defineSchema({
         },
         includePrerelease: {
           type: "boolean",
+        },
+      },
+    },
+    script: {
+      type: "object",
+      fields: {
+        transformer: {
+          type: "enum",
+          enumObject: TransformerKind,
         },
       },
     },
@@ -53,12 +66,15 @@ export type ScriptPlusConfig = CreateTypeBySchemaType<
 
 export const defaultConfig: ScriptPlusConfig = {
   node: {
-    packageManager: PackageManager.yarn,
+    packageManager: PackageManagerKind.yarn,
   },
   packages: {
     installPosition: InstallPosition.Local,
     installTypes: true,
     includePrerelease: false,
+  },
+  script: {
+    transformer: TransformerKind.esbuild,
   },
   startUp: {
     autoCheck: true,

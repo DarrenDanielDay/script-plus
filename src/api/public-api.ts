@@ -67,6 +67,14 @@ export function createPublicAPI(api: CoreAPI): CoreAPI {
       ),
     },
     PackageService: {
+      installExtensionDependencies: factory(
+        api.PackageService.installExtensionDependencies,
+        "PackageService.installExtensionDependencies",
+        isObject({
+          production: optional(isBoolean),
+          useLock: optional(isBoolean),
+        })
+      ),
       installModules: factory(
         api.PackageService.installModules,
         "PackageService.installModules",

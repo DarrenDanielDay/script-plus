@@ -16,6 +16,7 @@ import { generate } from "./debug/generator";
 import type { Func } from "taio/build/types/concepts";
 import { startUp } from "./start/start-up";
 import { createTreeViewService } from "./modules/views/tree-view-service";
+import { defaultConfig } from "./configs/user-config";
 
 export function activate(context: vscode.ExtensionContext): CoreAPI {
   const globalEventHubAdapter = createEventHubAdapter<CoreEvents>();
@@ -24,9 +25,7 @@ export function activate(context: vscode.ExtensionContext): CoreAPI {
   );
   const { api } = globalModuleManager;
   const treeViewService = createTreeViewService(api.ScriptService);
-  vscode.window.createTreeView("script-plus.view.startup", {
-    treeDataProvider: treeViewService.createProvider(),
-  });
+  treeViewService.register();
   const globalMessageHandler = createMessageHandler({
     moduleManager: globalModuleManager,
     eventAdapter: globalEventHubAdapter,
@@ -54,6 +53,8 @@ export function activate(context: vscode.ExtensionContext): CoreAPI {
     });
   };
   const commandsMapping: Record<Command, Func<[], void>> = {
+    [Commands.Configuration.Reset]: () =>
+      api.ConfigService.updateConfigs(defaultConfig),
     [Commands.PackageManage.InstallModule]: () => installModule(api),
     [Commands.ScriptControl.Execute]: (...args: unknown[]) =>
       execute(api, ...args),
@@ -98,8 +99,9 @@ export function activate(context: vscode.ExtensionContext): CoreAPI {
       treeViewService.refresh();
     }),
   });
-  api.StartUpService.checkAll().finally(startUp.done);
-  return createPublicAPI(api);
+  const publicAPI = createPublicAPI(api);
+  publicAPI.StartUpService.checkAll().finally(startUp.done);
+  return publicAPI;
 }
 
 export function deactivate() {

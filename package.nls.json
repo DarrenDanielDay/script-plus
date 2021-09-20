@@ -1,4 +1,5 @@
 {
+  "script-plus.commands.configuration.reset": "Script Plus: Reset configuration",
   "script-plus.commands.packageManage.installModule": "Script Plus: Install a module",
   "script-plus.commands.scriptControl.cleanUp": "Script Plus: Clean up side effects",
   "script-plus.commands.scriptControl.cleanUpAllSideEffects": "Script Plus: Clean up all side effects",
@@ -16,6 +17,7 @@
   "script-plus.configs.packages.includePrerelease": "Whether to include pre-release version of packages in module search.\nWhen set to true, the version list of large packages may be very long.",
   "script-plus.configs.packages.installPosition": "Position to install packages.\nWhen set to `local`, packages will be installed in extension global storage.\nWhen set to `global`, packages will be installed in the pacakge manager's global folder.",
   "script-plus.configs.packages.installTypes": "Auto install `@types` for packages.",
+  "script-plus.configs.script.transformer": "Specifies the transformer to transform script code into CommonJS syntax.",
   "script-plus.configs.startUp.autoCheck": "Whether to check folder on activate.",
   "script-plus.configs.startUp.checkExtensionDependencies": "Whether to check extension dependencies (especially `esbuild`) on start up.",
   "script-plus.configs.startUp.warnLocale": "Whether to show locale warning on start up."

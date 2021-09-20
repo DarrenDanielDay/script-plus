@@ -4,7 +4,10 @@ import type {
   ExecutionTask,
   TaskExecutionSignal,
 } from "../models/execution-task";
-import type { InstallConfig } from "../modules/node-utils";
+import type {
+  AddPackageConfig,
+  DependencyInstallConfig,
+} from "../modules/node-utils";
 import type { DeepPartial } from "taio/build/types/object";
 import type { ConfigUpdateSignal } from "../models/configurations";
 export interface CoreAPI {
@@ -29,9 +32,12 @@ export interface StartUpService {
 
 export interface PackageService {
   listVersions(moduleId: string): Promise<string[]>;
+  installExtensionDependencies(
+    config: Pick<DependencyInstallConfig, "production" | "useLock">
+  ): Promise<string>;
   installModules(
     moduleIds: string[],
-    config: InstallConfig,
+    config: AddPackageConfig,
     message?: string,
     showLoading?: boolean
   ): Promise<string>;

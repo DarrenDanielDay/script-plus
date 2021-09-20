@@ -61,6 +61,7 @@ import { invalidUsage } from "../../errors/invalid-usage";
 import { impossible } from "../../errors/internal-error";
 import { getDisplay } from "../../common/object-display";
 import type { StorageService } from "../storage/storage-service";
+import type { CodeService } from "../code/code-service";
 const f = ts.factory;
 interface ScriptModule {
   main: (
@@ -87,7 +88,8 @@ export function createScriptService(
   context: vscode.ExtensionContext,
   eventHub: IEventHubAdapter<CoreEvents>,
   storage: StorageService,
-  pkg: PackageService
+  pkg: PackageService,
+  transform: CodeService
 ): ScriptService {
   const activeTasks = new Map<string, LocalExecutionTask>();
   const { basedOnScripts, getGlobalStates, updateGlobalState } = storage;
@@ -320,23 +322,6 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
     const content = await readFile(getScriptAbsolutePath(script));
     return content;
   }
-
-  async function transformTsScript(content: string) {
-    const esbuildTransformed = await esbuild.transform(content, {
-      format: "cjs",
-      loader: "ts",
-    });
-    return esbuildTransformed.code;
-  }
-
-  async function transformJsScript(content: string) {
-    const esbuildTransformed = await esbuild.transform(content, {
-      format: "cjs",
-      loader: "js",
-    });
-    return esbuildTransformed.code;
-  }
-
   function getRequirePaths(): string[] {
     return [
       basedOnScripts(paths.nodeModules).fsPath,
@@ -421,13 +406,8 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
     exports: object
   ): Promise<ScriptModule> {
     const rawContent = await getScriptContent(script);
-    let content: string;
-    if (script.lang === "ts") {
-      content = await transformTsScript(rawContent);
-    } else {
-      content = await transformJsScript(rawContent);
-    }
-    const vmScript = new vm.Script(content, {
+    const transformed = await transform.transform(rawContent, script.lang);
+    const vmScript = new vm.Script(transformed.code, {
       displayErrors: true,
       filename: getScriptFileName(script),
     });

@@ -57,6 +57,12 @@ export const en: IntlTextTemplates = {
     invalidParam:
       'API "{api}" invoked with invalid parameter at position {index}.',
   },
+  code: {
+    transform: {
+      failed:
+        "Code transform failed. Maybe the codes have syntax error or not supported syntax.",
+    },
+  },
   common: {
     ask: {
       no: "No",
@@ -98,7 +104,7 @@ export const en: IntlTextTemplates = {
         "Package manager `yarn` cannot be found, use `npm` instead?",
     },
   },
-  script: {
+  startUp: {
     check: {
       cancel: {
         doNotCheckAgain:
@@ -111,6 +117,17 @@ export const en: IntlTextTemplates = {
         title: "Script Plus Start Up check",
       },
     },
+    dependency: {
+      cancel: {
+        problem:
+          "Canceled installation for dependencies of Script Plus. Some features (JavaScript/TypeScript esbuild transform) may be unavailable.",
+      },
+      install: {
+        title: "Installing dependencies of Script Plus...",
+      },
+    },
+  },
+  script: {
     create: {
       code: {
         generate: {

@@ -9,36 +9,39 @@ import {
   getErrorMessage,
   output,
 } from "../vscode-utils";
-import {
-  detectNpm,
-  detectYarn,
-  Installer,
-  npmInstallPackages,
-  ProcessOutput,
-  yarnAddPackages,
-} from "../node-utils";
-import { PackageManager } from "../../models/configurations";
+import { npm, yarn, ProcessOutput, PackageManager } from "../node-utils";
+import { PackageManagerKind } from "../../models/configurations";
 import { invalidUsage } from "../../errors/invalid-usage";
 import { createTaskService, TaskService } from "../tasks/task-service";
 import type child_process from "child_process";
 import { noop } from "taio/build/utils/typed-function";
 import type { StorageService } from "../storage/storage-service";
+import env from "@esbuild-env";
 
 export type PackageInstallTaskService = TaskService<
-  Parameters<Installer>,
+  Parameters<PackageManager["addPackage"]>,
+  child_process.ChildProcess,
+  ProcessOutput
+>;
+
+export type DependencyInstallTaskService = TaskService<
+  Parameters<PackageManager["install"]>,
   child_process.ChildProcess,
   ProcessOutput
 >;
 
 export function createPackageService(
+  context: vscode.ExtensionContext,
   storage: StorageService,
   config: ConfigService
-): [PackageService, PackageInstallTaskService] {
+): [PackageService, PackageInstallTaskService, DependencyInstallTaskService] {
   const { basedOnScripts } = storage;
   const { getConfigs, updateConfigs } = config;
   const installTaskService: PackageInstallTaskService = createTaskService(
     async (param, { resolve, reject }) => {
-      const promiseWithChild = (await determinePackageInstaller())(...param);
+      const promiseWithChild = (await determinePackageInstaller()).addPackage(
+        ...param
+      );
       promiseWithChild.then(resolve).catch(reject);
       return promiseWithChild.child;
     },
@@ -46,6 +49,19 @@ export function createPackageService(
       task.data?.kill();
     }
   );
+  const installDependencyTaskService: DependencyInstallTaskService =
+    createTaskService(
+      async (param, { resolve, reject }) => {
+        const promiseWithChild = (await determinePackageInstaller()).install(
+          ...param
+        );
+        promiseWithChild.then(resolve).catch(reject);
+        return promiseWithChild.child;
+      },
+      (task) => {
+        task.data?.kill();
+      }
+    );
   function logInstallPackage(
     packageName: string,
     stdout: string,
@@ -58,27 +74,29 @@ export function createPackageService(
     output.appendLine(stderr);
     output.show();
   }
-  async function determinePackageInstaller(): Promise<Installer> {
+  async function determinePackageInstaller(): Promise<PackageManager> {
     const {
       node: { packageManager },
     } = await getConfigs();
-    const [hasNpm, hasYarn] = await Promise.all([detectNpm(), detectYarn()]);
-    if (packageManager === PackageManager.yarn) {
+    const [hasNpm, hasYarn] = await Promise.all([npm.detect(), yarn.detect()]);
+    if (packageManager === PackageManagerKind.yarn) {
       if (hasYarn) {
-        return yarnAddPackages;
+        return yarn;
       }
       if (hasNpm) {
         const userSayUseNpm = await askYesNoQuestion(
           intl("node.packageManager.useNpmInstead")
         );
         if (userSayUseNpm) {
-          await updateConfigs({ node: { packageManager: PackageManager.npm } });
-          return npmInstallPackages;
+          await updateConfigs({
+            node: { packageManager: PackageManagerKind.npm },
+          });
+          return npm;
         }
       }
     }
     if (hasNpm) {
-      return npmInstallPackages;
+      return yarn;
     }
     return invalidUsage(intl("node.packageManager.noManager"));
   }
@@ -110,6 +128,17 @@ export function createPackageService(
           throw error;
         }
       }
+    },
+    async installExtensionDependencies(config) {
+      const taskId = await installDependencyTaskService.create([
+        { ...config, cwd: context.extensionUri.fsPath },
+      ]);
+      installDependencyTaskService
+        .waitForResult(taskId)
+        .then(({ stderr, stdout }) => {
+          logInstallPackage(env.EXTENSION_BASE_NAME, stdout, stderr);
+        });
+      return taskId;
     },
     async installPackage(packageName, version, options) {
       const id = await packageService.installModules(
@@ -146,7 +175,8 @@ export function createPackageService(
                 moduleNames,
               }),
             });
-            token.onCancellationRequested(() => {
+            const disposable = token.onCancellationRequested(() => {
+              disposable.dispose();
               installTaskService.killTask(
                 id,
                 intl("module.install.canceled.message", {
@@ -161,5 +191,5 @@ export function createPackageService(
       return id;
     },
   };
-  return [packageService, installTaskService];
+  return [packageService, installTaskService, installDependencyTaskService];
 }

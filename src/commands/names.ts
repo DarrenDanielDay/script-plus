@@ -9,6 +9,9 @@ import env from "@esbuild-env";
 import type { FullAccessPaths } from "../utils/types/full-access-paths";
 import { namespaces } from "../modules/constant";
 const commands = {
+  Configuration: {
+    Reset: "",
+  },
   PackageManage: {
     InstallModule: "",
   },
