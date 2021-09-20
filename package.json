@@ -13,7 +13,7 @@
     "yarn",
     "vscode API"
   ],
-  "version": "0.9.0",
+  "version": "0.9.1",
   "author": {
     "email": "Darren_Daniel_Day@hotmail.com",
     "name": "Darren Daniel Day",
@@ -251,7 +251,6 @@
   },
   "scripts": {
     "prepare": "yarn husky install",
-    "vscode:prepublish": "yarn build",
     "watch:types": "tsc -watch --noEmit -p ./",
     "watch:esbuild": "esbuild ./esbuild-for-extension.ts --format=cjs --platform=node | node - --dev",
     "format": "prettier --write .",
@@ -259,9 +258,9 @@
     "lint:style": "eslint ./src/**/*.ts",
     "lint:types": "tsc --noEmit -p ./ && cd ./src/app && tsc --noEmit -p ./",
     "build": "yarn build:extension && yarn build:ui",
-    "build:extension": "esbuild ./esbuild-for-extension.ts --format=cjs --platform=node | node -",
+    "build:extension": "esbuild ./scripts/esbuild-for-extension.ts --format=cjs --platform=node | node -",
     "build:ui": "cd src/app && yarn build",
-    "bundle": "yarn vsce package"
+    "bundle": "yarn build && node ./scripts/dependency.mjs && yarn vsce package && node ./scripts/dependency.mjs --reset"
   },
   "devDependencies": {
     "@babel/core": "^7.15.5",

@@ -1,3 +1,7 @@
+import babel from "@babel/core";
+import babelPluginCommonJS from "@babel/plugin-transform-modules-commonjs";
+import babelPluginTypeScript from "@babel/plugin-transform-typescript";
+import esbuild from "esbuild";
 import { notSupported } from "../../errors/not-supported";
 import { intl } from "../../i18n/core/locale";
 import { TransformerKind } from "../../../models/configurations";
@@ -18,13 +22,11 @@ export interface Transformer {
 }
 
 const esbuildTransformer = ((): Transformer => {
-  const lazyLoadESBuild = () => import("esbuild").then((mod) => mod.default);
   return {
     get type() {
       return TransformerKind.esbuild;
     },
     async transform(code, lang) {
-      const esbuild = await lazyLoadESBuild();
       try {
         return await esbuild.transform(code, {
           format: "cjs",
@@ -37,24 +39,16 @@ const esbuildTransformer = ((): Transformer => {
   };
 })();
 const babelTransformer = ((): Transformer => {
-  const lazyLoadBabel = () => import("@babel/core").then((mod) => mod.default);
-  const lazyLoadBabelPluginTypeScript = () =>
-    import("@babel/plugin-transform-typescript").then((mod) => mod.default);
-  const lazyLoadBabelPluginCommonJS = () =>
-    import("@babel/plugin-transform-modules-commonjs").then(
-      (mod) => mod.default
-    );
   return {
     get type() {
       return TransformerKind.esbuild;
     },
     async transform(code, lang) {
-      const babel = await lazyLoadBabel();
       try {
         const result = await babel.transformAsync(code, {
           plugins: [
-            ...(lang === "ts" ? [await lazyLoadBabelPluginTypeScript()] : []),
-            await lazyLoadBabelPluginCommonJS(),
+            ...(lang === "ts" ? [babelPluginTypeScript] : []),
+            babelPluginCommonJS,
           ],
         });
         return {
