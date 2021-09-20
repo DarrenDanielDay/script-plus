@@ -1,5 +1,5 @@
 import type { PassedParameter, UserScript } from "../models/script";
-import type { ScriptPlusConfig } from "../configs/user-config";
+import type { ScriptPlusConfig } from "../extension/configs/user-config";
 import type {
   ExecutionTask,
   TaskExecutionSignal,
@@ -7,7 +7,7 @@ import type {
 import type {
   AddPackageConfig,
   DependencyInstallConfig,
-} from "../modules/node-utils";
+} from "../extension/utils/node-utils";
 import type { DeepPartial } from "taio/build/types/object";
 import type { ConfigUpdateSignal } from "../models/configurations";
 export interface CoreAPI {

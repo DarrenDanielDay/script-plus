@@ -2,7 +2,7 @@ import type {
   GetTemplateValue,
   CreateIntlTextKeys,
   CreateTemplateType,
-} from "../../../../utils/types/intl-types";
+} from "../../../../common/types/intl-types";
 
 export type IntlTextKeys = CreateIntlTextKeys<IntlTextTemplates>;
 export type IntlTextTemplates = CreateTemplateType<IntlTextFields>;

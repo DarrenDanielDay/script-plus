@@ -6,8 +6,7 @@
     "**/*.mjs",
     "**/*.d.ts",
     "src/app/*",
-    "src/templates/*",
-    "user-scripts/**"
+    "src/extension/templates/*"
   ],
   "parserOptions": {
     "project": ["./tsconfig.json"]

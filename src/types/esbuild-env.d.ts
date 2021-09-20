@@ -15,8 +15,3 @@ declare module "@esbuild-env" {
   export type { ESBuildEnv };
   export default env;
 }
-
-declare module "*.svg" {
-  const path: string;
-  export default path;
-}

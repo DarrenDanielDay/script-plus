@@ -22,7 +22,7 @@ import { Skeleton } from "../../components/skeleton";
 import { EnumPicker } from "../../components/enum-picker";
 import { InstallPosition } from "../../../../models/configurations";
 import type { Mapper } from "taio/build/types/concepts";
-import type { ScriptPlusConfig } from "../../../../configs/user-config";
+import type { ScriptPlusConfig } from "../../../../extension/configs/user-config";
 import { useTypedIntl } from "../../i18n/core/locale";
 import { noop } from "taio/build/utils/typed-function";
 export const ModuleManager: React.FC = () => {

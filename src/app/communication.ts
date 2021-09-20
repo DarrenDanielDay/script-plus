@@ -1,4 +1,4 @@
-import type { PropertyKeys } from "../utils/types/property-key";
+import type { PropertyKeys } from "../common/types/property-key";
 
 export interface DataTransferMiddleware {
   serialize(value: unknown): unknown;

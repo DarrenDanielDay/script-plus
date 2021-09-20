@@ -15,5 +15,5 @@
     "resolveJsonModule": true
   },
   "include": ["src", "assets", "esbuild-for-extension.ts"],
-  "exclude": ["node_modules", "src/app/src", "src/templates"]
+  "exclude": ["node_modules", "src/app/src", "src/extension/templates"]
 }

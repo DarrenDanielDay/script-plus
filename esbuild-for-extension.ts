@@ -5,12 +5,12 @@ import fs from "fs";
 const readFile = (file: string) => fs.readFileSync(file).toString("utf-8");
 const resolve = (...paths: string[]) => path.resolve(process.cwd(), ...paths);
 const templates: ESBuildEnv["TEMPLATES"] = {
-  API_D_TS: readFile(resolve("src", "templates", "api.d.ts")),
+  API_D_TS: readFile(resolve("src", "extension", "templates", "api.d.ts")),
   JS_TEMPLATE: readFile(
-    resolve("src", "templates", "script-name", "js-template.mjs")
+    resolve("src", "extension", "templates", "script-name", "js-template.mjs")
   ),
   TS_TEMPLATE: readFile(
-    resolve("src", "templates", "script-name", "ts-template.ts")
+    resolve("src", "extension", "templates", "script-name", "ts-template.ts")
   ),
 };
 //#region Environment variables
@@ -35,7 +35,7 @@ const isDevBuild = process.argv.includes("--dev-build");
 //#region Extension build options
 const extensionCommonBuildOptions: esbuild.BuildOptions = {
   platform: "node",
-  entryPoints: [path.resolve("src", "extension.ts")],
+  entryPoints: [path.resolve("src", "extension", "extension.ts")],
   external: ["vscode", "snowpack", "esbuild"],
   outdir: path.resolve("out"),
   plugins: [

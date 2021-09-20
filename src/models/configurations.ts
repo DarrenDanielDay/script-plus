@@ -1,4 +1,4 @@
-import type { ScriptPlusConfig } from "../configs/user-config";
+import type { ScriptPlusConfig } from "../extension/configs/user-config";
 
 export enum InstallPosition {
   Local = "local",

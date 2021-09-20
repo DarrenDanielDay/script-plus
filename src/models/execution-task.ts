@@ -15,7 +15,7 @@ import type {
   CleanUp,
   ScriptRunObjectResult,
   ScriptRunResult,
-} from "../templates/api";
+} from "../extension/templates/api";
 
 const nocheck = (obj: unknown): obj is unknown => !obj || !!obj;
 export interface ExecutionTask {

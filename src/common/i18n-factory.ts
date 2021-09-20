@@ -1,6 +1,6 @@
 import { isObjectLike } from "taio/build/utils/validator/object";
 import { isString } from "taio/build/utils/validator/primitive";
-import type { CreateIntlTextKeys } from "../utils/types/intl-types";
+import type { CreateIntlTextKeys } from "./types/intl-types";
 
 export function createMessages<T extends Record<string, unknown>>(
   templates: T
