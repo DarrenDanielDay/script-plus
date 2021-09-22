@@ -144,6 +144,9 @@ export const isUserScript = defineValidator<UserScript>(
   })
 );
 export type ScriptParameter = Record<string, boolean | number | string>;
+export interface ModuleImport {
+  path: string;
+}
 export type Dependencies = Record<string, string>;
 
 export interface ScriptPlusBundle {

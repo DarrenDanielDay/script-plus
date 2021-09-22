@@ -58,6 +58,11 @@ export const en: IntlTextTemplates = {
       'API "{api}" invoked with invalid parameter at position {index}.',
   },
   code: {
+    analyse: {
+      syntax: {
+        error: "The script may have syntax error.",
+      },
+    },
     transform: {
       failed:
         "Code transform failed. Maybe the codes have syntax error or not supported syntax.",
@@ -176,6 +181,7 @@ export const en: IntlTextTemplates = {
         unresolved:
           'Versions for the following import path can not be resolved, marked as "latest":\n          {dependencies}',
       },
+      done: 'Successfully exported script "{scriptName}".',
       title: 'Export script "{scriptName}"',
     },
     import: {

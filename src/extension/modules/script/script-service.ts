@@ -17,16 +17,10 @@ import {
 } from "../../../models/script";
 import * as vscode from "vscode";
 import { names, paths, scriptBundleFilter } from "../constant";
-import {
-  glob,
-  parsePackageJson,
-  path,
-  randomString,
-} from "../../utils/node-utils";
-import esbuild from "esbuild";
+import { glob, parsePackageJson, randomString } from "../../utils/node-utils";
 import ts from "typescript";
 import vm from "vm";
-import { tmpdir, homedir } from "os";
+import { homedir } from "os";
 import { builtinModules } from "module";
 import { enumValues } from "taio/build/utils/enum";
 import {
@@ -94,7 +88,7 @@ export function createScriptService(
   eventHub: IEventHubAdapter<CoreEvents>,
   storage: StorageService,
   pkg: PackageService,
-  transform: CodeService
+  code: CodeService
 ): ScriptService {
   const activeTasks = new Map<string, LocalExecutionTask>();
   const { basedOnScripts, getGlobalStates, updateGlobalState } = storage;
@@ -270,46 +264,26 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
     script: UserScript,
     contents: string
   ): Promise<Dependencies> {
-    const importPaths = new Set<string>();
     const dependencies: Dependencies = {};
-    await esbuild.build({
-      stdin: {
-        contents,
-        loader: script.lang === "ts" ? "ts" : "js",
-      },
-      bundle: true,
-      platform: "node",
-      outfile: path.resolve(tmpdir(), "script-plus-esbuild-temp.js"),
-      plugins: [
-        {
-          name: "dependency-analyser-plugin",
-          setup(build) {
-            build.onResolve({ filter: /.*/ }, ({ path }) => {
-              if (!builtinModules.includes(path)) {
-                importPaths.add(path);
-              }
-              return {
-                external: true,
-              };
-            });
-          },
-        },
-      ],
-    });
+    const importPaths = await code.analyse(contents, script.lang);
+    const modules = new Set(builtinModules);
     const notResolvedPackages = (
       await Promise.all(
-        [...importPaths].map(async (importPath) => {
-          if (importPath === "vscode") {
-            return;
-          }
-          const installedVersion = await findInstalledVersionFor(importPath);
-          if (!installedVersion) {
-            dependencies[importPath] = "latest";
-            return importPath;
-          }
-          const { name, version } = installedVersion;
-          dependencies[name] = version.format();
-        })
+        importPaths
+          .filter(({ path }) => !modules.has(path))
+          .map(async (moduleImport) => {
+            const importPath = moduleImport.path;
+            if (importPath === "vscode" || importPath.match(/^[\.\/]/)) {
+              return;
+            }
+            const installedVersion = await findInstalledVersionFor(importPath);
+            if (!installedVersion) {
+              dependencies[importPath] = "latest";
+              return importPath;
+            }
+            const { name, version } = installedVersion;
+            dependencies[name] = version.format();
+          })
       )
     ).filter(isString);
     if (notResolvedPackages.length) {
@@ -411,7 +385,7 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
     exports: object
   ): Promise<ScriptModule> {
     const rawContent = await getScriptContent(script);
-    const transformed = await transform.transform(rawContent, script.lang);
+    const transformed = await code.transform(rawContent, script.lang);
     const vmScript = new vm.Script(transformed.code, {
       displayErrors: true,
       filename: getScriptFileName(script),
@@ -600,6 +574,9 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
           dependencies: await analyseDependencies(script, content),
         };
         await dumpObjectToFile(askLocation, bundle);
+        vscode.window.showInformationMessage(
+          intl("script.export.done", { scriptName: script.name })
+        );
       }
     },
     async execute(script, params) {

@@ -13,7 +13,7 @@
     "yarn",
     "vscode API"
   ],
-  "version": "0.9.1",
+  "version": "0.9.2",
   "author": {
     "email": "Darren_Daniel_Day@hotmail.com",
     "name": "Darren Daniel Day",
@@ -252,7 +252,7 @@
   "scripts": {
     "prepare": "yarn husky install",
     "watch:types": "tsc -watch --noEmit -p ./",
-    "watch:esbuild": "esbuild ./esbuild-for-extension.ts --format=cjs --platform=node | node - --dev",
+    "watch:esbuild": "esbuild ./scripts/esbuild-for-extension.ts --format=cjs --platform=node | node - --dev",
     "format": "prettier --write .",
     "lint:fix": " yarn eslint src/**/*.ts --fix && pretty-quick --staged",
     "lint:style": "eslint ./src/**/*.ts",

@@ -68,6 +68,11 @@ export interface IntlTextFields {
     invalidParam: [{ index: number; api: string }];
   };
   code: {
+    analyse: {
+      syntax: {
+        error: [];
+      };
+    };
     transform: {
       failed: [];
     };
@@ -172,6 +177,7 @@ export interface IntlTextFields {
       dependencies: {
         unresolved: [{ dependencies: string }];
       };
+      done: [{ scriptName: string }];
       title: [{ scriptName: string }];
     };
     import: {

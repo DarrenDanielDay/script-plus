@@ -58,6 +58,11 @@ export const zhCN: IntlTextTemplates = {
     invalidParam: "调用“{api}”的第{index}个参数类型不正确",
   },
   code: {
+    analyse: {
+      syntax: {
+        error: "脚本可能有语法错误。",
+      },
+    },
     transform: {
       failed: "代码转译失败。代码中可能有语法错误或不支持的语法。",
     },
@@ -165,6 +170,7 @@ export const zhCN: IntlTextTemplates = {
         unresolved:
           "以下导入路径对应包的版本无法解析，作为latest处理：\n  {dependencies}",
       },
+      done: "已成功导出脚本“{scriptName}”。",
       title: "导出脚本“{scriptName}”",
     },
     import: {
