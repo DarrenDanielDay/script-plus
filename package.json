@@ -143,6 +143,15 @@
           ],
           "default": "yarn"
         },
+        "script-plus.configs.packages.dependencyStrategy": {
+          "description": "%script-plus.configs.packages.dependencyStrategy%",
+          "type": "string",
+          "enum": [
+            "always latest",
+            "local installed"
+          ],
+          "default": "always latest"
+        },
         "script-plus.configs.packages.installPosition": {
           "description": "%script-plus.configs.packages.installPosition%",
           "type": "string",

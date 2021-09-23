@@ -22,7 +22,8 @@ function createCoreAPI(
     eventHub,
     storageService,
     packageService,
-    transformService
+    transformService,
+    configService
   );
   const startUpService = createStartUpService(
     packageService,

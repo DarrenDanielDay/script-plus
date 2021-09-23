@@ -1,4 +1,5 @@
 import type {
+  ConfigService,
   CoreEvents,
   PackageService,
   ScriptService,
@@ -61,6 +62,7 @@ import { impossible } from "../../errors/internal-error";
 import { getDisplay } from "../../../common/object-display";
 import type { StorageService } from "../storage/storage-service";
 import type { CodeService } from "../code/code-service";
+import { DependencyStrategy } from "../../../models/configurations";
 const f = ts.factory;
 interface ScriptModule {
   main: (
@@ -88,11 +90,13 @@ export function createScriptService(
   eventHub: IEventHubAdapter<CoreEvents>,
   storage: StorageService,
   pkg: PackageService,
-  code: CodeService
+  code: CodeService,
+  config: ConfigService
 ): ScriptService {
   const activeTasks = new Map<string, LocalExecutionTask>();
   const { basedOnScripts, getGlobalStates, updateGlobalState } = storage;
   const { installModules } = pkg;
+  const { getConfigs } = config;
   const userConsole = vscode.window.createOutputChannel(
     intl("script.execute.console.name")
   );
@@ -267,6 +271,9 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
     const dependencies: Dependencies = {};
     const importPaths = await code.analyse(contents, script.lang);
     const modules = new Set(builtinModules);
+    const {
+      packages: { dependencyStrategy },
+    } = await getConfigs();
     const notResolvedPackages = (
       await Promise.all(
         importPaths
@@ -286,13 +293,19 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
           })
       )
     ).filter(isString);
-    if (notResolvedPackages.length) {
-      const dependencies = notResolvedPackages
-        .map((pkg) => `"${pkg}"`)
-        .join(" ");
-      vscode.window.showWarningMessage(
-        intl("script.export.dependencies.unresolved", { dependencies })
-      );
+    if (dependencyStrategy === DependencyStrategy.LocalInstalled) {
+      if (notResolvedPackages.length) {
+        const dependencies = notResolvedPackages
+          .map((pkg) => `"${pkg}"`)
+          .join(" ");
+        vscode.window.showWarningMessage(
+          intl("script.export.dependencies.unresolved", { dependencies })
+        );
+      }
+    } else {
+      for (const key of Object.keys(dependencies)) {
+        dependencies[key] = "latest";
+      }
     }
     return dependencies;
   }

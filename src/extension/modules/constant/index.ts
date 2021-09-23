@@ -10,7 +10,7 @@ export const paths = {
 
 export const names = {
   configName: "Config",
-  extension: "spp",
+  extension: "scriptplus",
 } as const;
 
 export const namespaces = {

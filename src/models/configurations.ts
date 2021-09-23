@@ -14,6 +14,11 @@ export enum TransformerKind {
   babel = "babel",
 }
 
+export enum DependencyStrategy {
+  AlwaysLatest = "always latest",
+  LocalInstalled = "local installed",
+}
+
 export interface ConfigUpdateSignal {
   fullConfig: ScriptPlusConfig;
 }
