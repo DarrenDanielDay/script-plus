@@ -269,7 +269,8 @@
     "build": "yarn build:extension && yarn build:ui",
     "build:extension": "esbuild ./scripts/esbuild-for-extension.ts --format=cjs --platform=node | node -",
     "build:ui": "cd src/app && yarn build",
-    "bundle": "yarn build && node ./scripts/dependency.mjs && yarn vsce package && node ./scripts/dependency.mjs --reset"
+    "bundle": "yarn build && node ./scripts/dependency.mjs && yarn vsce package && node ./scripts/dependency.mjs --reset",
+    "deploy": "vsce publish --yarn"
   },
   "devDependencies": {
     "@babel/core": "^7.15.5",
