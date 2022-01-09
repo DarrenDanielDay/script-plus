@@ -13,6 +13,7 @@ import {
 } from "../../models/script";
 import { typed } from "taio/build/utils/typed-function";
 import { isArrayOf } from "taio/build/utils/validator/array";
+import type { EnumUnderlayingType } from "taio/build/types/enum";
 
 export async function askScript(api: CoreAPI) {
   const scriptList = await api.ScriptService.getList();
@@ -76,37 +77,54 @@ function askParameter(field: ArgumentField, fieldKey: string) {
     matchOnDetail: true,
     canPickMany: false,
   };
+  const createDefaultValueFirstPickOptionSorter =
+    <T, R>(selector: (item: T) => R, defaultValue: R) =>
+    (a: T, b: T) =>
+      +(selector(b) === defaultValue) - +(selector(a) === defaultValue);
   if (field.type === "boolean") {
+    const options: (vscode.QuickPickItem & { bool: boolean })[] = [
+      {
+        label: "true",
+        bool: true,
+      },
+      {
+        label: "false",
+        bool: false,
+      },
+    ];
     return vscode.window
-      .showQuickPick<vscode.QuickPickItem & { bool: boolean }>(
-        [
-          {
-            label: "true",
-            bool: true,
-          },
-          {
-            label: "false",
-            bool: false,
-          },
-        ],
+      .showQuickPick(
+        options.sort(
+          createDefaultValueFirstPickOptionSorter(
+            (item) => item.bool,
+            field.defaultValue
+          )
+        ),
         pickOptions
       )
       .then((result) => result?.bool);
   }
   if (field.type === "enum") {
+    const options: (vscode.QuickPickItem & { value: EnumUnderlayingType })[] =
+      enumValues(field.enumOptions.enumObject).map((value) => ({
+        label:
+          enumKeys(field.enumOptions.enumObject).find(
+            (key) => field.enumOptions.enumObject[key] === value
+          ) ?? `${value}`,
+        value,
+        description: intl("actions.script.ask.parameter.enum.description", {
+          value: value.toString(),
+          displayName: field.enumOptions.enumNameMapping?.[value] ?? "",
+        }),
+      }));
     return vscode.window
-      .showQuickPick<vscode.QuickPickItem & { value: number | string }>(
-        enumValues(field.enumOptions.enumObject).map((value) => ({
-          label:
-            enumKeys(field.enumOptions.enumObject).find(
-              (key) => field.enumOptions.enumObject[key] === value
-            ) ?? `${value}`,
-          value,
-          description: intl("actions.script.ask.parameter.enum.description", {
-            value: value.toString(),
-            displayName: field.enumOptions.enumNameMapping?.[value] ?? "",
-          }),
-        })),
+      .showQuickPick(
+        options.sort(
+          createDefaultValueFirstPickOptionSorter(
+            (item) => item.value,
+            field.defaultValue
+          )
+        ),
         pickOptions
       )
       .then((result) => result?.value);

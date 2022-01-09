@@ -512,6 +512,6 @@ function isNumberLike(strOrNumber: string | number) {
   return !isNaN(+strOrNumber) && strOrNumber !== "";
 }
 
-function enumValueDisplay(strOrNumber: string | number) {
+function enumValueDisplay(strOrNumber: EnumUnderlayingType) {
   return isNumberLike(strOrNumber) ? +strOrNumber + "" : `"${strOrNumber}"`;
 }
