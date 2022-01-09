@@ -23,7 +23,7 @@ export const en: IntlTextTemplates = {
       ask: {
         parameter: {
           enum: {
-            description: "{display}(value = {value})",
+            description: "{displayName}(value = {value})",
           },
           title: 'Give the value of "{fieldKey}"',
           validate: {

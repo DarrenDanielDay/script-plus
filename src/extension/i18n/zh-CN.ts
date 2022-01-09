@@ -23,7 +23,7 @@ export const zhCN: IntlTextTemplates = {
       ask: {
         parameter: {
           enum: {
-            description: "{display}(枚举值 = {value})",
+            description: "{displayName}(枚举值 = {value})",
           },
           title: '提供参数字段"{fieldKey}"的值',
           validate: {
