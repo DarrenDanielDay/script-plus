@@ -13,11 +13,11 @@
     "debug": "esbuild ./vscode-debug.ts --format=iife --platform=node | node - --dev"
   },
   "devDependencies": {
-    "@types/react": "^17.0.24",
-    "@types/react-dom": "^17.0.9",
+    "@types/react": "^17.0.38",
+    "@types/react-dom": "^17.0.11",
     "@types/react-swipeable-views": "^0.13.1",
     "snowpack": "^3.8.8",
-    "typescript": "^4.4.3"
+    "typescript": "^4.5.4"
   },
   "dependencies": {
     "@material-ui/core": "^4.12.3",
@@ -25,8 +25,8 @@
     "classnames": "^2.3.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-intl": "^5.20.10",
+    "react-intl": "^5.24.2",
     "react-swipeable-views": "^0.14.0",
-    "rxjs": "^7.3.0"
+    "rxjs": "^7.5.1"
   }
 }

@@ -1,7 +1,7 @@
-import babel from "@babel/core";
-import babelPluginCommonJS from "@babel/plugin-transform-modules-commonjs";
-import babelPluginTypeScript from "@babel/plugin-transform-typescript";
-import esbuild from "esbuild";
+import * as babel from "@babel/core";
+import * as babelPluginCommonJS from "@babel/plugin-transform-modules-commonjs";
+import * as babelPluginTypeScript from "@babel/plugin-transform-typescript";
+import * as esbuild from "esbuild";
 import { tmpdir } from "os";
 import { notSupported } from "../../errors/not-supported";
 import { intl } from "../../i18n/core/locale";

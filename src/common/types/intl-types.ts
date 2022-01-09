@@ -7,8 +7,8 @@ export type CreateTemplateType<T> = T extends AnyArray
   : {
       [K in keyof T]: CreateTemplateType<T[K]>;
     };
-// @ts-expect-error TypeScript Limitation
 export type CreateIntlTextKeys<Template extends Record<string, unknown>> = Join<
+  // @ts-expect-error TypeScript Limitation
   FullAccessPaths<Template, string>,
   "."
 >;

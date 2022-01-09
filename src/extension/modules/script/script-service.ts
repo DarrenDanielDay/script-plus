@@ -324,6 +324,7 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
 
   function initExecutionContext(taskId: string) {
     const exports = {};
+    const module = { exports };
     const tryResolve = (packagePath: string, moduelId: string) => {
       try {
         return require.resolve(moduelId, { paths: [packagePath] });
@@ -348,6 +349,7 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
         Reflect.set(globalMixin, key, Reflect.get(globalThis, key));
         return globalMixin;
       }, {}),
+      module,
       exports,
       console: new Proxy(console, {
         get(target, methodName: keyof typeof console, receiver) {
@@ -387,6 +389,7 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
       require: customRequire,
     });
     return {
+      module,
       exports,
       context,
     };
@@ -394,8 +397,7 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
 
   async function createScriptModule(
     script: UserScript,
-    context: object,
-    exports: object
+    { context, module, exports }: ReturnType<typeof initExecutionContext>
   ): Promise<ScriptModule> {
     const rawContent = await getScriptContent(script);
     const transformed = await code.transform(rawContent, script.lang);
@@ -407,6 +409,9 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
       microtaskMode: "afterEvaluate",
       displayErrors: true,
     });
+    if (isScriptModule(module.exports)) {
+      return module.exports;
+    }
     if (isScriptModule(exports)) {
       return exports;
     } else {
@@ -423,12 +428,8 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
     args: PassedParameter,
     taskId: string
   ) {
-    const { context: executionContext, exports } = initExecutionContext(taskId);
-    const scriptModule = await createScriptModule(
-      script,
-      executionContext,
-      exports
-    );
+    const initContext = initExecutionContext(taskId);
+    const scriptModule = await createScriptModule(script, initContext);
     return scriptModule.main(args, context);
   }
   function finishTask(taskId: string, result: unknown, hasError?: boolean) {

@@ -1,5 +1,5 @@
 import type { ESBuildEnv } from "@esbuild-env";
-import esbuild from "esbuild";
+import * as esbuild from "esbuild";
 import path from "path";
 import fs from "fs";
 const readFile = (file: string) => fs.readFileSync(file).toString("utf-8");
