@@ -49,16 +49,15 @@ jobs:
             platform: darwin
             arch: arm64
             npm_config_arch: arm64
-        node-version: [14.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
     runs-on: ${{ matrix.os }}
     steps:
       - name: Pull Code
         uses: actions/checkout@v2
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js 16.x
         uses: actions/setup-node@v2
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 16.x
           cache: "npm"
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
@@ -74,7 +73,7 @@ jobs:
       - name: Setup Yarn
         uses: DerYeger/yarn-setup-action@v1.0.1
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 16.x
         env:
           npm_config_arch: ${{ matrix.npm_config_arch }}
       - name: Set target platform environment variable
