@@ -74,13 +74,12 @@ jobs:
         uses: DerYeger/yarn-setup-action@v1.0.1
         with:
           node-version: 16.x
-        env:
-          npm_config_arch: ${{ matrix.npm_config_arch }}
       - name: Set target platform environment variable
         shell: pwsh
         run: echo "target=${{ matrix.platform }}-${{ matrix.arch }}" >> $env:GITHUB_ENV
       - name: Build platform specific extension
         run: |
+          yarn
           cd src/app
           yarn
           cd ../.. 
@@ -88,6 +87,8 @@ jobs:
           node ./scripts/dependency.mjs 
           yarn vsce package --target ${{ env.target }}
           node ./scripts/dependency.mjs --reset
+        env:
+          npm_config_arch: ${{ matrix.npm_config_arch }}
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ env.target }}
