@@ -730,7 +730,7 @@
   resolved "https://registry.npmjs.org/@types/semver/-/semver-7.3.9.tgz#152c6c20a7688c30b967ec1841d31ace569863fc"
   integrity sha512-L/TMpyURfBkf+o/526Zb6kd/tchUP3iBDEPjqjb+U2MAJhVRxxrmr2fwpe08E7QsV7YLcpq0tUaQ9O9x97ZIxQ==
 
-"@types/vscode@^1.60.0":
+"@types/vscode@^1.61.0":
   version "1.63.1"
   resolved "https://registry.npmjs.org/@types/vscode/-/vscode-1.63.1.tgz#b40f9f18055e2c9498ae543d18c59fbd6ef2e8a3"
   integrity sha512-Z+ZqjRcnGfHP86dvx/BtSwWyZPKQ/LBdmAVImY82TphyjOw2KgTKcp7Nx92oNwCTsHzlshwexAG/WiY2JuUm3g==
@@ -1422,11 +1422,6 @@ dashdash@^1.12.0:
   integrity sha1-hTz6D3y+L+1d4gMmuN1YEDX24vA=
   dependencies:
     assert-plus "^1.0.0"
-
-date-fns@^2.28.0:
-  version "2.28.0"
-  resolved "https://registry.npmjs.org/date-fns/-/date-fns-2.28.0.tgz#9570d656f5fc13143e50c975a3b6bbeb46cd08b2"
-  integrity sha512-8d35hViGYx/QH0icHYCeLmsLmMUheMmTyV9Fcm6gvNwdw31yXXH+O85sOBJ+OLnLQMKZowvpKb6FgMIQjcpvQw==
 
 debug@4, debug@^4.1.0, debug@^4.1.1, debug@^4.3.1, debug@^4.3.2:
   version "4.3.3"
