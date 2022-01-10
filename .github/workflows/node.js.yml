@@ -49,7 +49,7 @@ jobs:
             platform: darwin
             arch: arm64
             npm_config_arch: arm64
-        node-version: [16.x]
+        node-version: [14.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
     runs-on: ${{ matrix.os }}
     steps:
