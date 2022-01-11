@@ -37,12 +37,14 @@ const commands = {
 type MapUncapitalize<Arr extends readonly string[]> = {
   [I in keyof Arr]: Arr[I] extends string ? Uncapitalize<Arr[I]> : Arr[I];
 };
-type CreateAccessPathObjectType<Path extends readonly string[], T> =
-  T extends string
-    ? Join<MapUncapitalize<Path>, ".">
-    : {
-        [K in StringKey<T>]: CreateAccessPathObjectType<[...Path, K], T[K]>;
-      };
+type CreateAccessPathObjectType<
+  Path extends readonly string[],
+  T
+> = T extends string
+  ? Join<MapUncapitalize<Path>, ".">
+  : {
+      [K in StringKey<T>]: CreateAccessPathObjectType<[...Path, K], T[K]>;
+    };
 type PrefixPath = [
   ESBuildEnv["EXTENSION_BASE_NAME"],
   typeof namespaces["commands"]

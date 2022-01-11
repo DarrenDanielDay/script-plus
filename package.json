@@ -193,7 +193,7 @@
         "script-plus.configs.startUp.checkExtensionDependencies": {
           "description": "%script-plus.configs.startUp.checkExtensionDependencies%",
           "type": "boolean",
-          "default": true
+          "default": false
         }
       }
     },

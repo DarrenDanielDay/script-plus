@@ -32,11 +32,9 @@ export interface PromiseHandler<T> {
 }
 
 export interface IMessageManager<T> {
-  handlerMap: Partial<
-    {
-      [K in StringKey<T>]: Set<Func<[T[K]], void>>;
-    }
-  >;
+  handlerMap: Partial<{
+    [K in StringKey<T>]: Set<Func<[T[K]], void>>;
+  }>;
   messageQueue: Map<number, PromiseHandler<unknown>>;
   readonly seq: number;
   enqueue(handler: PromiseHandler<unknown>): number;
@@ -59,11 +57,9 @@ export function createMessageManager<T>(): IMessageManager<T> {
   type EventNames = StringKey<T>;
   let _seq = 0;
   const messageQueue = new Map<number, PromiseHandler<unknown>>();
-  const handlerMap: Partial<
-    {
-      [K in EventNames]: Set<Func<[T[K]], void>>;
-    }
-  > = {};
+  const handlerMap: Partial<{
+    [K in EventNames]: Set<Func<[T[K]], void>>;
+  }> = {};
   function getNextSeq() {
     return _seq++;
   }

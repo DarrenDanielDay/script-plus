@@ -85,7 +85,7 @@ export const defaultConfig: ScriptPlusConfig = {
   startUp: {
     autoCheck: true,
     warnLocale: true,
-    checkExtensionDependencies: true,
+    checkExtensionDependencies: false,
   },
 };
 

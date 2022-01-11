@@ -4,6 +4,7 @@ src/**
 .prettierignore
 .eslintrc
 .yarnrc
+.github/**
 .husky/**
 .vscode/**
 **/tsconfig.json
