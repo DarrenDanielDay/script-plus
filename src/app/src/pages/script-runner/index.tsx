@@ -9,7 +9,6 @@ import {
   Button,
   CircularProgress,
   colors,
-  Paper,
   Tooltip,
   Typography,
   useTheme,
@@ -112,12 +111,14 @@ export const ScriptRunner: React.FC<IScriptRunnerProp> = ({}) => {
               <Typography>{script.name}</Typography>
             </AccordionSummary>
             <AccordionDetails>
-              <Paper>{script.description}</Paper>
-              <ParameterInput
-                arugmentConfig={script.argumentConfig}
-                value={argument}
-                onChange={setArgument}
-              ></ParameterInput>
+              <Box>
+                <Typography>{script.description}</Typography>
+                <ParameterInput
+                  arugmentConfig={script.argumentConfig}
+                  value={argument}
+                  onChange={setArgument}
+                ></ParameterInput>
+              </Box>
             </AccordionDetails>
             <AccordionActions>
               <Button
@@ -153,10 +154,10 @@ export const ScriptRunner: React.FC<IScriptRunnerProp> = ({}) => {
               <Typography>{intl("runner.console.title")}</Typography>
             </AccordionSummary>
             <AccordionDetails>
-              <div className={styles["max-width"]}>
+              <Box className={styles["max-width"]}>
                 {outputs.map((val, i) => {
                   return (
-                    <div
+                    <Box
                       style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}
                       key={i}
                     >
@@ -166,10 +167,10 @@ export const ScriptRunner: React.FC<IScriptRunnerProp> = ({}) => {
                           ? val.payload.map((v) => getDisplay(v)).join(", ")
                           : getDisplay(val)}
                       </Typography>
-                    </div>
+                    </Box>
                   );
                 })}
-              </div>
+              </Box>
             </AccordionDetails>
             <AccordionActions>
               <Tooltip title={intl("runner.mount.tooltip")}>

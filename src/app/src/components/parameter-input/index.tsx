@@ -2,11 +2,12 @@ import React from "react";
 import * as R from "ramda";
 import {
   Box,
+  Checkbox,
   FormControl,
+  FormControlLabel,
   FormHelperText,
   Input,
   InputLabel,
-  Switch,
 } from "@material-ui/core";
 import classNames from "classnames";
 import { die } from "taio/build/utils/internal/exceptions";
@@ -39,6 +40,26 @@ export const ParameterInput: React.FC<IParameterInputProp> = ({
     <Box>
       {Object.entries(arugmentConfig).map(([fieldKey, field], i) => {
         const fieldValue = value[fieldKey];
+        if (isBooleanArgumentField(field)) {
+          return (
+            <Box key={i}>
+              <FormControl>
+                <FormControlLabel
+                  label={fieldKey}
+                  control={
+                    <Checkbox
+                      checked={!!fieldValue}
+                      onChange={(_, bool) =>
+                        onChange({ ...value, [fieldKey]: bool })
+                      }
+                    />
+                  }
+                />
+                <FormHelperText>{field.description}</FormHelperText>
+              </FormControl>
+            </Box>
+          );
+        }
         return (
           <Box key={i}>
             <FormControl
@@ -67,13 +88,6 @@ export const ParameterInput: React.FC<IParameterInputProp> = ({
                     onChange({ ...value, [fieldKey]: +e.target.value })
                   }
                 ></Input>
-              ) : isBooleanArgumentField(field) ? (
-                <Switch
-                  checked={!!fieldValue}
-                  onChange={(_, bool) =>
-                    onChange({ ...value, [fieldKey]: bool })
-                  }
-                ></Switch>
               ) : isEnumArgumentField(field) ? (
                 <EnumPicker
                   enumObject={field.enumOptions.enumObject}
