@@ -26,11 +26,11 @@ type MapToValidators<Arr extends AnyArray> = Extract<
 >;
 type APINames = Join<FullAccessPaths<CoreAPI, AnyFunc>, ".">;
 
-function factory<Fn extends AnyFunc>(
+const factory = <Fn extends AnyFunc>(
   fn: Fn,
   name: APINames,
   ...validators: MapToValidators<Parameters<Fn>>
-): Fn {
+): Fn => {
   // @ts-expect-error Dynamic impl
   const wrapped: Fn = async (...args: unknown[]): ReturnType<Fn> => {
     try {
@@ -49,9 +49,9 @@ function factory<Fn extends AnyFunc>(
     }
   };
   return wrapped;
-}
+};
 
-export function createPublicAPI(api: CoreAPI): CoreAPI {
+export const createPublicAPI = (api: CoreAPI): CoreAPI => {
   const nocheck = (value: unknown): value is never => !!value || !value;
   return {
     ConfigService: {
@@ -183,4 +183,4 @@ export function createPublicAPI(api: CoreAPI): CoreAPI {
       ),
     },
   };
-}
+};

@@ -15,7 +15,7 @@ import { typed } from "taio/build/utils/typed-function";
 import { isArrayOf } from "taio/build/utils/validator/array";
 import type { EnumUnderlayingType } from "taio/build/types/enum";
 
-export async function askScript(api: CoreAPI) {
+export const askScript = async (api: CoreAPI) => {
   const scriptList = await api.ScriptService.getList();
   const lastExecutedScriptName =
     await api.ScriptService.getLastExecutedScriptName();
@@ -54,9 +54,9 @@ export async function askScript(api: CoreAPI) {
   if (result) {
     return result.script;
   }
-}
+};
 
-export async function askParameters(argConfig: ArgumentConfig) {
+export const askParameters = async (argConfig: ArgumentConfig) => {
   const passed: PassedParameter = {};
   for (const [key, field] of Object.entries(argConfig)) {
     const result = await askParameter(field, key);
@@ -66,9 +66,9 @@ export async function askParameters(argConfig: ArgumentConfig) {
     passed[key] = result;
   }
   return passed;
-}
+};
 
-function askParameter(field: ArgumentField, fieldKey: string) {
+const askParameter = (field: ArgumentField, fieldKey: string) => {
   const parameterPromote =
     (field.description ?? "") ||
     intl("actions.script.ask.parameter.title", { fieldKey });
@@ -150,13 +150,13 @@ function askParameter(field: ArgumentField, fieldKey: string) {
   return vscode.window.showInputBox({
     ...inputOptions,
   });
-}
+};
 
-export async function execute(
+export const execute = async (
   api: CoreAPI,
   script?: unknown,
   params?: unknown
-) {
+) => {
   script ??= await askScript(api);
   if (!isUserScript(script)) {
     return;
@@ -166,9 +166,9 @@ export async function execute(
     return;
   }
   return api.ScriptService.execute(script, params);
-}
+};
 
-async function askTasks(api: CoreAPI) {
+const askTasks = async (api: CoreAPI) => {
   const tasks = await api.ScriptService.getTasks();
   return vscode.window
     .showQuickPick<vscode.QuickPickItem & { task: ExecutionTask }>(
@@ -182,18 +182,18 @@ async function askTasks(api: CoreAPI) {
       }
     )
     .then((tasks) => tasks?.map((task) => task.task));
-}
+};
 
-export async function cleanUp(api: CoreAPI, tasks?: unknown) {
+export const cleanUp = async (api: CoreAPI, tasks?: unknown) => {
   tasks ??= await askTasks(api);
   if (isArrayOf(isExecutionTask)(tasks)) {
     await Promise.all(
       tasks.map((task) => api.ScriptService.cleanUp(task.taskId))
     );
   }
-}
+};
 
-export async function create(api: CoreAPI) {
+export const create = async (api: CoreAPI) => {
   const lang = (
     await vscode.window.showQuickPick<
       vscode.QuickPickItem & { label: UserScript["lang"] }
@@ -229,18 +229,18 @@ export async function create(api: CoreAPI) {
     description: "",
     argumentConfig: {},
   });
-}
+};
 
-export async function deleteScript(api: CoreAPI, script?: unknown) {
+export const deleteScript = async (api: CoreAPI, script?: unknown) => {
   script ??= await askScript(api);
   if (isUserScript(script)) {
     await api.ScriptService.delete(script);
   }
-}
+};
 
-export async function edit(api: CoreAPI, script?: unknown) {
+export const edit = async (api: CoreAPI, script?: unknown) => {
   script ??= await askScript(api);
   if (isUserScript(script)) {
     await api.ScriptService.editScript(script);
   }
-}
+};

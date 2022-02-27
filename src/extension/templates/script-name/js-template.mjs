@@ -4,6 +4,6 @@ import * as vscode from "vscode";
  * @param context {vscode.ExtensionContext}
  * @returns {import("../api").ScriptRunResult}
  */
-export async function main(params, context) {
+export const main = async (params, context) => {
   vscode.window.showInformationMessage("Hello, Script Plus!");
-}
+};

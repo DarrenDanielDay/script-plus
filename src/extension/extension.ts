@@ -18,7 +18,7 @@ import { startUp } from "./start/start-up";
 import { createTreeViewService } from "./modules/views/tree-view-service";
 import { defaultConfig } from "./configs/user-config";
 
-export function activate(context: vscode.ExtensionContext): CoreAPI {
+export const activate = (context: vscode.ExtensionContext): CoreAPI => {
   const globalEventHubAdapter = createEventHubAdapter<CoreEvents>();
   const globalModuleManager = createModuleManager(
     createCoreAPI(context, globalEventHubAdapter)
@@ -102,8 +102,8 @@ export function activate(context: vscode.ExtensionContext): CoreAPI {
   const publicAPI = createPublicAPI(api);
   publicAPI.StartUpService.checkAll().finally(startUp.done);
   return publicAPI;
-}
+};
 
-export function deactivate() {
+export const deactivate = () => {
   // Do nothing
-}
+};

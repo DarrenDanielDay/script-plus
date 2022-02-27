@@ -64,11 +64,11 @@ export const normalizeNlsJson: Normalizer<ExtensionPackageNlsJSON> = (
   return result;
 };
 
-function getConfigKey(path: string[]) {
+const getConfigKey = (path: string[]) => {
   return [env.EXTENSION_BASE_NAME, namespaces.configs, ...path].join(".");
-}
+};
 
-function accessSchema(schema: JSONSchema, path: string[]): JSONSchema {
+const accessSchema = (schema: JSONSchema, path: string[]): JSONSchema => {
   const [key, ...rest] = path;
   if (schema.type === "object") {
     return accessSchema(schema.fields[key], rest);
@@ -77,4 +77,4 @@ function accessSchema(schema: JSONSchema, path: string[]): JSONSchema {
     return schema;
   }
   return invalidUsage("Invalid config schema");
-}
+};

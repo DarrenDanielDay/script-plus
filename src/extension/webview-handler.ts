@@ -31,40 +31,40 @@ export interface IWebviewManager extends vscode.Disposable {
   detach: () => void;
 }
 
-export function createWebviewManager(
+export const createWebviewManager = (
   viewType: string,
   title: string,
   context: vscode.ExtensionContext
-): IWebviewManager {
+): IWebviewManager => {
   let attachResource: vscode.Disposable | undefined = undefined;
   let panel: vscode.WebviewPanel | undefined = undefined;
   let messageHandler: OnDidReceiveMessageHandler | undefined = undefined;
   let devServerConfig: DevServerConfig | undefined = undefined;
   let onCloseHook: (() => void) | undefined = undefined;
-  function processLangOfHtml(html: string) {
+  const processLangOfHtml = (html: string) => {
     return html.replace("%LANG%", getLocale());
-  }
-  function processUrlOfHtml(html: string, baseUrl: string): string {
+  };
+  const processUrlOfHtml = (html: string, baseUrl: string): string => {
     return html.replace("%BASE_URL%", baseUrl);
-  }
-  function processHashOfHtml(html: string): string {
+  };
+  const processHashOfHtml = (html: string): string => {
     return html.replace("%HASH%", new Date().getTime().toString());
-  }
-  function staticFileUrlString(
+  };
+  const staticFileUrlString = (
     panel: vscode.WebviewPanel,
     ...paths: string[]
-  ): string {
+  ): string => {
     return urlOfFile(
       panel,
       context,
       path.join(...env.STATIC_FILE_BASE_DIR_NAMES, ...paths)
     );
-  }
-  function urlOfFile(
+  };
+  const urlOfFile = (
     panel: vscode.WebviewPanel,
     context: vscode.ExtensionContext,
     relativePathToExtensionProject: string
-  ): string {
+  ): string => {
     return panel.webview
       .asWebviewUri(
         vscode.Uri.file(
@@ -72,8 +72,8 @@ export function createWebviewManager(
         )
       )
       .toString();
-  }
-  async function open() {
+  };
+  const open = async () => {
     if (!panel) {
       panel = vscode.window.createWebviewPanel(
         viewType,
@@ -96,8 +96,8 @@ export function createWebviewManager(
       await reload();
     }
     panel.reveal();
-  }
-  async function reload() {
+  };
+  const reload = async () => {
     if (!panel) {
       return invalidUsage(intl("webview.reload.beforeOpen"));
     }
@@ -154,15 +154,15 @@ export function createWebviewManager(
     // A <meta> element with hash is designed to ensure the webview to reload.
     html = processHashOfHtml(html);
     panel.webview.html = html;
-  }
-  function close() {
+  };
+  const close = () => {
     if (!panel) {
       return;
     }
     detach();
     panel.dispose();
-  }
-  function attach(handler: OnDidReceiveMessageHandler) {
+  };
+  const attach = (handler: OnDidReceiveMessageHandler) => {
     if (messageHandler) {
       return impossible(intl("webview.attach.moreThanOnce"));
     }
@@ -178,12 +178,12 @@ export function createWebviewManager(
     };
     attachResource = panel.webview.onDidReceiveMessage(messageHandler);
     return instance;
-  }
-  function detach() {
+  };
+  const detach = () => {
     messageHandler = undefined;
     attachResource?.dispose();
     attachResource = undefined;
-  }
+  };
   const instance: IWebviewManager = {
     get context() {
       return context;
@@ -214,4 +214,4 @@ export function createWebviewManager(
     detach,
   };
   return instance;
-}
+};

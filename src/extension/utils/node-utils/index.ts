@@ -156,9 +156,9 @@ const isPackageJson = defineValidator<ReferencedPackageJsonPart>(
   })
 );
 
-export function parsePackageJson(
+export const parsePackageJson = (
   text: string
-): ReferencedPackageJsonPart | undefined {
+): ReferencedPackageJsonPart | undefined => {
   try {
     const json: unknown = JSON.parse(text);
     if (isPackageJson(json)) {
@@ -168,4 +168,4 @@ export function parsePackageJson(
   } catch (error) {
     return undefined;
   }
-}
+};

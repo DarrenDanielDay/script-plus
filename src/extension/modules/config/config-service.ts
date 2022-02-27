@@ -6,9 +6,9 @@ import type { IEventHubAdapter } from "../../events/event-manager";
 import { intl } from "../../i18n/core/locale";
 import { impossible } from "../../errors/internal-error";
 
-export function createConfigService(
+export const createConfigService = (
   eventHub: IEventHubAdapter<CoreEvents>
-): ConfigService {
+): ConfigService => {
   const disposable = vscode.workspace.onDidChangeConfiguration(() => {
     const nowConfig = getConfigs();
     eventHub.dispatcher.emit("config", { fullConfig: nowConfig });
@@ -28,4 +28,4 @@ export function createConfigService(
       await updateConfig(patch);
     },
   };
-}
+};

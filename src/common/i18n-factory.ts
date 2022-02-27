@@ -2,9 +2,9 @@ import { isObjectLike } from "taio/build/utils/validator/object";
 import { isString } from "taio/build/utils/validator/primitive";
 import type { CreateIntlTextKeys } from "./types/intl-types";
 
-export function createMessages<T extends Record<string, unknown>>(
+export const createMessages = <T extends Record<string, unknown>>(
   templates: T
-): Record<CreateIntlTextKeys<T>, string> {
+): Record<CreateIntlTextKeys<T>, string> => {
   const result = {};
   const path: string[] = [];
   const walk = (node: unknown) => {
@@ -22,4 +22,4 @@ export function createMessages<T extends Record<string, unknown>>(
   walk(templates);
   // @ts-expect-error Dynamic impl
   return result;
-}
+};

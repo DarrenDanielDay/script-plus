@@ -3,14 +3,14 @@ import type { AccessByPath, AccessPaths } from "taio/build/types/object";
 import { isObjectLike } from "taio/build/utils/validator/object";
 import type { PromiseHandler } from "../../common/types/promise";
 
-export function clone<T>(obj: T): T {
+export const clone = <T>(obj: T): T => {
   return JSON.parse(JSON.stringify(obj));
-}
+};
 
-export function access<T, Path extends AccessPaths<T>>(
+export const access = <T, Path extends AccessPaths<T>>(
   source: T,
   path: Path
-): AccessByPath<T, Path> {
+): AccessByPath<T, Path> => {
   let result: unknown = source;
   for (const key of path as string[]) {
     const wrappedResult = Object(result) as object;
@@ -18,9 +18,9 @@ export function access<T, Path extends AccessPaths<T>>(
   }
   // @ts-expect-error Access result cannot be infered
   return result;
-}
+};
 
-export function getFullPaths(obj: unknown): string[][] {
+export const getFullPaths = (obj: unknown): string[][] => {
   if (typeof obj !== "object" || obj === null) {
     return [];
   }
@@ -29,9 +29,9 @@ export function getFullPaths(obj: unknown): string[][] {
     if (!subPaths.length) return [[key]];
     return subPaths.map((path) => [key, ...path]);
   });
-}
+};
 
-export function sort<T>(json: T): T {
+export const sort = <T>(json: T): T => {
   if (Array.isArray(json)) {
     // @ts-expect-error Dynamic impl
     return json.map((item) => sort(item));
@@ -45,8 +45,8 @@ export function sort<T>(json: T): T {
     );
   }
   return json;
-}
-export function createPromiseHandler<T>(): [PromiseHandler<T>, Promise<T>] {
+};
+export const createPromiseHandler = <T>(): [PromiseHandler<T>, Promise<T>] => {
   let resolve: Func<[T], void>;
   let reject: Func<[unknown], void>;
   let promise = new Promise<T>((...args) => {
@@ -59,8 +59,8 @@ export function createPromiseHandler<T>(): [PromiseHandler<T>, Promise<T>] {
     },
     promise,
   ];
-}
-export function createPending() {
+};
+export const createPending = () => {
   let resolve: Func<[], void>;
   let reject: Func<[unknown], void>;
   let promise = new Promise<void>((...args) => {
@@ -71,7 +71,7 @@ export function createPending() {
     abort: (reason?: unknown) => reject(reason),
     ready: promise,
   };
-}
-export function keyIn<T>() {
+};
+export const keyIn = <T>() => {
   return <K extends keyof T>(key: K) => key;
-}
+};

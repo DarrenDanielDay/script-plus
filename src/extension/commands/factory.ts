@@ -3,10 +3,10 @@ import type { Func } from "taio/build/types/concepts";
 import { globalErrorHandler } from "../utils/vscode-utils";
 import { startUp } from "../start/start-up";
 
-export function handlerFactory(
+export const handlerFactory = (
   handler: Func<unknown[], unknown>,
   silent?: boolean
-) {
+) => {
   return async (...args: unknown[]) => {
     const pendings = [startUp.ready];
     if (env.ENV === "dev") {
@@ -21,4 +21,4 @@ export function handlerFactory(
       }
     }
   };
-}
+};

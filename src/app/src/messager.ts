@@ -53,16 +53,16 @@ export interface IMessageManager<T> {
   listener: (event: { data: AnyMessage }) => void;
 }
 
-export function createMessageManager<T>(): IMessageManager<T> {
+export const createMessageManager = <T>(): IMessageManager<T> => {
   type EventNames = StringKey<T>;
   let _seq = 0;
   const messageQueue = new Map<number, PromiseHandler<unknown>>();
   const handlerMap: Partial<{
     [K in EventNames]: Set<Func<[T[K]], void>>;
   }> = {};
-  function getNextSeq() {
+  const getNextSeq = () => {
     return _seq++;
-  }
+  };
   const listener = (event: { data: AnyMessage }) => {
     const message = json.parse(event.data) as AnyMessage;
     if (message.type === "response") {
@@ -77,30 +77,33 @@ export function createMessageManager<T>(): IMessageManager<T> {
       dispatchEvent(message.name, message.payload);
     }
   };
-  function dispatchEvent<K extends EventNames>(name: K, payload: T[K]): void {
+  const dispatchEvent = <K extends EventNames>(
+    name: K,
+    payload: T[K]
+  ): void => {
     instance.handlerMap[name]?.forEach((handler) => {
       handler.call(undefined, payload);
     });
-  }
-  function enqueue(handler: PromiseHandler<unknown>) {
+  };
+  const enqueue = (handler: PromiseHandler<unknown>) => {
     const nextSeq = getNextSeq();
     messageQueue.set(nextSeq, handler);
     return nextSeq;
-  }
-  function accept(seq: number, payload: unknown) {
+  };
+  const accept = (seq: number, payload: unknown) => {
     const { resolve } = messageQueue.get(seq) ?? {};
     resolve?.(payload);
     messageQueue.delete(seq);
-  }
-  function abort(seq: number, error?: unknown) {
+  };
+  const abort = (seq: number, error?: unknown) => {
     const { reject } = messageQueue.get(seq) ?? {};
     reject?.(error);
     messageQueue.delete(seq);
-  }
-  async function request(
+  };
+  const request = async (
     path: string[],
     payload: unknown[]
-  ): Promise<Response<unknown>> {
+  ): Promise<Response<unknown>> => {
     return new Promise((resolve, reject) => {
       const id = enqueue({ resolve, reject });
       const request: Request<unknown[]> = {
@@ -113,12 +116,12 @@ export function createMessageManager<T>(): IMessageManager<T> {
       };
       window.vscodeAPI.postMessage(json.serialize(request));
     });
-  }
+  };
 
-  function dispatchToExtension<K extends EventNames>(
+  const dispatchToExtension = <K extends EventNames>(
     name: K,
     payload: T[K]
-  ): void {
+  ): void => {
     const event: Event<T[K]> = {
       id: 0,
       name,
@@ -127,24 +130,24 @@ export function createMessageManager<T>(): IMessageManager<T> {
     };
 
     window.vscodeAPI.postMessage(json.serialize(event));
-  }
+  };
 
-  function onEvent<K extends EventNames>(
+  const onEvent = <K extends EventNames>(
     name: K,
     handler: (value: T[K]) => void
-  ) {
+  ) => {
     handlerMap[name] ??= new Set();
     handlerMap[name]!.add(handler);
     return () => offEvent(name, handler);
-  }
+  };
 
-  function offEvent<K extends EventNames>(
+  const offEvent = <K extends EventNames>(
     name: K,
     handler: (value: T[K]) => void
-  ) {
+  ) => {
     handlerMap[name] ??= new Set();
     handlerMap[name]!.delete(handler);
-  }
+  };
   const instance: IMessageManager<T> = {
     get handlerMap() {
       return handlerMap;
@@ -165,6 +168,6 @@ export function createMessageManager<T>(): IMessageManager<T> {
     offEvent,
   };
   return instance;
-}
+};
 
 export const globalMessageManager = createMessageManager<CoreEvents>();

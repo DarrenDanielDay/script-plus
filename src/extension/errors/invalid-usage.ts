@@ -5,6 +5,6 @@ const $InvalidUsage: unique symbol = Symbol();
 export interface InvalidUsageError extends CustomError<typeof $InvalidUsage> {}
 export const isInvalidUsage: Validator<InvalidUsageError> =
   validatorFactory($InvalidUsage);
-export function invalidUsage(message: string): never {
+export const invalidUsage = (message: string): never => {
   throw factory($InvalidUsage, message);
-}
+};

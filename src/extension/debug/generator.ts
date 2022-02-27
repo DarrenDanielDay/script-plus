@@ -9,7 +9,7 @@ import { sort } from "../utils";
 
 export type Normalizer<T> = Mapper<T, T>;
 
-export async function generate(context: vscode.ExtensionContext) {
+export const generate = async (context: vscode.ExtensionContext) => {
   const extensionUri = context.extensionUri;
   const packageJsonUri = vscode.Uri.joinPath(extensionUri, "package.json");
   const packageNlsJsonUri = vscode.Uri.joinPath(
@@ -28,9 +28,12 @@ export async function generate(context: vscode.ExtensionContext) {
     configGenerator.normalizeNlsJson,
     sort
   );
-}
+};
 
-async function normalize<T>(uri: vscode.Uri, ...normalizers: Func<[T], T>[]) {
+const normalize = async <T>(
+  uri: vscode.Uri,
+  ...normalizers: Func<[T], T>[]
+) => {
   const original = JSON.parse(await readFile(uri)) as T;
   await writeFile(
     uri,
@@ -40,4 +43,4 @@ async function normalize<T>(uri: vscode.Uri, ...normalizers: Func<[T], T>[]) {
       2
     ) + "\n"
   );
-}
+};

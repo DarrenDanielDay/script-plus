@@ -21,13 +21,13 @@ import {
   writeFile,
 } from "../../utils/vscode-utils";
 
-export function createStartUpService(
+export const createStartUpService = (
   pkg: PackageService,
   storage: StorageService,
   config: ConfigService,
   installTask: PackageInstallTaskService,
   dependencyTask: DependencyInstallTaskService
-): StartUpService {
+): StartUpService => {
   const { installModules, installExtensionDependencies } = pkg;
   const { basedOnScripts } = storage;
   const { getConfigs, updateConfigs } = config;
@@ -162,4 +162,4 @@ export function createStartUpService(
     },
   };
   return startUpService;
-}
+};

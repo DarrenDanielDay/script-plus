@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
 import type { ScriptRunResult } from "../api";
 import type { Config } from "./config";
-export async function main(
+export const main = async (
   params: Config,
   context: vscode.ExtensionContext
-): Promise<ScriptRunResult> {
+): Promise<ScriptRunResult> => {
   vscode.window.showInformationMessage("Hello, Script Plus!");
-}
+};

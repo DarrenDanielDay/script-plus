@@ -4,9 +4,9 @@ const $InternalError: unique symbol = Symbol();
 export interface InternalError extends CustomError<typeof $InternalError> {}
 export const isInternalError: Validator<InternalError> =
   validatorFactory($InternalError);
-function interanlError(message?: string): InternalError {
+const interanlError = (message?: string): InternalError => {
   return factory($InternalError, message);
-}
-export function impossible(message?: string): never {
+};
+export const impossible = (message?: string): never => {
   throw interanlError(message);
-}
+};

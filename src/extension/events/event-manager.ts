@@ -12,7 +12,7 @@ export interface IEventDispatcher<T> extends EventHub<T>, vscode.Disposable {
   ): void;
 }
 
-export function createDispatcher<T>(): IEventDispatcher<T> {
+export const createDispatcher = <T>(): IEventDispatcher<T> => {
   const handlersMap = new Map<
     PropertyKeys<T>,
     Set<(value: T[PropertyKeys<T>]) => void>
@@ -21,39 +21,39 @@ export function createDispatcher<T>(): IEventDispatcher<T> {
   const handlers = new Set<
     (event: PropertyKeys<T>, value: T[PropertyKeys<T>]) => void
   >();
-  function onEach(
+  const onEach = (
     handler: (event: PropertyKeys<T>, value: T[PropertyKeys<T>]) => void
-  ) {
+  ) => {
     handlers.add(handler);
-  }
-  function offEach(
+  };
+  const offEach = (
     handler: (event: PropertyKeys<T>, value: T[PropertyKeys<T>]) => void
-  ) {
+  ) => {
     handlers.delete(handler);
-  }
-  function on<K extends PropertyKeys<T>>(
+  };
+  const on = <K extends PropertyKeys<T>>(
     event: K,
     handler: (value: T[K]) => void
-  ): () => void {
+  ): (() => void) => {
     handlersMap.has(event) || handlersMap.set(event, new Set());
     // @ts-expect-error Key mapping
     handlersMap.get(event)!.add(handler);
     return () => off(event, handler);
-  }
-  function off<K extends PropertyKeys<T>>(
+  };
+  const off = <K extends PropertyKeys<T>>(
     event: K,
     handler: (value: T[K]) => void
-  ): void {
+  ): void => {
     handlersMap.has(event) || handlersMap.set(event, new Set());
     // @ts-expect-error Key mapping
     handlersMap.get(event)!.delete(handler);
-  }
-  function emit<K extends PropertyKeys<T>>(event: K, value: T[K]): void {
+  };
+  const emit = <K extends PropertyKeys<T>>(event: K, value: T[K]): void => {
     handlers.forEach((handler) => handler.call(undefined, event, value));
     handlersMap
       .get(event)
       ?.forEach((handler) => handler.call(undefined, value));
-  }
+  };
   return {
     dispose() {
       handlersMap.clear();
@@ -65,7 +65,7 @@ export function createDispatcher<T>(): IEventDispatcher<T> {
     onEach,
     offEach,
   };
-}
+};
 
 export interface IEventHubAdapter<T> extends vscode.Disposable {
   panels: Set<vscode.WebviewPanel>;
@@ -75,7 +75,7 @@ export interface IEventHubAdapter<T> extends vscode.Disposable {
   detach(panel: vscode.WebviewPanel): void;
 }
 
-export function createEventHubAdapter<T>(): IEventHubAdapter<T> {
+export const createEventHubAdapter = <T>(): IEventHubAdapter<T> => {
   const panels = new Set<vscode.WebviewPanel>();
   const dispatcher = createDispatcher<T>();
   const eventHandler = (event: Event<unknown>) => {
@@ -108,4 +108,4 @@ export function createEventHubAdapter<T>(): IEventHubAdapter<T> {
     eventHandler,
   };
   return adapter;
-}
+};

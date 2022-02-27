@@ -12,10 +12,10 @@ export interface IModuleManager<T> {
   ) => Promise<Error<unknown> | Response<unknown>>;
 }
 
-export function createModuleManager<T>(api: T): IModuleManager<T> {
-  function useImpl(newApi: T) {
+export const createModuleManager = <T>(api: T): IModuleManager<T> => {
+  const useImpl = (newApi: T) => {
     api = newApi;
-  }
+  };
   const requestHandler = async (
     path: string[],
     request: Request<unknown[]>
@@ -40,10 +40,10 @@ export function createModuleManager<T>(api: T): IModuleManager<T> {
       };
     }
   };
-  async function callModuleAPI(
+  const callModuleAPI = async (
     path: string[],
     params: readonly unknown[]
-  ): Promise<unknown> {
+  ): Promise<unknown> => {
     // @ts-expect-error Access path cannot be statically checked
     const method = access(api, path);
     if (typeof method === "function") {
@@ -57,7 +57,7 @@ export function createModuleManager<T>(api: T): IModuleManager<T> {
         `Cannot call module method with path '${path.join(".")}'.`
       );
     }
-  }
+  };
   const instance: IModuleManager<T> = {
     get api() {
       return api;
@@ -67,4 +67,4 @@ export function createModuleManager<T>(api: T): IModuleManager<T> {
     requestHandler,
   };
   return instance;
-}
+};

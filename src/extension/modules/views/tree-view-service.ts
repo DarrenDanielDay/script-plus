@@ -10,9 +10,9 @@ export interface TreeViewService {
 
 export const treeViewId = "script-plus.view.startup";
 
-export function createTreeViewService(
+export const createTreeViewService = (
   scriptService: ScriptService
-): TreeViewService {
+): TreeViewService => {
   const eventEmitter = new vscode.EventEmitter<UserScript | undefined | void>();
   let registered = false;
   let provider: vscode.TreeDataProvider<UserScript> | undefined = undefined;
@@ -48,4 +48,4 @@ export function createTreeViewService(
     },
   };
   return treeViewService;
-}
+};

@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import type { CoreAPI } from "../../types/public-api";
 import { intl } from "../i18n/core/locale";
 
-export async function installModule(api: CoreAPI) {
+export const installModule = async (api: CoreAPI) => {
   const moduleId = await vscode.window.showInputBox({
     title: intl("actions.module.install.moduleId.promote"),
     placeHolder: intl("actions.module.install.moduleId.placeholder"),
@@ -39,4 +39,4 @@ export async function installModule(api: CoreAPI) {
     return;
   }
   await api.PackageService.installPackage(moduleId, version);
-}
+};

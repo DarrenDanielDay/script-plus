@@ -35,11 +35,15 @@ export type DependencyInstallTaskService = TaskService<
   ProcessOutput
 >;
 
-export function createPackageService(
+export const createPackageService = (
   context: vscode.ExtensionContext,
   storage: StorageService,
   config: ConfigService
-): [PackageService, PackageInstallTaskService, DependencyInstallTaskService] {
+): [
+  PackageService,
+  PackageInstallTaskService,
+  DependencyInstallTaskService
+] => {
   const { basedOnScripts } = storage;
   const { getConfigs, updateConfigs } = config;
   const installTaskService: PackageInstallTaskService = createTaskService(
@@ -67,19 +71,19 @@ export function createPackageService(
         task.data?.kill();
       }
     );
-  function logInstallPackage(
+  const logInstallPackage = (
     packageName: string,
     stdout: string,
     stderr: string
-  ) {
+  ) => {
     divider(intl("script.logging.installModule", { moduleName: packageName }));
     divider("stdout");
     output.appendLine(stdout);
     divider("stderr");
     output.appendLine(stderr);
     output.show();
-  }
-  async function determinePackageInstaller(): Promise<PackageManager> {
+  };
+  const determinePackageInstaller = async (): Promise<PackageManager> => {
     const {
       node: { packageManager },
     } = await getConfigs();
@@ -104,7 +108,7 @@ export function createPackageService(
       return yarn;
     }
     return invalidUsage(intl("node.packageManager.noManager"));
-  }
+  };
   const packageService: PackageService = {
     async listVersions(moduleId) {
       try {
@@ -197,4 +201,4 @@ export function createPackageService(
     },
   };
   return [packageService, installTaskService, installDependencyTaskService];
-}
+};

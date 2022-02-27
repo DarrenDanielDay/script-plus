@@ -21,17 +21,17 @@ export interface CustomError<Mark extends symbol> extends Error {
   $mark: Mark;
 }
 
-export function factory<Mark extends symbol>(mark: Mark, message?: string) {
+export const factory = <Mark extends symbol>(mark: Mark, message?: string) => {
   const error = new Error(message);
   TypedObject.defineProperty(error, "$mark", { value: mark });
   return error;
-}
+};
 
-export function validatorFactory<Mark extends symbol>(
+export const validatorFactory = <Mark extends symbol>(
   mark: Mark
-): Validator<CustomError<Mark>> {
+): Validator<CustomError<Mark>> => {
   return isIntersectionThat(
     isError,
     isObject<Pick<CustomError<Mark>, "$mark">>({ $mark: is(mark) })
   );
-}
+};

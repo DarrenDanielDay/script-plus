@@ -3,7 +3,7 @@ import type { IEventHubAdapter } from "../events/event-manager";
 import type { Event, Message, Request } from "../../app/communication";
 import { globalErrorHandler } from "../utils/vscode-utils";
 
-function isMessage(obj: unknown): obj is Message<unknown> {
+const isMessage = (obj: unknown): obj is Message<unknown> => {
   return (
     typeof obj === "object" &&
     !!obj &&
@@ -11,8 +11,8 @@ function isMessage(obj: unknown): obj is Message<unknown> {
     typeof Reflect.get(obj, "type") === "string" &&
     !!Reflect.get(obj, "payload")
   );
-}
-function isRequest(obj: unknown): obj is Request<unknown[]> {
+};
+const isRequest = (obj: unknown): obj is Request<unknown[]> => {
   return (
     isMessage(obj) &&
     obj.type === "request" &&
@@ -20,17 +20,17 @@ function isRequest(obj: unknown): obj is Request<unknown[]> {
     !!obj.payload &&
     Array.isArray(Reflect.get(obj.payload, "args"))
   );
-}
-function isEvent(obj: unknown): obj is Event<unknown> {
+};
+const isEvent = (obj: unknown): obj is Event<unknown> => {
   return isMessage(obj) && obj.type === "event";
-}
-export function createMessageHandler<APIs, Events>({
+};
+export const createMessageHandler = <APIs, Events>({
   eventAdapter,
   moduleManager,
 }: {
   moduleManager: IModuleManager<APIs>;
   eventAdapter: IEventHubAdapter<Events>;
-}) {
+}) => {
   return async (e: unknown) => {
     try {
       if (isRequest(e)) {
@@ -43,4 +43,4 @@ export function createMessageHandler<APIs, Events>({
       globalErrorHandler(error);
     }
   };
-}
+};

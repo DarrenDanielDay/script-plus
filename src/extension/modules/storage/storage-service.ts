@@ -22,9 +22,9 @@ export interface StorageService {
   updateGlobalState(patch: Partial<ScriptPlusGlobalStates>): Promise<void>;
 }
 
-export function createStorageService(
+export const createStorageService = (
   context: vscode.ExtensionContext
-): StorageService {
+): StorageService => {
   const storageService: StorageService = {
     basedOnScripts(...fragments) {
       return vscode.Uri.joinPath(
@@ -45,4 +45,4 @@ export function createStorageService(
     },
   };
   return storageService;
-}
+};

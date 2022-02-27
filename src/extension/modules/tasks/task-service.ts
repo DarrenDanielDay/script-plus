@@ -26,16 +26,16 @@ export interface TaskService<P, T, R> {
   waitForResult(id: string): Promise<R>;
 }
 
-export function createTaskService<P, S, R>(
+export const createTaskService = <P, S, R>(
   factory: Func<[P, PromiseHandler<R>], AsyncResult<S>>,
   terminator: Func<[Task<S>], AsyncResult<void>>
-): TaskService<P, S, R> {
+): TaskService<P, S, R> => {
   const tasks = new Map<string, Task<S>>();
   const promises = new Map<string, [Promise<R>, PromiseHandler<R>]>();
-  function drop(id: string) {
+  const drop = (id: string) => {
     promises.delete(id);
     tasks.delete(id);
-  }
+  };
   const taskService: TaskService<P, S, R> = {
     async create(param) {
       let id = randomString(8);
@@ -93,4 +93,4 @@ export function createTaskService<P, S, R>(
     },
   };
   return taskService;
-}
+};

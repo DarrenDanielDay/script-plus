@@ -1,6 +1,6 @@
 import { isPrimitive, isSymbol } from "taio/build/utils/validator/primitive";
 
-export function getDisplay(obj: unknown): string {
+export const getDisplay = (obj: unknown): string => {
   if (isPrimitive(obj)) {
     if (isSymbol(obj)) {
       return obj.toString();
@@ -21,4 +21,4 @@ export function getDisplay(obj: unknown): string {
   } catch (error) {
     return `${obj}`;
   }
-}
+};

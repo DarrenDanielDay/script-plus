@@ -71,10 +71,10 @@ const extensionCommonBuildOptions: esbuild.BuildOptions = {
 /**
  * Trace build message.
  */
-function trackMessage(
+const trackMessage = (
   message: Pick<esbuild.BuildFailure, "errors" | "warnings">,
   method: (...args: unknown[]) => void
-) {
+) => {
   const date = new Date();
   const timeData = [date.getHours(), date.getMinutes(), date.getSeconds()];
   const prefix = `[${timeData
@@ -94,7 +94,7 @@ function trackMessage(
   for (const error of message.errors) {
     logESBuildErrors(error);
   }
-}
+};
 if (isDev) {
   esbuild.build({
     ...extensionCommonBuildOptions,

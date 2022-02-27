@@ -125,22 +125,22 @@ const babelTransformer = ((): Transformer => {
   };
 })();
 
-function getBabelLanguagePlugin(lang: string) {
+const getBabelLanguagePlugin = (lang: string) => {
   return lang === "ts" ? [babelPluginTypeScript] : [];
-}
+};
 
-export function createTransformService(config: ConfigService): CodeService {
+export const createTransformService = (config: ConfigService): CodeService => {
   const transformerMapping: Record<TransformerKind, Transformer> = {
     [TransformerKind.esbuild]: esbuildTransformer,
     [TransformerKind.babel]: babelTransformer,
   };
-  async function transformerStrategy(): Promise<Transformer> {
+  const transformerStrategy = async (): Promise<Transformer> => {
     const {
       script: { transformer },
     } = await config.getConfigs();
     return transformerMapping[transformer];
-  }
-  async function analyserStrategy() {
+  };
+  const analyserStrategy = async () => {
     const {
       script: { transformer },
     } = await config.getConfigs();
@@ -148,7 +148,7 @@ export function createTransformService(config: ConfigService): CodeService {
       return esbuildAnalyser;
     }
     return babelAnalyser;
-  }
+  };
 
   return {
     async transform(code, lang) {
@@ -160,4 +160,4 @@ export function createTransformService(config: ConfigService): CodeService {
       return analyser.grabImports(lang, code);
     },
   };
-}
+};

@@ -51,13 +51,13 @@ export const intl = (() => {
   const assertIsStringRecord: Assertion<Record<string, string>> = assertThat(
     record(isString)
   );
-  function typedIntl<K extends IntlTextKeys>(
+  const typedIntl = <K extends IntlTextKeys>(
     id: K,
     ...values: TemplateValues<K>
-  ) {
+  ) => {
     const fillValues = values[0] ?? {};
     assertIsStringRecord(fillValues);
     return intl.formatMessage({ id }, fillValues);
-  }
+  };
   return typedIntl;
 })();

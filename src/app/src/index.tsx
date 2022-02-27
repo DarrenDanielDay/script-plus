@@ -8,10 +8,10 @@ window.addEventListener("message", globalMessageManager.listener);
 const noop = () => {
   // Do nothing
 };
-function createTrackerProxy(
+const createTrackerProxy = (
   path: string[],
   callHandler: (path: string[], argArray: unknown[]) => void
-): unknown {
+): unknown => {
   return new Proxy(noop, {
     get(_, key) {
       if (typeof key !== "string") {
@@ -26,7 +26,7 @@ function createTrackerProxy(
       return callHandler(path, argArray);
     },
   });
-}
+};
 window.SessionInvoker = new Proxy(
   {},
   {

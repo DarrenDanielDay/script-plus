@@ -8,10 +8,10 @@ import { createStorageService } from "./storage/storage-service";
 import { createStartUpService } from "./start/start-up-service";
 import { createTransformService } from "./code/code-service";
 
-function createCoreAPI(
+const createCoreAPI = (
   context: vscode.ExtensionContext,
   eventHub: IEventHubAdapter<CoreEvents>
-): CoreAPI {
+): CoreAPI => {
   const storageService = createStorageService(context);
   const configService = createConfigService(eventHub);
   const [packageService, installTaskSercice, installDependencyTaskService] =
@@ -39,6 +39,6 @@ function createCoreAPI(
     StartUpService: startUpService,
   };
   return coreApi;
-}
+};
 
 export { createCoreAPI };

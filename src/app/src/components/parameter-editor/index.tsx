@@ -508,10 +508,10 @@ export const EnumValueEditor: React.FC<IEnumValueEditorProp> = ({
     </Box>
   );
 };
-function isNumberLike(strOrNumber: string | number) {
+const isNumberLike = (strOrNumber: string | number) => {
   return !isNaN(+strOrNumber) && strOrNumber !== "";
-}
+};
 
-function enumValueDisplay(strOrNumber: EnumUnderlayingType) {
+const enumValueDisplay = (strOrNumber: EnumUnderlayingType) => {
   return isNumberLike(strOrNumber) ? +strOrNumber + "" : `"${strOrNumber}"`;
-}
+};

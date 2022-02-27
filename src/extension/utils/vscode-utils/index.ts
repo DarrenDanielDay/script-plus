@@ -29,10 +29,10 @@ export const divider = (title: string, char = "=", length = 50) => {
   );
 };
 
-export async function openEdit(
+export const openEdit = async (
   fileUri: vscode.Uri,
   focusPosition?: vscode.Position
-) {
+) => {
   await vscode.commands.executeCommand("vscode.open", fileUri, {
     viewColumn: vscode.ViewColumn.One,
   });
@@ -45,7 +45,7 @@ export async function openEdit(
       "gotoAndPeek"
     );
   }
-}
+};
 
 export const existFile = async (uri: vscode.Uri) => {
   try {
@@ -65,33 +65,33 @@ export const existDir = async (uri: vscode.Uri) => {
   }
 };
 
-export async function readFile(uri: vscode.Uri) {
+export const readFile = async (uri: vscode.Uri) => {
   const decoder = new TextDecoder("utf-8");
   const uint8Array = await vscode.workspace.fs.readFile(uri);
   return decoder.decode(uint8Array);
-}
+};
 
-export async function writeFile(uri: vscode.Uri, content: string) {
+export const writeFile = async (uri: vscode.Uri, content: string) => {
   const encoder = new TextEncoder();
   vscode.workspace.fs.writeFile(uri, encoder.encode(content));
-}
+};
 
-export async function dumpObjectToFile(uri: vscode.Uri, obj: unknown) {
+export const dumpObjectToFile = async (uri: vscode.Uri, obj: unknown) => {
   const buf = v8.serialize(obj);
   await vscode.workspace.fs.writeFile(uri, buf);
-}
+};
 
-export async function loadObjectFromFile(uri: vscode.Uri): Promise<unknown> {
+export const loadObjectFromFile = async (uri: vscode.Uri): Promise<unknown> => {
   const buf = await vscode.workspace.fs.readFile(uri);
   return v8.deserialize(buf);
-}
+};
 
 const isErrorLike = isObject({
   message: isString,
   stack: isString,
 });
 
-export function getErrorMessage(error: unknown): string {
+export const getErrorMessage = (error: unknown): string => {
   let displayMessage: string;
   if (isErrorLike(error)) {
     displayMessage = error.stack;
@@ -101,9 +101,9 @@ export function getErrorMessage(error: unknown): string {
     displayMessage = `${error}`;
   }
   return displayMessage;
-}
+};
 
-export function globalErrorHandler(error: unknown): void {
+export const globalErrorHandler = (error: unknown): void => {
   let displayMessage = "";
   if (isInternalError(error)) {
     displayMessage = `${error.message}
@@ -115,12 +115,12 @@ ${getErrorMessage(error)}`;
     displayMessage = getErrorMessage(error);
   }
   vscode.window.showErrorMessage(displayMessage);
-}
+};
 
-export async function askYesNoQuestion(
+export const askYesNoQuestion = async (
   question: string,
   modal = true
-): Promise<boolean | undefined> {
+): Promise<boolean | undefined> => {
   const [yes, no] = [intl("common.ask.yes"), intl("common.ask.no")];
   const result = await vscode.window.showInformationMessage(
     question,
@@ -129,38 +129,39 @@ export async function askYesNoQuestion(
     { title: no }
   );
   return result && result.title === yes;
-}
+};
 
-export async function askForOptions<Options extends readonly string[]>(
+export const askForOptions = async <Options extends readonly string[]>(
   question: string,
   modal: boolean,
   ...options: Options
-) {
+) => {
   const result = await vscode.window.showInformationMessage<{
     title: ArrayItem<Options>;
   }>(question, { modal }, ...options.map((option) => ({ title: option })));
   return result?.title;
-}
+};
 
-export function promoteReinstall(): never {
+export const promoteReinstall = (): never => {
   vscode.window.showErrorMessage(intl("common.promote.maybeCorrupted"));
   return die();
-}
+};
 
-function getExtensionConfiguration() {
+const getExtensionConfiguration = () => {
   return vscode.workspace.getConfiguration(
     `${env.EXTENSION_BASE_NAME}.${namespaces.configs}`
   );
-}
+};
 
-export function getConfigs(): ScriptPlusConfig & vscode.WorkspaceConfiguration {
+export const getConfigs = (): ScriptPlusConfig &
+  vscode.WorkspaceConfiguration => {
   const config = getExtensionConfiguration();
   return isScriptPlusConfig(config)
     ? config
     : impossible(intl("config.check.maybeCrashed"));
-}
+};
 
-export async function updateConfig(patch: DeepPartial<ScriptPlusConfig>) {
+export const updateConfig = async (patch: DeepPartial<ScriptPlusConfig>) => {
   const config = getConfigs();
   type Pair = [string[], unknown];
   const iterator = dfs<Pair, Pair>(
@@ -178,4 +179,4 @@ export async function updateConfig(patch: DeepPartial<ScriptPlusConfig>) {
       config.update(path.join("."), value, vscode.ConfigurationTarget.Global)
     )
   );
-}
+};

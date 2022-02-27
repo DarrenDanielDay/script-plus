@@ -48,7 +48,7 @@ export const json: DataTransferMiddleware = {
   },
 };
 
-function serializeObject(value: object): object {
+const serializeObject = (value: object): object => {
   if (Array.isArray(value)) {
     return value.map((item) => json.serialize(item));
   }
@@ -59,9 +59,9 @@ function serializeObject(value: object): object {
     }
     return prev;
   }, {});
-}
+};
 
-function getAllKeys(obj: object): string[] {
+const getAllKeys = (obj: object): string[] => {
   const keys = new Set<string>(
     Object.keys(Object.getOwnPropertyDescriptors(obj))
   );
@@ -75,9 +75,9 @@ function getAllKeys(obj: object): string[] {
     prototype = Object.getPrototypeOf(prototype);
   }
   return [...keys];
-}
+};
 
-function parseObject(value: object): unknown {
+const parseObject = (value: object): unknown => {
   if (Array.isArray(value)) {
     return value.map((item) => json.parse(item));
   }
@@ -95,4 +95,4 @@ function parseObject(value: object): unknown {
     Reflect.set(prev, curr, json.parse(Reflect.get(value, curr)));
     return prev;
   }, {});
-}
+};
