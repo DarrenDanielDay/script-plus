@@ -1,5 +1,5 @@
 import type { CoreAPI, CoreEvents } from "../../types/public-api";
-import type { PromisifyMethods } from "../../utils/types/promise";
+import type { PromisifyMethods } from "../../common/types/promise";
 import type { EventHub } from "../communication";
 import type { Subject } from "rxjs";
 import { Locales } from "../../models/locales";

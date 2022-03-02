@@ -36,7 +36,8 @@ import type {
 import styles from "../../components/common/common.module.css";
 import { useLoadingPipe } from "../../hooks/use-loading";
 import { useTypedIntl } from "../../i18n/core/locale";
-import { getDisplay } from "../../../../common/object-display";
+import { getDisplay } from "../../../../common/shared-utils";
+import { PresetTools } from "../../components/preset-tools";
 
 export interface IScriptRunnerProp {}
 
@@ -113,6 +114,13 @@ export const ScriptRunner: React.FC<IScriptRunnerProp> = ({}) => {
             <AccordionDetails>
               <Box>
                 <Typography>{script.description}</Typography>
+                <PresetTools
+                  currentArguments={argument}
+                  script={script}
+                  onLoadPreset={(preset) => {
+                    setArgument(preset.args);
+                  }}
+                />
                 <ParameterInput
                   arugmentConfig={script.argumentConfig}
                   value={argument}

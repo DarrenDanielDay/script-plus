@@ -60,18 +60,6 @@ export const createPromiseHandler = <T>(): [PromiseHandler<T>, Promise<T>] => {
     promise,
   ];
 };
-export const createPending = () => {
-  let resolve: Func<[], void>;
-  let reject: Func<[unknown], void>;
-  let promise = new Promise<void>((...args) => {
-    [resolve, reject] = args;
-  });
-  return {
-    done: () => resolve(),
-    abort: (reason?: unknown) => reject(reason),
-    ready: promise,
-  };
-};
 export const keyIn = <T>() => {
   return <K extends keyof T>(key: K) => key;
 };

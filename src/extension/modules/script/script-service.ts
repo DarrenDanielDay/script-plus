@@ -59,7 +59,7 @@ import env from "@esbuild-env";
 import { intl } from "../../i18n/core/locale";
 import { invalidUsage } from "../../errors/invalid-usage";
 import { impossible } from "../../errors/internal-error";
-import { getDisplay } from "../../../common/object-display";
+import { getDisplay } from "../../../common/shared-utils";
 import type { StorageService } from "../storage/storage-service";
 import type { CodeService } from "../code/code-service";
 import { DependencyStrategy } from "../../../models/configurations";
@@ -540,6 +540,7 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
         return impossible(intl("script.invalid.scriptObject"));
       }
       await Promise.all([writeDeclaration(script), writeMeta(script)]);
+      emitScriptListUpdate();
     },
     async editScript(script) {
       await openEdit(getScriptAbsolutePath(script));

@@ -8,7 +8,10 @@ import { keyOf } from "taio/build/utils/typed-function";
 import type { WithoutKey } from "taio/build/types/object";
 
 export interface IEnumPickerProp<E extends EnumUnderlayingType>
-  extends WithoutKey<IListPickerProp<E>, "displayMapping" | "list"> {
+  extends WithoutKey<
+    IListPickerProp<E>,
+    "displayMapping" | "list" | "identity"
+  > {
   enumObject: StandardEnum<E>;
   enumNameMapping?: Map<E, string> | Record<E, string> | Mapper<E, string>;
 }

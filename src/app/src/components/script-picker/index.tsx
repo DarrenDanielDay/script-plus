@@ -42,6 +42,7 @@ export const ScriptPicker: React.FC<IScriptPickerProp> = ({ onChange }) => {
   );
   const [loading, fetchWithLoading] = useLoadingPipe(
     () => SessionInvoker.ScriptService.getList(),
+    // TODO: use React.startTransition with React 18
     R.compose(setFilteredScripts, R.find(R.T), setStateEffect(setScriptList))
   );
   useEffect(
@@ -70,6 +71,7 @@ export const ScriptPicker: React.FC<IScriptPickerProp> = ({ onChange }) => {
             value={script}
             onChange={setFilteredScripts}
             displayMapping={R.prop<"name", UserScript>("name")}
+            identity={(a, b) => a.name === b.name}
           ></ListPicker>
         </FormControl>
       )}

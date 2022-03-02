@@ -5,7 +5,7 @@ import type { Assertion } from "taio/build/utils/validator/common";
 import { isString } from "taio/build/utils/validator/primitive";
 import { assertThat, record } from "taio/build/utils/validator/utils";
 import { createCleanUp, setStateEffect } from "../../utils/well-typed";
-import { createMessages } from "../../../../common/i18n-factory";
+import { createMessages } from "../../../../common/shared-utils";
 import type { IntlTextKeys, IntlTextTemplates, TemplateValues } from "./types";
 import { isLocales, Locales } from "../../../../models/locales";
 import { die } from "taio/build/utils/internal/exceptions";

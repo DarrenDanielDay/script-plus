@@ -144,6 +144,18 @@ export const en: IntlTextTemplates = {
       button: "Mount",
       tooltip: "Mount your script to background for event listeners.",
     },
+    preset: {
+      label: "Preset",
+      load: {
+        one: "Load Preset",
+      },
+      save: {
+        as: "Save as new preset",
+        help: "A unique name for the template parameter.",
+        name: "Preset Template Name",
+        title: "Save as Preset Template",
+      },
+    },
     run: {
       apply: "Run",
       cleaning: "Cleaning",

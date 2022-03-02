@@ -43,7 +43,7 @@ export const ParameterInput: React.FC<IParameterInputProp> = ({
         if (isBooleanArgumentField(field)) {
           return (
             <Box key={i}>
-              <FormControl>
+              <FormControl className={classes.formControl}>
                 <FormControlLabel
                   label={fieldKey}
                   control={

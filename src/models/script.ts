@@ -16,6 +16,7 @@ import {
 } from "taio/build/utils/validator/primitive";
 import {
   isAnyOf,
+  isArrayOf,
   isUnionOf,
   isUnionThat,
   unionOf,
@@ -129,11 +130,25 @@ export type PassedParameter = Record<string, boolean | number | string>;
 export const isPassedParameter = defineValidator<PassedParameter>(
   record(isUnionOf(isBoolean, isNumber, isString))
 );
+
+export interface PresetArgument {
+  name: string;
+  args: PassedParameter;
+}
+
+export const isPresetArgument = defineValidator<PresetArgument>(
+  isObject({
+    name: isString,
+    args: isPassedParameter,
+  })
+);
+
 export interface UserScript {
   name: string;
   description: string;
   lang: "js" | "ts";
   argumentConfig: ArgumentConfig;
+  presetArgs?: PresetArgument[];
 }
 export const isUserScript = defineValidator<UserScript>(
   isObject({
@@ -141,6 +156,7 @@ export const isUserScript = defineValidator<UserScript>(
     lang: isAnyOf(...(["js", "ts"] as const)),
     description: isString,
     argumentConfig: record(isArgumentField),
+    presetArgs: optional(isArrayOf(isPresetArgument)),
   })
 );
 export type ScriptParameter = Record<string, boolean | number | string>;

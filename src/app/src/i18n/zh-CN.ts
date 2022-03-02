@@ -144,6 +144,18 @@ export const zhCN: IntlTextTemplates = {
       button: "挂载",
       tooltip: "将你的脚本挂载到后台，使事件监听持续生效。",
     },
+    preset: {
+      label: "预设",
+      load: {
+        one: "加载预设",
+      },
+      save: {
+        as: "保存为新的预设",
+        help: "作为唯一标识的模板名称。",
+        name: "预设模板名称",
+        title: "保存为预设模板",
+      },
+    },
     run: {
       apply: "运行",
       cleaning: "清理中",

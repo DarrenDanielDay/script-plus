@@ -82,6 +82,7 @@ export const ScriptManager: React.FC<IScriptManagerProp> = ({}) => {
             value={editingScript}
             onChange={setEditingScript}
             displayMapping={R.prop<"name", UserScript>("name")}
+            identity={(a, b) => a.name === b.name}
           ></ListPicker>
         </FormControl>
         <Tooltip title={intl("manager.script.delete.tooltip")}>

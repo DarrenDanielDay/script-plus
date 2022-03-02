@@ -5,7 +5,7 @@ import { isString } from "taio/build/utils/validator/primitive";
 import { assertThat, record } from "taio/build/utils/validator/utils";
 import type { IntlTextKeys, TemplateValues } from "./types";
 import { Locales, normalizeLocale } from "../../../models/locales";
-import { createMessages } from "../../../common/i18n-factory";
+import { createMessages } from "../../../common/shared-utils";
 import { en } from "../en";
 import { zhCN } from "../zh-CN";
 import {
