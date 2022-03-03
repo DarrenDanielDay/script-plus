@@ -4,7 +4,6 @@ import {
   Select,
   SelectProps,
 } from "@material-ui/core";
-import * as R from "ramda";
 import React, { useMemo } from "react";
 import type { Func, Mapper } from "taio/build/types/concepts";
 import type { IPickerProps } from "../common/schema";
@@ -26,7 +25,7 @@ export const ListPicker = <T extends unknown>(
     list,
     onChange,
     displayMapping,
-    identity = R.identity as PickerMemo<T>,
+    identity = Object.is,
     selectProps,
     menuProps,
   } = params;
