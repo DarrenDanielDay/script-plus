@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import "./polyfills";
 import env from "@esbuild-env";
 import { createWebviewManager } from "./webview-handler";
 import { createEventHubAdapter } from "./events/event-manager";
