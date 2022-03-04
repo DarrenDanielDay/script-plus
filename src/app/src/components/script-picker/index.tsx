@@ -43,7 +43,11 @@ export const ScriptPicker: React.FC<IScriptPickerProp> = ({ onChange }) => {
   const [loading, fetchWithLoading] = useLoadingPipe(
     () => SessionInvoker.ScriptService.getList(),
     // TODO: use React.startTransition with React 18
-    R.compose(setFilteredScripts, R.find(R.T), setStateEffect(setScriptList))
+    R.compose(
+      setFilteredScripts,
+      R.find<UserScript>(R.T),
+      setStateEffect(setScriptList)
+    )
   );
   useEffect(
     R.pipe(fetchWithLoading, () =>

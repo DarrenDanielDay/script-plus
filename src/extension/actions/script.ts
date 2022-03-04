@@ -11,9 +11,9 @@ import {
   PassedParameter,
   UserScript,
 } from "../../models/script";
-import { typed } from "taio/build/utils/typed-function";
 import { isArrayOf } from "taio/build/utils/validator/array";
 import type { EnumUnderlayingType } from "taio/build/types/enum";
+import { identity } from "taio/build/libs/custom/functions/identity";
 
 export const askScript = async (api: CoreAPI) => {
   const scriptList = await api.ScriptService.getList();
@@ -30,7 +30,7 @@ export const askScript = async (api: CoreAPI) => {
     [
       ...(lastExecutedScript
         ? [
-            typed<ScriptQuickPickItem>({
+            identity<ScriptQuickPickItem>({
               label: lastExecutedScript.name,
               description: lastExecutedScript.description || undefined,
               script: lastExecutedScript,

@@ -1,6 +1,6 @@
 import { TypedObject } from "taio/build/libs/typescript/object";
 import type { Func } from "taio/build/types/concepts";
-import type { WithoutKey } from "taio/build/types/object";
+import type { OmitKey } from "taio/build/types/object";
 import { impossible } from "../../errors/internal-error";
 import { createPromiseHandler, keyIn } from "../../utils";
 import type {
@@ -42,7 +42,7 @@ export const createTaskService = <P, S, R>(
       while (tasks.has(id)) {
         id = randomString(8);
       }
-      const task: WithoutKey<Task<S>, "taskId"> = { state: TaskState.Pending };
+      const task: OmitKey<Task<S>, "taskId"> = { state: TaskState.Pending };
       TypedObject.defineProperty(task, keyIn<Task<S>>()("taskId"), {
         writable: false,
         value: id,

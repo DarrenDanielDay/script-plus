@@ -5,13 +5,10 @@ import { IListPickerProp, ListPicker } from "../list-picker";
 import type { StringKey } from "taio/build/types/converts";
 import { TypedReflect } from "taio/build/libs/typescript/reflect";
 import { keyOf } from "taio/build/utils/typed-function";
-import type { WithoutKey } from "taio/build/types/object";
+import type { OmitKey } from "taio/build/types/object";
 
 export interface IEnumPickerProp<E extends EnumUnderlayingType>
-  extends WithoutKey<
-    IListPickerProp<E>,
-    "displayMapping" | "list" | "identity"
-  > {
+  extends OmitKey<IListPickerProp<E>, "displayMapping" | "list" | "identity"> {
   enumObject: StandardEnum<E>;
   enumNameMapping?: Map<E, string> | Record<E, string> | Mapper<E, string>;
 }

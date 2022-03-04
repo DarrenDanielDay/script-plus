@@ -1,4 +1,4 @@
-import { typed } from "taio/build/utils/typed-function";
+import { identity } from "taio/build/libs/custom/functions/identity";
 import { isAnyOf, isUnionThat } from "taio/build/utils/validator/array";
 import { isObject } from "taio/build/utils/validator/object";
 import {
@@ -48,7 +48,7 @@ export interface TaskConsoleOutput {
 }
 
 export const isLogLevel = defineValidator<LogLevels>(
-  isAnyOf(...typed<LogLevels[]>(["debug", "error", "info", "log", "warn"]))
+  isAnyOf(...identity<LogLevels[]>(["debug", "error", "info", "log", "warn"]))
 );
 const isTaskConsoleOutput = defineValidator<TaskConsoleOutput>(
   isObject({
