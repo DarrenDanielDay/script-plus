@@ -132,7 +132,7 @@ export const PresetTools: React.FC<IPresetToolsProp> = ({
           <ListPicker
             list={presets}
             displayMapping={(arg) => arg.name}
-            identity={(a, b) => a.name === b.name}
+            identity={ListPicker.key("name")}
             value={presetSelectValue}
             onChange={setPresetSelectValue}
           />

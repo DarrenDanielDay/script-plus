@@ -42,7 +42,13 @@ export const ScriptManager: React.FC<IScriptManagerProp> = ({}) => {
     () => SessionInvoker.ScriptService.getList(),
     R.pipe(
       setStateEffect(setScripts),
-      R.tap((scripts) => setEditingScript(scripts[0]))
+      R.tap((scripts) =>
+        setEditingScript(
+          (oldEditingScript) =>
+            scripts.find((script) => script.name === oldEditingScript?.name) ??
+            scripts[0]
+        )
+      )
     )
   );
   useEffect(

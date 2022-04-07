@@ -5,6 +5,7 @@ import {
   SelectProps,
 } from "@material-ui/core";
 import React, { useMemo } from "react";
+import { TypedObject } from "taio/build/libs/typescript/object";
 import type { Func, Mapper } from "taio/build/types/concepts";
 import type { IPickerProps } from "../common/schema";
 
@@ -18,7 +19,7 @@ export interface IListPickerProp<T> extends IPickerProps<T> {
   menuProps?: Omit<MenuItemProps, "value">;
 }
 
-export const ListPicker = <T extends unknown>(
+const ListPicker = <T extends unknown>(
   params: IListPickerProp<T>
 ): JSX.Element => {
   const {
@@ -58,3 +59,19 @@ export const ListPicker = <T extends unknown>(
     </Select>
   );
 };
+
+interface ListPickerStatic {
+  key<T extends object>(key: keyof T): PickerMemo<T>;
+}
+
+TypedObject.defineProperty(ListPicker, "key", {
+  get:
+    () =>
+    <T extends object>(key: keyof T) =>
+    (a: T, b: T) =>
+      Object.is(a[key], b[key]),
+});
+
+const ListPickerAlias: typeof ListPicker & ListPickerStatic = ListPicker;
+
+export { ListPickerAlias as ListPicker };
