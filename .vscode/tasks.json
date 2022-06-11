@@ -10,7 +10,7 @@
       "options": {
         "env": { "TSC_WATCH": "Both" }
       },
-      "path": "src/app/package.json",
+      "path": "src/app",
       "isBackground": true,
       "problemMatcher": "$tsc-watch",
       "dependsOn": [

@@ -141,7 +141,7 @@
             "npm",
             "yarn"
           ],
-          "default": "yarn"
+          "default": "npm"
         },
         "script-plus.configs.packages.dependencyStrategy": {
           "description": "%script-plus.configs.packages.dependencyStrategy%",
