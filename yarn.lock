@@ -2149,6 +2149,11 @@ fsevents@~2.1.2:
   resolved "https://registry.npmjs.org/fsevents/-/fsevents-2.1.3.tgz#fb738703ae8d2f9fe900c33836ddebee8b97f23e"
   integrity sha512-Auw9a4AxqWpa9GUfj370BMPzzyncfBABW8Mab7BGWBYDj4Isgq+cDKtx0i6u9jcX9pQDnswsaaOTgTmA5pEjuQ==
 
+func-di@^1.0.1:
+  version "1.0.1"
+  resolved "https://mirrors.cloud.tencent.com/npm/func-di/-/func-di-1.0.1.tgz#aac0ba94b5870944eb5a1e4ea97ba89dd075907a"
+  integrity sha512-HXE1dbPYQQ6Vm24GJwy/iMIlXrTUkRz7aYO9fgIdthbADxk/L1pbqNWAh+txPaPSFxmlV0GDCrRl/fBA24fMwA==
+
 function-bind@^1.1.1:
   version "1.1.1"
   resolved "https://registry.npmjs.org/function-bind/-/function-bind-1.1.1.tgz#a56899d3ea3c9bab874bb9773b7c5ede92f4895d"

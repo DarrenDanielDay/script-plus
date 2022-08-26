@@ -22,6 +22,16 @@ import type child_process from "child_process";
 import { noop } from "taio/build/utils/typed-function";
 import type { StorageService } from "../storage/storage-service";
 import env from "@esbuild-env";
+import { inject } from "func-di";
+import {
+  configService,
+  context,
+  dependencyTask,
+  installTask,
+  legacyTuple,
+  packageService,
+  storageService,
+} from "../tokens";
 
 export type PackageInstallTaskService = TaskService<
   Parameters<PackageManager["addPackage"]>,
@@ -35,7 +45,7 @@ export type DependencyInstallTaskService = TaskService<
   ProcessOutput
 >;
 
-export const createPackageService = (
+const createPackageService = (
   context: vscode.ExtensionContext,
   storage: StorageService,
   config: ConfigService
@@ -202,3 +212,22 @@ export const createPackageService = (
   };
   return [packageService, installTaskService, installDependencyTaskService];
 };
+export const legacyTupleImpl = inject({
+  context,
+  storage: storageService,
+  config: configService,
+}).implements(legacyTuple, ({ context, storage, config }) =>
+  createPackageService(context, storage, config)
+);
+export const packageServiceImpl = inject({ legacyTuple }).implements(
+  packageService,
+  ({ legacyTuple }) => legacyTuple[0]
+);
+export const installTaskImpl = inject({ legacyTuple }).implements(
+  installTask,
+  ({ legacyTuple }) => legacyTuple[1]
+);
+export const dependencyTaskImpl = inject({ legacyTuple }).implements(
+  dependencyTask,
+  ({ legacyTuple }) => legacyTuple[2]
+);

@@ -20,8 +20,17 @@ import {
   output,
   writeFile,
 } from "../../utils/vscode-utils";
+import { inject } from "func-di";
+import {
+  configService,
+  dependencyTask,
+  installTask,
+  packageService,
+  startUpService,
+  storageService,
+} from "../tokens";
 
-export const createStartUpService = (
+const createStartUpService = (
   pkg: PackageService,
   storage: StorageService,
   config: ConfigService,
@@ -163,3 +172,15 @@ export const createStartUpService = (
   };
   return startUpService;
 };
+
+export const startUpServiceImpl = inject({
+  pkg: packageService,
+  storage: storageService,
+  config: configService,
+  installTask,
+  dependencyTask,
+}).implements(
+  startUpService,
+  ({ pkg, storage, config, installTask, dependencyTask }) =>
+    createStartUpService(pkg, storage, config, installTask, dependencyTask)
+);

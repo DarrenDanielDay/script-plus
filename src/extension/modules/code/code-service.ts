@@ -12,6 +12,8 @@ import type { AsyncResult } from "../../../common/types/promise";
 import { path } from "../../utils/node-utils";
 import { invalidUsage } from "../../errors/invalid-usage";
 import * as b from "@babel/types";
+import { inject } from "func-di";
+import { codeService, configService } from "../tokens";
 
 export interface CodeService {
   transform(code: string, lang: UserScript["lang"]): Promise<TransformResult>;
@@ -129,7 +131,7 @@ const getBabelLanguagePlugin = (lang: string) => {
   return lang === "ts" ? [babelPluginTypeScript] : [];
 };
 
-export const createTransformService = (config: ConfigService): CodeService => {
+const createTransformService = (config: ConfigService): CodeService => {
   const transformerMapping: Record<TransformerKind, Transformer> = {
     [TransformerKind.esbuild]: esbuildTransformer,
     [TransformerKind.babel]: babelTransformer,
@@ -161,3 +163,8 @@ export const createTransformService = (config: ConfigService): CodeService => {
     },
   };
 };
+
+export const codeServiceImpl = inject({ config: configService }).implements(
+  codeService,
+  ({ config }) => createTransformService(config)
+);

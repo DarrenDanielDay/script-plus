@@ -1,8 +1,10 @@
+import { inject } from "func-di";
 import { isObject } from "taio/build/utils/validator/object";
 import { isString } from "taio/build/utils/validator/primitive";
 import { defineValidator, optional } from "taio/build/utils/validator/utils";
 import * as vscode from "vscode";
 import { namespaces, paths } from "../constant";
+import { context, storageService } from "../tokens";
 
 export interface ScriptPlusGlobalStates {
   lastExecutedScript: string;
@@ -22,7 +24,7 @@ export interface StorageService {
   updateGlobalState(patch: Partial<ScriptPlusGlobalStates>): Promise<void>;
 }
 
-export const createStorageService = (
+const createStorageService = (
   context: vscode.ExtensionContext
 ): StorageService => {
   const storageService: StorageService = {
@@ -46,3 +48,7 @@ export const createStorageService = (
   };
   return storageService;
 };
+
+export const storageServiceImpl = inject({
+  context,
+}).implements(storageService, ({ context }) => createStorageService(context));

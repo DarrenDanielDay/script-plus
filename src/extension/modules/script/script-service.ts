@@ -63,6 +63,16 @@ import { getDisplay } from "../../../common/shared-utils";
 import type { StorageService } from "../storage/storage-service";
 import type { CodeService } from "../code/code-service";
 import { DependencyStrategy } from "../../../models/configurations";
+import { inject } from "func-di";
+import {
+  codeService,
+  configService,
+  context,
+  eventHub,
+  packageService,
+  scriptService,
+  storageService,
+} from "../tokens";
 const f = ts.factory;
 interface ScriptModule {
   main: (
@@ -85,7 +95,7 @@ const isScriptModule = defineValidator<ScriptModule>(
   })
 );
 
-export const createScriptService = (
+const createScriptService = (
   context: vscode.ExtensionContext,
   eventHub: IEventHubAdapter<CoreEvents>,
   storage: StorageService,
@@ -751,3 +761,16 @@ const getTsTemplate = () => {
 const getJsTemplate = () => {
   return env.TEMPLATES.JS_TEMPLATE;
 };
+
+export const scriptServiceImpl = inject({
+  context,
+  eventHub,
+  storage: storageService,
+  pkg: packageService,
+  code: codeService,
+  config: configService,
+}).implements(
+  scriptService,
+  ({ context, eventHub, storage, pkg, code, config }) =>
+    createScriptService(context, eventHub, storage, pkg, code, config)
+);

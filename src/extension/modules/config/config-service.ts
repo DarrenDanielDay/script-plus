@@ -5,8 +5,10 @@ import { getConfigs, updateConfig } from "../../utils/vscode-utils";
 import type { IEventHubAdapter } from "../../events/event-manager";
 import { intl } from "../../i18n/core/locale";
 import { impossible } from "../../errors/internal-error";
+import { inject } from "func-di";
+import { configService, eventHub } from "../tokens";
 
-export const createConfigService = (
+const createConfigService = (
   eventHub: IEventHubAdapter<CoreEvents>
 ): ConfigService => {
   const disposable = vscode.workspace.onDidChangeConfiguration(() => {
@@ -29,3 +31,8 @@ export const createConfigService = (
     },
   };
 };
+
+export const configServiceImpl = inject({ eventHub }).implements(
+  configService,
+  ({ eventHub }) => createConfigService(eventHub)
+);
