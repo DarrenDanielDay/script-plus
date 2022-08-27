@@ -1,5 +1,9 @@
 import * as vscode from "vscode";
-import packageJson from "package-json";
+import {
+  default as packageJson,
+  AbbreviatedMetadata,
+  PackageNotFoundError,
+} from "package-json";
 import semver from "semver";
 import type { ConfigService, PackageService } from "../../../types/public-api";
 import { intl } from "../../i18n/core/locale";
@@ -125,8 +129,10 @@ const createPackageService = (
         const {
           packages: { includePrerelease },
         } = await getConfigs();
-        const packageMeta: Partial<packageJson.AbbreviatedMetadata> =
-          await packageJson(moduleId, { allVersions: true });
+        const packageMeta: Partial<AbbreviatedMetadata> = await packageJson(
+          moduleId,
+          { allVersions: true }
+        );
         return [
           ...Object.keys(packageMeta.versions ?? {})
             .map((version) => new semver.SemVer(version, { includePrerelease }))
@@ -140,7 +146,7 @@ const createPackageService = (
             .keys(),
         ].sort((a, b) => (semver.lt(a, b) ? 1 : semver.gt(a, b) ? -1 : 0));
       } catch (error) {
-        if (error instanceof packageJson.PackageNotFoundError) {
+        if (error instanceof PackageNotFoundError) {
           vscode.window.showErrorMessage(error.message);
           return [];
         } else {

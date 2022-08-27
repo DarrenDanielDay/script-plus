@@ -1,4 +1,4 @@
-import ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client";
 import React from "react";
 import { App } from "./app";
 import type { EventHub } from "../communication";
@@ -60,4 +60,4 @@ window.SessionHubs = new Proxy(
     },
   }
 ) as never;
-ReactDOM.render(<App></App>, document.getElementById("root"));
+ReactDOM.createRoot(document.getElementById("root")!).render(<App></App>);

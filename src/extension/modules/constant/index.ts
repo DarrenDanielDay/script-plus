@@ -20,5 +20,6 @@ export const namespaces = {
 } as const;
 
 export const scriptBundleFilter = {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   "Script Plus Bundle": [names.extension],
 };
