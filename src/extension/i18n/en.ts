@@ -146,7 +146,7 @@ export const en: IntlTextTemplates = {
     },
     delete: {
       confirm:
-        'Are you sure to delete script "{scriptname}" ? It will be permanently lost!',
+        'Are you sure to delete script "{scriptName}" ? It will be permanently lost!',
       done: 'Script "{scriptName}" Removed.',
       notFound: 'Script "{script.name}" not found!',
     },
