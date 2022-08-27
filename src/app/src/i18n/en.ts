@@ -102,6 +102,9 @@ export const en: IntlTextTemplates = {
       edit: {
         tooltip: "edit",
       },
+      explore: {
+        rootFolder: "open folder of user scripts",
+      },
       export: {
         tooltip: "export",
       },

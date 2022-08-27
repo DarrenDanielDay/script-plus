@@ -47,6 +47,14 @@ export const openEdit = async (
   }
 };
 
+export const openFolder = async (uri: vscode.Uri) => {
+  await vscode.commands.executeCommand(
+    "vscode.openFolder",
+    vscode.Uri.file(uri.path),
+    true
+  );
+};
+
 export const existFile = async (uri: vscode.Uri) => {
   try {
     const stat = await vscode.workspace.fs.stat(uri);

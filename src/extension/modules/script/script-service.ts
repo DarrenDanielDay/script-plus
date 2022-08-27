@@ -48,6 +48,7 @@ import {
   globalErrorHandler,
   loadObjectFromFile,
   openEdit,
+  openFolder,
   output,
   readFile,
   writeFile,
@@ -554,6 +555,9 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
     },
     async editScript(script) {
       await openEdit(getScriptAbsolutePath(script));
+    },
+    async openUserScriptsFolder() {
+      await openFolder(storage.basedOnScripts());
     },
     async import() {
       const spps = await vscode.window.showOpenDialog({

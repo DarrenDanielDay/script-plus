@@ -102,6 +102,9 @@ export const zhCN: IntlTextTemplates = {
       edit: {
         tooltip: "修改",
       },
+      explore: {
+        rootFolder: "打开用户脚本目录",
+      },
       export: {
         tooltip: "导出",
       },

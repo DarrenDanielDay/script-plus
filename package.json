@@ -42,6 +42,7 @@
     "onCommand:script-plus.commands.scriptControl.execute",
     "onCommand:script-plus.commands.scriptControl.executeCurrentScript",
     "onCommand:script-plus.commands.scriptControl.forceCheckUserScriptsFolder",
+    "onCommand:script-plus.commands.scriptControl.openUserScriptsFolder",
     "onCommand:script-plus.commands.treeViewControl.refresh",
     "onCommand:script-plus.commands.webviewControl.close",
     "onCommand:script-plus.commands.webviewControl.open",
@@ -105,6 +106,10 @@
       {
         "command": "script-plus.commands.scriptControl.forceCheckUserScriptsFolder",
         "title": "%script-plus.commands.scriptControl.forceCheckUserScriptsFolder%"
+      },
+      {
+        "command": "script-plus.commands.scriptControl.openUserScriptsFolder",
+        "title": "%script-plus.commands.scriptControl.openUserScriptsFolder%"
       },
       {
         "command": "script-plus.commands.treeViewControl.refresh",

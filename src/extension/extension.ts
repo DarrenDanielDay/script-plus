@@ -74,6 +74,8 @@ export const activate = (context: vscode.ExtensionContext): CoreAPI => {
       deleteScript(api, ...args),
     [Commands.ScriptControl.EditScript]: (...args: unknown[]) =>
       edit(api, ...args),
+    [Commands.ScriptControl.OpenUserScriptsFolder]: () =>
+      api.ScriptService.openUserScriptsFolder(),
     [Commands.TreeViewControl.Refresh]: treeViewService.refresh,
     [Commands.WebviewControl.Open]: open,
     [Commands.WebviewControl.Close]: close,

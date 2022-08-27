@@ -151,6 +151,10 @@ export const createPublicAPI = (api: CoreAPI): CoreAPI => {
         "ScriptService.mountTask",
         isString
       ),
+      openUserScriptsFolder: factory(
+        api.ScriptService.openUserScriptsFolder,
+        "ScriptService.openUserScriptsFolder"
+      ),
       updateScript: factory(
         api.ScriptService.updateScript,
         "ScriptService.updateScript",

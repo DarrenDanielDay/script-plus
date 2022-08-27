@@ -63,6 +63,7 @@ export interface ScriptService {
   getTasks(): Promise<ExecutionTask[]>;
   import(): Promise<void>;
   mountTask(taskId: string): Promise<void>;
+  openUserScriptsFolder(): Promise<void>;
   updateScript(script: UserScript): Promise<void>;
   validateScriptNamePattern(name: string): string;
 }

@@ -24,6 +24,7 @@ const commands = {
     Execute: "",
     ExecuteCurrentScript: "",
     ForceCheckUserScriptsFolder: "",
+    OpenUserScriptsFolder: "",
   },
   TreeViewControl: {
     Refresh: "",

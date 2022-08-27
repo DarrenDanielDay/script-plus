@@ -15,6 +15,7 @@ import {
   AddOutlined,
   DeleteOutline,
   EditOutlined,
+  Explore,
   LaunchOutlined,
   RefreshOutlined,
   SaveAlt,
@@ -162,6 +163,14 @@ export const ScriptManager: React.FC<IScriptManagerProp> = ({}) => {
         >
           <AddOutlined></AddOutlined>
         </IconButton>
+        <Tooltip
+          title={intl("manager.script.explore.rootFolder")}
+          onClick={() => SessionInvoker.ScriptService.openUserScriptsFolder()}
+        >
+          <IconButton style={{ color: theme.palette.primary.main }}>
+            <Explore />
+          </IconButton>
+        </Tooltip>
       </Box>
       <Box position="relative">
         {!!editingScript && (

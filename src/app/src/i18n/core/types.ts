@@ -113,6 +113,9 @@ export interface IntlTextFields {
       edit: {
         tooltip: [];
       };
+      explore: {
+        rootFolder: [];
+      };
       export: {
         tooltip: [];
       };

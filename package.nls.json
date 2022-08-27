@@ -9,6 +9,7 @@
   "script-plus.commands.scriptControl.execute": "Script Plus: Execute Script",
   "script-plus.commands.scriptControl.executeCurrentScript": "Script Plus: Execute Current Script (Using default configs)",
   "script-plus.commands.scriptControl.forceCheckUserScriptsFolder": "Script Plus: Check user-scripts folder",
+  "script-plus.commands.scriptControl.openUserScriptsFolder": "Script Plus: Open user-scripts folder",
   "script-plus.commands.treeViewControl.refresh": "Script Plus: Refresh tree view",
   "script-plus.commands.webviewControl.close": "Script Plus: Close Webview",
   "script-plus.commands.webviewControl.open": "Script Plus: Open Webview Panel",
