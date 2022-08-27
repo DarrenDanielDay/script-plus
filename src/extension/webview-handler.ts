@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import * as fs from "fs/promises";
 import * as path from "path";
 import * as http from "http";
 import env from "@esbuild-env";
@@ -7,6 +6,7 @@ import { json } from "../app/src/json-serializer";
 import { getLocale, intl } from "./i18n/core/locale";
 import { impossible } from "./errors/internal-error";
 import { invalidUsage } from "./errors/invalid-usage";
+import { readFile } from "./utils/vscode-utils";
 type OnDidReceiveMessageHandler = Parameters<
   vscode.Webview["onDidReceiveMessage"]
 >[0];
@@ -105,14 +105,13 @@ export const createWebviewManager = (
     let baseUrl: string;
     if (env.ENV === "prod") {
       baseUrl = staticFileUrlString(panel, "index.js").replace(/index.js$/, "");
-      const buffer = await fs.readFile(
-        path.join(
-          context.extensionPath,
+      html = await readFile(
+        vscode.Uri.joinPath(
+          context.extensionUri,
           ...env.STATIC_FILE_BASE_DIR_NAMES,
           "index.html"
         )
       );
-      html = buffer.toString("utf-8");
     } else {
       if (!devServerConfig) {
         vscode.window.showWarningMessage(
