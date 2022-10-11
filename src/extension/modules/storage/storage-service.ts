@@ -29,8 +29,14 @@ const createStorageService = (
 ): StorageService => {
   const storageService: StorageService = {
     basedOnScripts(...fragments) {
+      const workspaceRootUri = vscode.workspace.workspaceFolders?.[0]?.uri;
+      const globalStorageUri = context.globalStorageUri;
+      const targetRootUri =
+        globalStorageUri.fsPath === workspaceRootUri?.fsPath
+          ? workspaceRootUri
+          : globalStorageUri;
       return vscode.Uri.joinPath(
-        context.globalStorageUri,
+        targetRootUri,
         paths.userScripts,
         ...fragments
       );
