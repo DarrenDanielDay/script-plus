@@ -13,22 +13,22 @@
     "debug": "esbuild ./vscode-debug.ts --format=iife --platform=node | node - --dev"
   },
   "devDependencies": {
-    "@types/react": "^18.0.17",
+    "@types/react": "^18.0.21",
     "@types/react-dom": "^18.0.6",
     "@types/react-swipeable-views": "^0.13.1",
     "snowpack": "^3.8.8",
-    "typescript": "^4.8.2"
+    "typescript": "^4.8.4"
   },
   "dependencies": {
-    "@emotion/react": "^11.10.0",
-    "@emotion/styled": "^11.10.0",
+    "@emotion/react": "^11.10.4",
+    "@emotion/styled": "^11.10.4",
     "@material-ui/core": "^4.12.4",
     "@material-ui/icons": "^4.11.3",
-    "classnames": "^2.3.1",
+    "classnames": "^2.3.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-intl": "^6.1.0",
+    "react-intl": "^6.1.2",
     "react-swipeable-views": "^0.14.0",
-    "rxjs": "^7.5.6"
+    "rxjs": "^7.5.7"
   }
 }
