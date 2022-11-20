@@ -320,10 +320,9 @@ export const FieldEditor: React.FC<IFieldEditorProp> = ({
                         ? field.defaultValue + ""
                         : undefined,
                       enumKeys(field.enumOptions.enumObject).find(
-                        R.compose(
-                          R.equals(field.defaultValue),
-                          R.prop(R.__, field.enumOptions.enumObject)
-                        )
+                        (key) =>
+                          field.defaultValue ===
+                          field.enumOptions.enumObject[key]
                       ),
                     ].filter(isString),
                     field.enumOptions.enumObject
