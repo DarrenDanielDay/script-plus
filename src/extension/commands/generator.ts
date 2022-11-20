@@ -45,9 +45,13 @@ export const normalizePackageJson: Normalizer<ExtensionPackageJSON> = (
   packageJson
 ) => {
   const cloned = clone(packageJson);
+  // To support automatically run script on startup (#1), `activationEvents` has been changed to `*`.
+  /*
   cloned.activationEvents = CommandList.map(
     (command) => `onCommand:${command}`
   );
+  //*/
+  cloned.activationEvents = ["*"];
   cloned.contributes ??= {};
   cloned.contributes.commands = CommandList.map((command) => {
     const commandConfig: CommandConfig = {

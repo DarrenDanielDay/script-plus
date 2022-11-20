@@ -19,6 +19,15 @@ import { startUp } from "./start/start-up";
 import { createTreeViewService } from "./modules/views/tree-view-service";
 import { defaultConfig } from "./configs/user-config";
 
+const bootstrap = async (api: CoreAPI) => {
+  try {
+    await api.StartUpService.checkAll();
+  } finally {
+    startUp.done();
+  }
+  api.StartUpService.startAutoScripts();
+};
+
 export const activate = (context: vscode.ExtensionContext): CoreAPI => {
   const globalEventHubAdapter = createEventHubAdapter<CoreEvents>();
   const globalModuleManager = createModuleManager(
@@ -86,6 +95,12 @@ export const activate = (context: vscode.ExtensionContext): CoreAPI => {
       vscode.commands.registerCommand(command, handlerFactory(handler))
     );
   });
+  context.subscriptions.push({
+    dispose: globalEventHubAdapter.dispatcher.on("script-list-update", () => {
+      treeViewService.refresh();
+    }),
+  });
+  const publicAPI = createPublicAPI(api);
   if (env.ENV === "dev") {
     loadSnowpackConfig(context)
       .then((config) => {
@@ -95,15 +110,12 @@ export const activate = (context: vscode.ExtensionContext): CoreAPI => {
         };
       })
       .then(() => import("./start/dev").then((mod) => mod.devServer.done()));
-    generate(context);
+    generate(context).then(() => {
+      bootstrap(publicAPI);
+    });
+  } else {
+    bootstrap(publicAPI);
   }
-  context.subscriptions.push({
-    dispose: globalEventHubAdapter.dispatcher.on("script-list-update", () => {
-      treeViewService.refresh();
-    }),
-  });
-  const publicAPI = createPublicAPI(api);
-  publicAPI.StartUpService.checkAll().finally(startUp.done);
   return publicAPI;
 };
 

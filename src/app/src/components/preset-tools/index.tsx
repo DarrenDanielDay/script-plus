@@ -12,8 +12,11 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Typography,
+  Divider,
 } from "@material-ui/core";
 import {
+  Autorenew,
   Check,
   Close,
   DeleteOutlined,
@@ -23,26 +26,22 @@ import {
 import * as R from "ramda";
 import React, { useEffect, useState } from "react";
 import { noop } from "taio/build/utils/typed-function";
-import { createFutureValue } from "../../../../common/shared-utils";
 import type {
   PassedParameter,
   PresetArgument,
   UserScript,
 } from "../../../../models/script";
+import type { ConfigScope } from "../../../../types/public-api";
+import { IPromoteModalProps, usePromote } from "../../hooks/use-promote";
 import { useTypedIntl } from "../../i18n/core/locale";
-import { setStateEffect } from "../../utils/well-typed";
 import { useStyles } from "../common/common-mui-styles";
 import { ListPicker } from "../list-picker";
 
 interface SaveArgumentsPayload {
   name: string;
 }
-
-interface ISaveArgumentsModalProps {
-  open: boolean;
-  onSave: (payload: SaveArgumentsPayload) => void;
-  onCancel: () => void;
-}
+interface ISaveArgumentsModalProps
+  extends IPromoteModalProps<SaveArgumentsPayload> {}
 
 const SaveArgumentsModal: React.FC<ISaveArgumentsModalProps> = ({
   open,
@@ -83,6 +82,65 @@ const SaveArgumentsModal: React.FC<ISaveArgumentsModalProps> = ({
   );
 };
 
+interface ISaveAutoScriptPayload {
+  parameter: string | false;
+  scope: ConfigScope;
+}
+const scopes: ConfigScope[] = ["Global", "Workspace", "WorkspaceFolder"];
+interface ISaveAutoScriptModal
+  extends IPromoteModalProps<ISaveAutoScriptPayload> {}
+
+const SaveAutoScriptModal: React.FC<ISaveAutoScriptModal> = ({
+  open,
+  onSave,
+  onCancel,
+}) => {
+  const [name, setName] = useState("");
+  const [scope, setScope] = useState<ConfigScope>("Workspace");
+  const intl = useTypedIntl();
+  return (
+    <Dialog open={open} onClose={onCancel}>
+      <DialogTitle>{intl("runner.preset.auto.title")}</DialogTitle>
+      <DialogContent>
+        <Typography>{intl("runner.preset.auto.description")}</Typography>
+        <Divider></Divider>
+        <FormGroup>
+          <TextField
+            label={intl("runner.preset.auto.name.label")}
+            value={name}
+            variant="outlined"
+            onChange={(e) => setName(e.target.value)}
+            helperText={intl("runner.preset.auto.name.hint")}
+          />
+          <Divider></Divider>
+          <FormControl>
+            <FormLabel>{intl("runner.preset.auto.scope")}</FormLabel>
+            <ListPicker
+              value={scope}
+              onChange={setScope}
+              displayMapping={R.identity}
+              list={scopes}
+            ></ListPicker>
+          </FormControl>
+        </FormGroup>
+      </DialogContent>
+      <DialogActions>
+        <IconButton color="primary" onClick={onCancel}>
+          <Close />
+        </IconButton>
+        <IconButton
+          color="primary"
+          onClick={() => {
+            onSave({ scope, parameter: name ? name : false });
+          }}
+        >
+          <Check />
+        </IconButton>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
 export interface IPresetToolsProp {
   script: UserScript;
   currentArguments: PassedParameter;
@@ -108,24 +166,12 @@ export const PresetTools: React.FC<IPresetToolsProp> = ({
   useEffect(() => {
     presetSelectValue && onLoadPreset(presetSelectValue);
   }, [presetSelectValue]);
-  const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(() =>
-    createFutureValue<SaveArgumentsPayload>()
-  );
-
-  const askForSave = () => {
-    const newPending = createFutureValue<SaveArgumentsPayload>();
-    setPending(newPending);
-    setOpen(true);
-    return newPending.promise;
-  };
+  const savePreset = usePromote(SaveArgumentsModal);
+  const saveAuto = usePromote(SaveAutoScriptModal);
   return (
     <Box>
-      <SaveArgumentsModal
-        open={open}
-        onSave={R.pipe(pending.done, R.F, setStateEffect(setOpen))}
-        onCancel={R.pipe(R.F, setStateEffect(setOpen), pending.abort)}
-      />
+      {savePreset.view}
+      {saveAuto.view}
       {!!presets.length && (
         <FormControl className={classes.selectControl}>
           <InputLabel>{intl("runner.preset.label")}</InputLabel>
@@ -178,7 +224,8 @@ export const PresetTools: React.FC<IPresetToolsProp> = ({
           <IconButton
             style={{ color: colors.blue[500] }}
             onClick={() =>
-              askForSave()
+              savePreset
+                .askForSave()
                 .then(({ name }) => {
                   window.SessionInvoker.ScriptService.updateScript({
                     ...script,
@@ -198,6 +245,40 @@ export const PresetTools: React.FC<IPresetToolsProp> = ({
           </IconButton>
         </Tooltip>
       )}
+      <Tooltip title={intl("runner.preset.auto.title")}>
+        <IconButton
+          style={{ color: colors.blue[500] }}
+          onClick={async () => {
+            const { parameter, scope } = await saveAuto.askForSave();
+            if (parameter) {
+              await window.SessionInvoker.ScriptService.updateScript({
+                ...script,
+                presetArgs: [
+                  ...presets,
+                  {
+                    name: parameter,
+                    args: currentArguments,
+                  },
+                ],
+              });
+            }
+            const currentAutoScripts =
+              await window.SessionInvoker.ScriptService.getAutoList();
+            await window.SessionInvoker.ScriptService.updateAutoScripts(
+              [
+                ...currentAutoScripts,
+                {
+                  parameter: parameter ? parameter : currentArguments,
+                  script: script.name,
+                },
+              ],
+              scope
+            );
+          }}
+        >
+          <Autorenew />
+        </IconButton>
+      </Tooltip>
     </Box>
   );
 };

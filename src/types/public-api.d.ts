@@ -28,6 +28,7 @@ export interface StartUpService {
   checkExtensionDependencies(force?: boolean): Promise<void>;
   checkFolder(): Promise<void>;
   checkVSCodeAndNodeJS(): Promise<string>;
+  startAutoScripts(): Promise<void>;
 }
 
 export interface PackageService {
@@ -52,6 +53,7 @@ export interface ScriptService {
   cleanUp(taskId: string): Promise<void>;
   cleanUpAll(config?: { includeMounted?: boolean }): Promise<void>;
   create(script: UserScript): Promise<void>;
+  defaultParameter(script: UserScript): PassedParameter;
   delete(script: UserScript, directly?: boolean): Promise<void>;
   dispose(): void;
   editScript(script: UserScript): Promise<void>;
@@ -60,16 +62,26 @@ export interface ScriptService {
   export(script: UserScript): Promise<void>;
   getLastExecutedScriptName(): Promise<string | undefined>;
   getList(): Promise<UserScript[]>;
+  getAutoList(): Promise<ScriptPlusConfig["startUp"]["autoScripts"]>;
   getTasks(): Promise<ExecutionTask[]>;
   import(): Promise<void>;
   mountTask(taskId: string): Promise<void>;
   openUserScriptsFolder(): Promise<void>;
+  updateAutoScripts(
+    payload: ScriptPlusConfig["startUp"]["autoScripts"],
+    level: ConfigScope
+  ): Promise<void>;
   updateScript(script: UserScript): Promise<void>;
   validateScriptNamePattern(name: string): string;
 }
 
+type ConfigScope = "Global" | "Workspace" | "WorkspaceFolder";
+
 export interface ConfigService {
   dispose(): void;
   getConfigs(): Promise<ScriptPlusConfig>;
-  updateConfigs(patch: DeepPartial<ScriptPlusConfig>): Promise<void>;
+  updateConfigs(
+    patch: DeepPartial<ScriptPlusConfig>,
+    scope?: ConfigScope
+  ): Promise<void>;
 }

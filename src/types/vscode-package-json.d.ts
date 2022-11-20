@@ -35,7 +35,7 @@ export interface ExtensionPackageJSON {
     >;
   };
 }
-type ConfigItem = NumberConfig | BooleanConfig | StringConfig;
+type ConfigItem = NumberConfig | BooleanConfig | StringConfig | ArrayConfig;
 interface BaseConfig {
   description?: string;
 }
@@ -53,4 +53,9 @@ export interface StringConfig extends BaseConfig {
   type: "string";
   default: string;
   enum?: string[];
+}
+
+export interface ArrayConfig extends BaseConfig {
+  type: "array";
+  default: unknown[];
 }

@@ -169,22 +169,35 @@ export const getConfigs = (): ScriptPlusConfig &
     : impossible(intl("config.check.maybeCrashed"));
 };
 
-export const updateConfig = async (patch: DeepPartial<ScriptPlusConfig>) => {
+// TODO: support object configs that are not nested objects as namespace.
+export const updateConfig = async (
+  patch: DeepPartial<ScriptPlusConfig>,
+  scope?: vscode.ConfigurationTarget
+) => {
   const config = getConfigs();
   type Pair = [string[], unknown];
   const iterator = dfs<Pair, Pair>(
     [[], patch],
     ([path, obj]) => {
+      if (Array.isArray(obj)) {
+        return [];
+      }
       return isObjectLike(obj)
         ? Object.entries(obj).map(([key, value]) => [[...path, key], value])
         : [];
     },
     R.identity
   );
-  const configPaths = [...iterator].filter(([, value]) => isPrimitive(value));
+  const configPaths = [...iterator].filter(
+    ([, value]) => isPrimitive(value) || Array.isArray(value)
+  );
   await Promise.all(
     configPaths.map(([path, value]) =>
-      config.update(path.join("."), value, vscode.ConfigurationTarget.Global)
+      config.update(
+        path.join("."),
+        value,
+        scope ?? vscode.ConfigurationTarget.Global
+      )
     )
   );
 };

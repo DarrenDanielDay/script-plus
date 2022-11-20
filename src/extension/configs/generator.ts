@@ -34,8 +34,7 @@ export const normalizePackageJson: Normalizer<ExtensionPackageJSON> = (
         type:
           schema.type === "enum" || schema.type === "literal"
             ? "string"
-            : schema.type === "array" ||
-              schema.type === "object" ||
+            : schema.type === "object" ||
               schema.type === "tuple" ||
               schema.type === "union" ||
               schema.type === "null"
@@ -46,6 +45,7 @@ export const normalizePackageJson: Normalizer<ExtensionPackageJSON> = (
             ? enumValues(schema.enumObject).filter(isString)
             : undefined,
         default: value,
+        ...schema.vscodeConfigMeta,
       };
       return [configKey, configItem] as const;
     })

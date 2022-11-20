@@ -21,6 +21,7 @@
   "script-plus.configs.packages.installTypes": "Auto install `@types` for packages.",
   "script-plus.configs.script.transformer": "Specifies the transformer to transform script code into CommonJS syntax.",
   "script-plus.configs.startUp.autoCheck": "Whether to check folder on activate.",
+  "script-plus.configs.startUp.autoScripts": "The scripts to automatically run on startup.",
   "script-plus.configs.startUp.checkExtensionDependencies": "Whether to check extension dependencies (especially `esbuild`) on start up.",
   "script-plus.configs.startUp.warnLocale": "Whether to show locale warning on start up."
 }

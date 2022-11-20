@@ -148,6 +148,12 @@ export const zhCN: IntlTextTemplates = {
       tooltip: "将你的脚本挂载到后台，使事件监听持续生效。",
     },
     preset: {
+      auto: {
+        description: "为自动化脚本保存参数",
+        name: { label: "预设名称", hint: "留白意味着保存原始参数。" },
+        scope: "设置范围。",
+        title: "保存为自动化参数",
+      },
       label: "预设",
       load: {
         one: "加载预设",

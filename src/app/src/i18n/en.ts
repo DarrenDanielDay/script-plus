@@ -148,6 +148,15 @@ export const en: IntlTextTemplates = {
       tooltip: "Mount your script to background for event listeners.",
     },
     preset: {
+      auto: {
+        description: "Add auto script parameter on startup.",
+        name: {
+          label: "the preset name",
+          hint: " Leaving it empty means to save raw parameter.",
+        },
+        scope: "The settings scope.",
+        title: "Save as Auto Run Parameter",
+      },
       label: "Preset",
       load: {
         one: "Load Preset",
