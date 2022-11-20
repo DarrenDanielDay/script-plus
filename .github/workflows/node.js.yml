@@ -85,7 +85,7 @@ jobs:
           cd ../.. 
           yarn build
           node ./scripts/dependency.mjs 
-          yarn vsce package --target ${{ env.target }}
+          yarn vsce package --target ${{ env.target }} --allow-star-activation
           node ./scripts/dependency.mjs --reset
         env:
           npm_config_arch: ${{ matrix.npm_config_arch }}

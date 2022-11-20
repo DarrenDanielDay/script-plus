@@ -32,21 +32,7 @@
   ],
   "icon": "assets/logo.png",
   "activationEvents": [
-    "onCommand:script-plus.commands.configuration.reset",
-    "onCommand:script-plus.commands.packageManage.installModule",
-    "onCommand:script-plus.commands.scriptControl.cleanUp",
-    "onCommand:script-plus.commands.scriptControl.cleanUpAllSideEffects",
-    "onCommand:script-plus.commands.scriptControl.create",
-    "onCommand:script-plus.commands.scriptControl.delete",
-    "onCommand:script-plus.commands.scriptControl.editScript",
-    "onCommand:script-plus.commands.scriptControl.execute",
-    "onCommand:script-plus.commands.scriptControl.executeCurrentScript",
-    "onCommand:script-plus.commands.scriptControl.forceCheckUserScriptsFolder",
-    "onCommand:script-plus.commands.scriptControl.openUserScriptsFolder",
-    "onCommand:script-plus.commands.treeViewControl.refresh",
-    "onCommand:script-plus.commands.webviewControl.close",
-    "onCommand:script-plus.commands.webviewControl.open",
-    "onCommand:script-plus.commands.webviewControl.reload"
+    "*"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -190,6 +176,40 @@
           "type": "boolean",
           "default": true
         },
+        "script-plus.configs.startUp.autoScripts": {
+          "description": "%script-plus.configs.startUp.autoScripts%",
+          "type": "array",
+          "default": [],
+          "markdownDescription": "Expecting an array of object with the following shape:\n\n```ts\ninterface AutoRunOptions {\n  /**\n   * The user script name.\n   */\n  script: string;\n  /**\n   * Falsy value like `null` or empty string, or not provided, means the default parameter.\n   * String value means the `preset` name.\n   * Object value means the parameter instance.\n   */\n  parameter: string | object | null;\n}\n```\n\nSince it's not a simple array, currently `vscode` does not support to edit it directly in the settings UI. \n\nYou can edit it in `settings.json` or add one at the \"run script\" page in [webview panel](command:script-plus.commands.webviewControl.open).\n\nCurrently the webview panel does not support to remove auto scripts.\n",
+          "items": {
+            "type": "object",
+            "properties": {
+              "script": {
+                "description": "The user script name.",
+                "title": "The user script name.",
+                "type": "string"
+              },
+              "parameter": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Falsy value like `null` or empty string, or not provided, means the default parameter.\n\nString value means the `preset` name.\n\nObject value means the parameter instance.\n                        ",
+                "title": "The parameter to run script."
+              }
+            },
+            "required": [
+              "script"
+            ]
+          }
+        },
         "script-plus.configs.startUp.warnLocale": {
           "description": "%script-plus.configs.startUp.warnLocale%",
           "type": "boolean",
@@ -211,13 +231,6 @@
         }
       ]
     },
-    "viewsWelcome": [
-      {
-        "contents": "Welcome to script-plus! For performance reason, this extension is not activated by default. \n[Activate extension and open Script Plus UI](command:script-plus.commands.webviewControl.open)",
-        "view": "script-plus.view.startup",
-        "when": "config.git.enabled"
-      }
-    ],
     "views": {
       "script-plus": [
         {
@@ -274,7 +287,7 @@
     "build": "yarn build:extension && yarn build:ui",
     "build:extension": "esbuild ./scripts/esbuild-for-extension.ts --format=cjs --platform=node | node -",
     "build:ui": "cd src/app && yarn build",
-    "bundle": "yarn build && node ./scripts/dependency.mjs && yarn vsce package && node ./scripts/dependency.mjs --reset",
+    "bundle": "yarn build && node ./scripts/dependency.mjs && yarn vsce package --allow-star-activation && node ./scripts/dependency.mjs --reset",
     "deploy": "vsce publish --yarn"
   },
   "devDependencies": {

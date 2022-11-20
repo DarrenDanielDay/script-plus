@@ -6,6 +6,7 @@ import { TransformerKind } from "../../../models/configurations";
 import type {
   ConfigService,
   PackageService,
+  ScriptService,
   StartUpService,
 } from "../../../types/public-api";
 import { paths } from "../constant";
@@ -26,6 +27,7 @@ import {
   dependencyTask,
   installTask,
   packageService,
+  scriptService,
   startUpService,
   storageService,
 } from "../tokens";
@@ -35,6 +37,7 @@ const createStartUpService = (
   storage: StorageService,
   config: ConfigService,
   installTask: PackageInstallTaskService,
+  scriptService: ScriptService,
   dependencyTask: DependencyInstallTaskService
 ): StartUpService => {
   const { installModules, installExtensionDependencies } = pkg;
@@ -169,6 +172,37 @@ const createStartUpService = (
         "@types/vscode @types/node"
       );
     },
+    async startAutoScripts() {
+      const configs = await config.getConfigs();
+      const { autoScripts } = configs.startUp;
+      if (!Array.isArray(autoScripts)) {
+        return;
+      }
+      const scripts = await scriptService.getList();
+      for (const autoScript of autoScripts) {
+        const { parameter, script } = autoScript;
+        const target = scripts.find((s) => s.name === script);
+        if (!target) {
+          output.appendLine(
+            `[WARN]: Auto script "${script}" not found, skipped.`
+          );
+          continue;
+        }
+        const args = !parameter
+          ? scriptService.defaultParameter(target)
+          : typeof parameter === "string"
+          ? target.presetArgs?.find((preset) => preset.name === parameter)?.args
+          : parameter;
+        if (!args) {
+          output.appendLine(
+            `[WARN]: Arguments for auto script "${script}" not found, maybe the preset "${parameter}" is missing, skipped.`
+          );
+          continue;
+        }
+        const task = await scriptService.execute(target, args);
+        await scriptService.mountTask(task.taskId);
+      }
+    },
   };
   return startUpService;
 };
@@ -178,9 +212,17 @@ export const startUpServiceImpl = inject({
   storage: storageService,
   config: configService,
   installTask,
+  script: scriptService,
   dependencyTask,
 }).implements(
   startUpService,
-  ({ pkg, storage, config, installTask, dependencyTask }) =>
-    createStartUpService(pkg, storage, config, installTask, dependencyTask)
+  ({ pkg, storage, config, installTask, dependencyTask, script }) =>
+    createStartUpService(
+      pkg,
+      storage,
+      config,
+      installTask,
+      script,
+      dependencyTask
+    )
 );

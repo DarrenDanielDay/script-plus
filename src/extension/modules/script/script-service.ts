@@ -556,6 +556,21 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
     async editScript(script) {
       await openEdit(getScriptAbsolutePath(script));
     },
+    async getAutoList() {
+      const configs = await config.getConfigs();
+      const { autoScripts } = configs.startUp;
+      return autoScripts;
+    },
+    async updateAutoScripts(payload, level) {
+      await config.updateConfigs(
+        {
+          startUp: {
+            autoScripts: payload,
+          },
+        },
+        level
+      );
+    },
     async openUserScriptsFolder() {
       await openFolder(storage.basedOnScripts());
     },
@@ -637,18 +652,21 @@ ${getConfigTsDeclCodeOfUserScript(script)}`
         });
       return executionTask;
     },
-
+    defaultParameter(meta) {
+      const defaults = Object.entries(
+        meta.argumentConfig
+      ).reduce<PassedParameter>((defaultArgs, [key, value]) => {
+        defaultArgs[key] = value.defaultValue;
+        return defaultArgs;
+      }, {});
+      return defaults;
+    },
     async executeCurrent() {
       const currentFile = vscode.window.activeTextEditor?.document.uri;
       if (currentFile) {
         const folder = vscode.Uri.joinPath(currentFile, "..");
         const meta = await getMeta(folder);
-        const defaults = Object.entries(
-          meta.argumentConfig
-        ).reduce<PassedParameter>((defaultArgs, [key, value]) => {
-          defaultArgs[key] = value.defaultValue;
-          return defaultArgs;
-        }, {});
+        const defaults = scriptService.defaultParameter(meta);
         const task = await scriptService.execute(meta, defaults);
         const { taskId } = task;
         const { promise } = activeTasks.get(taskId)!;

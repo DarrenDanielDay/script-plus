@@ -112,6 +112,11 @@ export const createPublicAPI = (api: CoreAPI): CoreAPI => {
         "ScriptService.create",
         isUserScript
       ),
+      defaultParameter: factory(
+        api.ScriptService.defaultParameter,
+        "ScriptService.defaultParameter",
+        isUserScript
+      ),
       delete: factory(
         api.ScriptService.delete,
         "ScriptService.delete",
@@ -143,6 +148,10 @@ export const createPublicAPI = (api: CoreAPI): CoreAPI => {
         api.ScriptService.getLastExecutedScriptName,
         "ScriptService.getLastExecutedScriptName"
       ),
+      getAutoList: factory(
+        api.ScriptService.getAutoList,
+        "ScriptService.getAutoList"
+      ),
       getList: factory(api.ScriptService.getList, "ScriptService.getList"),
       getTasks: factory(api.ScriptService.getTasks, "ScriptService.getTasks"),
       import: factory(api.ScriptService.import, "ScriptService.import"),
@@ -154,6 +163,12 @@ export const createPublicAPI = (api: CoreAPI): CoreAPI => {
       openUserScriptsFolder: factory(
         api.ScriptService.openUserScriptsFolder,
         "ScriptService.openUserScriptsFolder"
+      ),
+      updateAutoScripts: factory(
+        api.ScriptService.updateAutoScripts,
+        "ScriptService.updateAutoScripts",
+        nocheck,
+        nocheck
       ),
       updateScript: factory(
         api.ScriptService.updateScript,
@@ -184,6 +199,10 @@ export const createPublicAPI = (api: CoreAPI): CoreAPI => {
       checkVSCodeAndNodeJS: factory(
         api.StartUpService.checkVSCodeAndNodeJS,
         "StartUpService.checkVSCodeAndNodeJS"
+      ),
+      startAutoScripts: factory(
+        api.StartUpService.startAutoScripts,
+        "StartUpService.startAutoScripts"
       ),
     },
   };

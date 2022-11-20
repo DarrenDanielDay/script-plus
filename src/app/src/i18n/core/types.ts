@@ -159,6 +159,15 @@ export interface IntlTextFields {
       tooltip: [];
     };
     preset: {
+      auto: {
+        description: [];
+        name: {
+          label: [];
+          hint: [];
+        };
+        scope: [];
+        title: [];
+      };
       label: [];
       load: {
         one: [];

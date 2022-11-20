@@ -26,8 +26,8 @@ const createConfigService = (
         ? config
         : impossible(intl("config.check.maybeCrashed"));
     },
-    async updateConfigs(patch) {
-      await updateConfig(patch);
+    async updateConfigs(patch, scope) {
+      await updateConfig(patch, scope && vscode.ConfigurationTarget[scope]);
     },
   };
 };
